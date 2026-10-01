@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!--
-  Numeri in Tasca: Bilancia, Quadrante, Primo, Resto, Girasette.
+  Numeri in Tasca: Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio.
   © 2026 Silvio Chiaverini.
   Giochi ideati e realizzati da Silvio Chiaverini.
   Licenza: GNU GPL v3 (vedi LICENSE).
@@ -72,9 +72,13 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 .g-resto .lx-play{background:var(--g-resto-acc);color:var(--g-resto-bg)}
 
 .g-gira{background:radial-gradient(ellipse at 30% 10%,#26307a,#0f1226);color:#e4e8ff}
-.g-gira .lx-name{font-family:"Fredoka",system-ui,sans-serif;font-weight:700;color:#ffffff}
+.g-gira .lx-name{font-family:"Fredoka",system-ui,sans-serif;font-weight:700;font-size:28px;color:#ffffff}
 .g-gira .lx-name i{font-style:normal;color:#ffd166}
 .g-gira .lx-play{background:#ffd166;color:#3a2a00}
+.g-rad{background:radial-gradient(ellipse at 30% 10%,#1f5a6e,#0b1721);color:#e3f3f8}
+.g-rad .lx-name{font-family:"Fredoka",system-ui,sans-serif;font-weight:700;font-size:26px;color:#ffffff}
+.g-rad .lx-name i{font-style:normal;color:#ff7a59}
+.g-rad .lx-play{background:#ff7a59;color:#2a0d04}
 .lx-grid>:last-child:nth-child(odd){grid-column:1 / -1}   /* l'ultima carta dispari occupa tutta la riga */
 
 .lx-donate{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;background:var(--l-card);border:1px solid var(--l-line);border-radius:18px;padding:14px 16px}
@@ -90,16 +94,16 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 .lx-foot{border-top:1px solid var(--l-line);padding-top:14px;display:flex;flex-direction:column;gap:6px;font-size:13px;line-height:1.45;color:var(--l-muted)}
 .lx-foot p{margin:0}
 .lx-foot strong{color:var(--l-ink)}
-/* quattro colonne su schermi larghi o telefono in orizzontale */
+/* tre colonne (sei giochi) su schermi larghi o telefono in orizzontale */
 @media (min-width:900px),(orientation:landscape) and (min-width:640px){
-  .lx-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .lx-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   .lx-grid>:last-child:nth-child(odd){grid-column:auto}
   .lx-name{font-size:28px}.g-primo .lx-name{font-size:36px}.g-resto .lx-name{font-size:30px}
 }
 @media (min-width:900px){
   .lx-page{max-width:1100px;padding-block:56px 40px;gap:30px}
   .lx-card{min-height:240px;padding:20px 20px 18px;border-radius:22px}
-  .lx-name{font-size:36px}.g-primo .lx-name{font-size:46px}.g-resto .lx-name{font-size:40px}
+  .lx-name{font-size:36px}.g-primo .lx-name{font-size:46px}.g-resto .lx-name{font-size:40px}.g-gira .lx-name,.g-rad .lx-name{font-size:34px}
   .lx-desc{font-size:15px}
   .lx-sub{font-size:18px}
 }
@@ -138,7 +142,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 
 <div id="lx-launcher" class="lx-page">
   <header>
-    <p class="lx-eyebrow">Cinque giochi di numeri</p>
+    <p class="lx-eyebrow">Sei giochi di numeri</p>
     <h1 class="lx-title">Numeri <span>in Tasca</span></h1>
     <p class="lx-sub">Partite da un minuto. Scegli un gioco e batti il tuo record.</p>
   </header>
@@ -168,6 +172,11 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
       <span class="lx-name">Gira<i>sette</i></span>
       <span class="lx-desc">Fondi le tessere uguali fino al 7. Finiti i pezzi, la plancia gira.</span>
       <span class="lx-best"><span>Record <b data-best="girasette_best">0</b></span><span class="lx-play">Gioca</span></span>
+    </button>
+    <button class="lx-card g-rad" type="button" data-game="raddoppio">
+      <span class="lx-name">Raddop<i>pio</i></span>
+      <span class="lx-desc">Scorri e fondi le tessere uguali. Le catene moltiplicano i punti, il martello salva.</span>
+      <span class="lx-best"><span>Record <b data-best="rad_best">0</b></span><span class="lx-play">Gioca</span></span>
     </button>
   </main>
 
@@ -201,7 +210,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 
   <footer class="lx-foot">
     <p><strong>© 2026 Silvio Chiaverini.</strong></p>
-    <p>Bilancia, Quadrante, Primo, Resto e Girasette sono giochi ideati e realizzati da Silvio Chiaverini. Codice rilasciato con licenza GNU GPL v3 (vedi LICENSE).</p>
+    <p>Bilancia, Quadrante, Primo, Resto, Girasette e Raddoppio sono giochi ideati e realizzati da Silvio Chiaverini. Codice rilasciato con licenza GNU GPL v3 (vedi LICENSE).</p>
   </footer>
 </div>
 
@@ -1003,6 +1012,179 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
       <p class="sub">Record: <b id="finalBest">0</b></p>
       <div class="btns">
         <button class="btn primary" id="again" type="button">Rigioca</button>
+      </div>
+    </div>
+  </section>
+</div></template>
+<template id="tpl-raddoppio"><style>
+/* RADDOPPIO. Layout: HUD in alto, striscia della catena, tabellone quadrato al centro, barra comandi in basso. Tema scuro unico (verde petrolio + corallo), scelto di proposito per distinguersi dai giochi di fusione piu' noti. */
+:root{
+  --bg:#0b1721; --bg2:#13303f; --panel:#122534; --line:#27506a; --ink:#eef7fb; --muted:#85a7ba;
+  --accent:#ff7a59; --accent-ink:#2a0d04; --gold:#ffd166; --board:#10222f; --cellbg:#1b3a4e;
+  --ui:"Fredoka",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overflow:hidden;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+.app{height:100%;display:flex;flex-direction:column;position:relative;
+  background:radial-gradient(ellipse 120% 70% at 50% 30%,var(--bg2) 0%,var(--bg) 72%)}
+.hud{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:8px;padding:12px 16px 2px;width:100%;max-width:560px;margin-inline:auto;box-sizing:border-box}
+.stat{display:flex;flex-direction:column;min-width:0}
+.stat.r{align-items:flex-end}
+.lbl{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.stat b{font-size:28px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.stat b.bump{animation:scorebump .25s ease-out}
+@keyframes scorebump{40%{transform:scale(1.12);color:var(--gold)}}
+h1{margin:0;font-size:28px;font-weight:700;letter-spacing:.01em;line-height:1}
+h1 span{color:var(--accent)}
+.sub{display:flex;justify-content:center;align-items:center;height:30px;gap:8px}
+.chain{font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--accent-ink);background:var(--gold);border-radius:99px;padding:3px 12px;visibility:hidden;transition:transform .15s}
+.chain.on{visibility:visible}
+.chain.up{animation:chainup .3s ease-out}
+@keyframes chainup{40%{transform:scale(1.18)}}
+.stage{flex:1;min-height:0;position:relative;display:grid;place-items:center;container-type:size;touch-action:none;padding:0 14px 8px}
+.board{position:relative;width:min(100cqw,100cqh,520px);aspect-ratio:1;container-type:inline-size;
+  background:var(--board);border-radius:3.4%;box-shadow:0 18px 40px rgba(0,0,0,.4),inset 0 0 0 2px rgba(255,255,255,.04);--slide:120ms}
+.board.bump-l{animation:bl .16s}.board.bump-r{animation:br .16s}.board.bump-u{animation:bu .16s}.board.bump-d{animation:bd .16s}
+@keyframes bl{40%{transform:translateX(-5px)}}@keyframes br{40%{transform:translateX(5px)}}
+@keyframes bu{40%{transform:translateY(-5px)}}@keyframes bd{40%{transform:translateY(5px)}}
+.cells{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);gap:2.4cqw;padding:2.4cqw;box-sizing:border-box}
+.cells i{background:var(--cellbg);border-radius:2.2cqw;opacity:.75}
+.tiles,.fx{position:absolute;inset:0}
+.fx{pointer-events:none;overflow:visible}
+.tile{position:absolute;left:0;top:0;width:22%;aspect-ratio:1;transition:transform var(--slide) cubic-bezier(.25,.8,.35,1);will-change:transform;z-index:2}
+.tile.dying{z-index:1}
+.tile .in{width:100%;height:100%;border-radius:2.2cqw;display:grid;place-items:center;font-weight:700;font-size:9.4cqw;line-height:1;
+  font-variant-numeric:tabular-nums;box-shadow:inset 0 -.8cqw 0 rgba(0,0,0,.16),0 .5cqw 1.2cqw rgba(0,0,0,.28)}
+.tile .in.d3{font-size:7.6cqw}.tile .in.d4{font-size:6.2cqw}.tile .in.d5{font-size:5.2cqw}.tile .in.d6{font-size:4.4cqw}
+.tile .in.spawn{animation:spawn .18s ease-out}
+.tile .in.pop{animation:pop .2s ease-out}
+.tile .in.out{animation:out .22s ease-in forwards}
+@keyframes spawn{from{transform:scale(.2);opacity:0}}
+@keyframes pop{45%{transform:scale(1.2)}}
+@keyframes out{to{transform:scale(1.5) rotate(12deg);opacity:0}}
+.v2{background:#d8ecf2;color:#1c2b33}.v4{background:#a9dce6;color:#1c2b33}
+.v8{background:#62cdbd;color:#0f2a26}.v16{background:#4cc58b;color:#0c2a1c}
+.v32{background:#9fd957;color:#1f2c0a}.v64{background:#f4d34c;color:#33280a}
+.v128{background:#f7a640;color:#381f05;box-shadow:0 0 3cqw rgba(247,166,64,.55),inset 0 -.8cqw 0 rgba(0,0,0,.16)}
+.v256{background:#f46f3c;color:#fff;box-shadow:0 0 3.4cqw rgba(244,111,60,.6),inset 0 -.8cqw 0 rgba(0,0,0,.16)}
+.v512{background:#e6455c;color:#fff;box-shadow:0 0 3.8cqw rgba(230,69,92,.65),inset 0 -.8cqw 0 rgba(0,0,0,.16)}
+.v1024{background:#c23fa0;color:#fff;box-shadow:0 0 4.2cqw rgba(194,63,160,.7),inset 0 -.8cqw 0 rgba(0,0,0,.16)}
+.v2048{background:linear-gradient(135deg,#7b4de0,#b05cf0);color:#fff;box-shadow:0 0 0 .6cqw var(--gold),0 0 5cqw rgba(176,92,240,.8),inset 0 -.8cqw 0 rgba(0,0,0,.16)}
+.vbig{background:#14141c;color:var(--gold);box-shadow:0 0 0 .6cqw var(--gold),0 0 5cqw rgba(255,209,102,.6)}
+.spark{position:absolute;width:1.6cqw;height:1.6cqw;border-radius:50%;animation:spark .5s ease-out forwards}
+@keyframes spark{to{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
+.pts{position:absolute;font-weight:700;font-size:6cqw;color:var(--gold);text-shadow:0 .4cqw 0 rgba(0,0,0,.5);transform:translate(-50%,0);animation:pts .85s ease-out forwards;white-space:nowrap}
+@keyframes pts{to{transform:translate(-50%,-9cqw);opacity:0}}
+.toast{position:absolute;left:50%;top:-4.5cqw;transform:translate(-50%,0);background:var(--gold);color:var(--accent-ink);font-weight:700;font-size:4cqw;padding:1.2cqw 3.4cqw;border-radius:99px;opacity:0;pointer-events:none;transition:opacity .2s;white-space:nowrap;z-index:6}
+.toast.on{opacity:1}
+.board.hammer{cursor:crosshair;box-shadow:0 0 0 .7cqw var(--accent),0 18px 40px rgba(0,0,0,.4)}
+.board.hammer .tile .in{animation:wob .5s ease-in-out infinite alternate}
+@keyframes wob{from{transform:rotate(-2deg)}to{transform:rotate(2deg)}}
+.bar{display:flex;gap:8px;justify-content:center;padding:6px 16px calc(12px + env(safe-area-inset-bottom,0px));width:100%;max-width:560px;margin-inline:auto;box-sizing:border-box}
+.btn{font:inherit;font-weight:600;font-size:14px;color:var(--ink);background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:10px 6px;cursor:pointer;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.hm{display:flex;align-items:center;justify-content:center;gap:6px}
+.btn.hm svg{width:17px;height:17px;flex:none}
+.btn.hm.armed{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.hm.pulse{animation:hpulse .8s ease-in-out infinite alternate}
+@keyframes hpulse{to{box-shadow:0 0 0 4px rgba(255,122,89,.55)}}
+.btn.ask{border-color:var(--accent);color:var(--accent)}
+#menu,#over,#win{position:absolute;inset:0;display:grid;place-items:center;padding:16px;background:rgba(5,12,18,.8);z-index:8}
+#menu[hidden],#over[hidden],#win[hidden]{display:none}
+.card{width:100%;max-width:340px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--panel);border:1.5px solid var(--line);border-radius:22px;padding:24px 22px 20px;display:flex;flex-direction:column;gap:14px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.card h1{font-size:44px}
+.card h2{margin:0;font-size:32px;font-weight:700;color:var(--accent)}
+.card .eyebrow{margin:0;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.35;text-align:left}
+.rules li{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center}
+.chip{font-weight:700;font-size:15px;text-align:center;color:var(--accent-ink);background:var(--accent);border-radius:9px;padding:5px 0}
+.chip.go{background:var(--gold)}.chip.cy{background:#62cdbd}
+.btns{display:flex;flex-direction:column;gap:10px}
+.btns .btn{flex:none;font-size:16px;padding:12px 14px}
+.btn.link{border:none;background:none;color:var(--muted);font-weight:600;padding:6px}
+.card .small{margin:0;font-size:13px;color:var(--muted)}
+.card .small b{color:var(--ink)}
+.card .big{font-size:60px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.card .rec{align-self:center;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--gold);color:var(--accent-ink);border-radius:99px;padding:3px 12px}
+.card .rec[hidden]{display:none}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats div{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line);padding-top:8px}
+.stats b{font-size:24px;font-variant-numeric:tabular-nums}
+.stats span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+#shareBox{width:100%;box-sizing:border-box;font:13px/1.4 var(--ui);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;resize:none}
+@media (max-height:560px){.hud{padding-top:6px}.stat b{font-size:22px}h1{font-size:22px}.bar{padding-bottom:8px}.sub{height:24px}.card{padding:16px 18px;gap:10px}.card h1{font-size:34px}.rules{font-size:13px;gap:6px}.card .big{font-size:44px}}
+@media (prefers-reduced-motion:reduce){.tile{transition-duration:.01ms}.tile .in,.board,.chain,.stat b,.btn.hm{animation:none!important}}
+</style><div class="app" id="app">
+  <header class="hud">
+    <div class="stat"><span class="lbl">Punti</span><b id="score">0</b></div>
+    <h1>Raddop<span>pio</span></h1>
+    <div class="stat r"><span class="lbl" id="bestLbl">Record</span><b id="best">0</b></div>
+  </header>
+  <div class="sub"><span class="chain" id="chain">Catena</span></div>
+  <div class="stage" id="stage">
+    <div class="board" id="board" aria-label="Tabellone 4 per 4">
+      <div class="cells"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="tiles" id="tiles"></div>
+      <div class="fx" id="fx"></div>
+      <div class="toast" id="toast"></div>
+    </div>
+  </div>
+  <footer class="bar">
+    <button class="btn" id="restart" type="button">Nuova</button>
+    <button class="btn" id="undo" type="button" disabled>Annulla</button>
+    <button class="btn hm" id="hammer" type="button" disabled aria-label="Martello"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M13.5 2.5l8 8-3.2 3.2-1.9-1.9-9.2 9.2a2.1 2.1 0 0 1-3-3l9.2-9.2-1.9-1.9z"/></svg><span id="hammerN">0</span></button>
+    <button class="btn" id="mute" type="button">Suono</button>
+  </footer>
+
+  <section id="menu">
+    <div class="card">
+      <p class="eyebrow">Puzzle di fusione · catene e martello</p>
+      <h1>Raddop<span>pio</span></h1>
+      <ul class="rules">
+        <li><span class="chip">←→</span><span>Scorri o usa le frecce: tutte le tessere scivolano. Due uguali si fondono (una sola volta per mossa).</span></li>
+        <li><span class="chip go">×4</span><span>Catena: fusioni in mosse consecutive moltiplicano i punti, fino a ×4.</span></li>
+        <li><span class="chip cy">⚒</span><span>Ogni nuova tessera record da 64 in su regala un martello (max 3): toccane uno e poi una tessera per romperla.</span></li>
+      </ul>
+      <div class="btns">
+        <button class="btn primary" id="play" type="button">Gioca</button>
+        <button class="btn" id="daily" type="button">Sfida del giorno</button>
+      </div>
+      <p class="small">Record: <b id="menuBest">0</b> · Sfida di oggi: <b id="menuDaily">—</b></p>
+    </div>
+  </section>
+
+  <section id="win" hidden>
+    <div class="card">
+      <h2>2048!</h2>
+      <p class="small">Hai raggiunto la tessera 2048. Puoi continuare per un punteggio ancora più alto.</p>
+      <div class="btns">
+        <button class="btn primary" id="winGo" type="button">Continua</button>
+        <button class="btn" id="winNew" type="button">Nuova partita</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="over" hidden>
+    <div class="card">
+      <p class="eyebrow" id="overMode">Partita libera</p>
+      <h2>Nessuna mossa</h2>
+      <div class="big" id="overScore">0</div>
+      <span class="rec" id="newRecord" hidden>Nuovo record</span>
+      <div class="stats">
+        <div><b id="stTile">0</b><span>Tessera</span></div>
+        <div><b id="stMoves">0</b><span>Mosse</span></div>
+        <div><b id="stChain">0</b><span>Catena max</span></div>
+      </div>
+      <div class="btns">
+        <button class="btn primary" id="again" type="button">Rigioca</button>
+        <button class="btn" id="share" type="button" hidden>Copia risultato</button>
+        <textarea id="shareBox" rows="3" readonly hidden></textarea>
+        <button class="btn link" id="toMenu" type="button">Menu</button>
       </div>
     </div>
   </section>
@@ -3387,6 +3569,447 @@ window.__M7 = {
 };
 })();
     },
+    raddoppio: function (window, requestAnimationFrame, setTimeout) {
+/* ============================================================================
+   RADDOPPIO: puzzle a scorrimento e fusione su griglia 4x4 (stessa famiglia di regole dei classici "2048").
+   Regole base: scorrimento fino in fondo, due tessere uguali si fondono, ogni tessera si fonde al massimo
+   una volta per mossa, dopo ogni mossa valida compare un 2 (90%) o un 4 (10%).
+   NOVITA' PROPRIE DEL GIOCO:
+   - Catena: fusioni in mosse consecutive moltiplicano i punti (x2 dalla 2a, x3 dalla 4a, x4 dalla 6a).
+   - Martello: ogni nuova tessera record da 64 in su regala un martello (max 3) per rompere una tessera.
+   - Annulla deterministico: ripristina anche il generatore casuale, quindi non permette di "ritirare i dadi".
+   - Sfida del giorno con sequenza uguale per tutti.
+   Struttura: 1) logica pura  2) stato  3) tessere e animazioni  4) audio  5) input e schermate
+   ============================================================================ */
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+
+/* ---------------------------------------------------------------- 1) LOGICA PURA */
+const N = 4, WIN_AT = 2048, MAX_HAMMERS = 3, HAMMER_FROM = 64;
+const GAP = 2.4, CELL = (100 - 5 * GAP) / 4;      // geometria in % del tabellone (deve coincidere con il CSS)
+
+// Piano di scorrimento di UNA riga. vals[0] e' la tessera piu' vicina al bordo verso cui si scorre.
+// Ogni tessera si fonde al massimo una volta: [2,2,2,2] -> [4,4,0,0], mai [8,0,0,0].
+function planLine(vals) {
+  const to = [-1, -1, -1, -1], absorbed = [false, false, false, false], out = [0, 0, 0, 0];
+  let k = -1, lastMerged = false, gained = 0, merges = 0;
+  for (let i = 0; i < N; i++) {
+    const v = vals[i];
+    if (!v) continue;
+    if (k >= 0 && out[k] === v && !lastMerged) {
+      out[k] = v * 2; to[i] = k; absorbed[i] = true; lastMerged = true; gained += v * 2; merges++;
+    } else {
+      k++; out[k] = v; to[i] = k; lastMerged = false;
+    }
+  }
+  return { to, absorbed, out, gained, merges };
+}
+// Cella (riga, colonna) della posizione i-esima della linea, vista dal bordo verso cui si scorre.
+function cellAt(dir, line, i) {
+  if (dir === 'left') return [line, i];
+  if (dir === 'right') return [line, N - 1 - i];
+  if (dir === 'up') return [i, line];
+  return [N - 1 - i, line];
+}
+const multOf = streak => 1 + Math.min(3, Math.floor(streak / 2));
+const levelOf = v => Math.round(Math.log2(v));
+
+/* ---------------------------------------------------------------- 2) STATO */
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+const today = (() => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); })();
+const todayLabel = today.slice(8, 10) + '/' + today.slice(5, 7);
+const dailyKey = 'rad_d_' + today;
+function hashStr(s) { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+
+let rs = 1;                                        // stato del generatore casuale (un solo intero: facile da salvare/ripristinare)
+const rand = () => { rs = (rs + 0x6D2B79F5) | 0; let t = Math.imul(rs ^ (rs >>> 15), 1 | rs); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+
+let grid = [];                                     // 4x4 di oggetti tessera o null
+let nextId = 1;
+let score = 0, best = 0, prevBest = 0, streak = 0, maxStreak = 0, hammers = 0, maxTile = 0, moves = 0;
+let won = false;                                   // 2048 gia' raggiunto (il modale si mostra una volta sola)
+let mode = 'free', lastMode = 'free';
+let running = false, over = false, busy = false, hammerMode = false, pending = null, undoSnap = null;
+let gen = 0;                                       // invalida i timer di una partita precedente
+let TS = 1;                                        // scala dei tempi (i test la riducono)
+
+const boardEl = $('board'), tilesEl = $('tiles'), fxEl = $('fx');
+const emptyGrid = () => Array.from({ length: N }, () => Array(N).fill(null));
+const eachTile = f => { for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (grid[r][c]) f(grid[r][c], r, c); };
+
+/* ---------------------------------------------------------------- 3) TESSERE E ANIMAZIONI */
+const pos = (r, c) => ({ x: (GAP + c * (CELL + GAP)) / CELL * 100, y: (GAP + r * (CELL + GAP)) / CELL * 100 });
+const place = t => { const p = pos(t.r, t.c); t.el.style.transform = 'translate(' + p.x + '%,' + p.y + '%)'; };
+function face(t) {
+  const d = String(t.v).length;
+  t.inner.className = 'in ' + (t.v <= WIN_AT ? 'v' + t.v : 'vbig') + (d >= 3 ? ' d' + d : '');
+  t.inner.textContent = t.v;
+}
+function restartAnim(t, cls) { t.inner.classList.remove('spawn', 'pop', 'out'); void t.inner.offsetWidth; if (!reduceMotion) t.inner.classList.add(cls); }
+function makeTile(v, r, c, anim) {
+  const el = document.createElement('div'), inner = document.createElement('div');
+  el.className = 'tile'; el.appendChild(inner);
+  const t = { id: nextId++, v, r, c, el, inner };
+  el._t = t;
+  face(t); place(t);
+  tilesEl.appendChild(el);
+  if (anim) restartAnim(t, 'spawn');
+  grid[r][c] = t;
+  return t;
+}
+function clearBoard() { tilesEl.textContent = ''; fxEl.textContent = ''; grid = emptyGrid(); }
+
+const COLORS = { 2: '#d8ecf2', 4: '#a9dce6', 8: '#62cdbd', 16: '#4cc58b', 32: '#9fd957', 64: '#f4d34c', 128: '#f7a640', 256: '#f46f3c', 512: '#e6455c', 1024: '#c23fa0', 2048: '#b05cf0' };
+function sparks(t, n) {
+  if (reduceMotion) return;
+  const col = COLORS[t.v] || '#ffd166', p = pos(t.r, t.c);
+  const cx = (p.x / 100 * CELL) + CELL / 2, cy = (p.y / 100 * CELL) + CELL / 2;
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement('i'), a = Math.random() * Math.PI * 2, d = 7 + Math.random() * 9;
+    s.className = 'spark'; s.style.left = cx + '%'; s.style.top = cy + '%'; s.style.background = col;
+    s.style.setProperty('--dx', Math.cos(a) * d + 'cqw'); s.style.setProperty('--dy', Math.sin(a) * d + 'cqw');
+    s.addEventListener('animationend', () => s.remove());
+    fxEl.appendChild(s);
+  }
+}
+function floatPts(t, text) {
+  const p = pos(t.r, t.c), el = document.createElement('div');
+  el.className = 'pts'; el.textContent = text;
+  el.style.left = (p.x / 100 * CELL + CELL / 2) + '%'; el.style.top = (p.y / 100 * CELL) + '%';
+  el.addEventListener('animationend', () => el.remove());
+  fxEl.appendChild(el);
+}
+let toastTimer = 0;
+function toast(text) {
+  const el = $('toast'); el.textContent = text; el.classList.add('on');
+  const g = ++toastTimer;
+  setTimeout(() => { if (g === toastTimer) el.classList.remove('on'); }, 1500);
+}
+function bump(dir) {
+  const cls = 'bump-' + dir[0];
+  boardEl.classList.remove('bump-l', 'bump-r', 'bump-u', 'bump-d'); void boardEl.offsetWidth;
+  if (!reduceMotion) boardEl.classList.add(cls);
+}
+
+/* ---------------------------------------------------------------- 4) AUDIO */
+let AC = null, muted = store.get('rad_mute', false);
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC = null; } }
+  if (AC && AC.state === 'suspended') AC.resume().catch(() => {});
+  return AC;
+}
+function tone(freq, dur, type = 'sine', vol = 0.15, when = 0, slide = 0) {
+  if (muted || !AC) return;
+  const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime + when;
+  o.type = type; o.frequency.setValueAtTime(freq, t);
+  if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(AC.destination); o.start(t); o.stop(t + dur + 0.03);
+}
+function noise(dur, vol, freq = 1200, when = 0) {
+  if (muted || !AC) return;
+  const len = Math.floor(AC.sampleRate * dur), buf = AC.createBuffer(1, len, AC.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+  const s = AC.createBufferSource(), g = AC.createGain(), f = AC.createBiquadFilter();
+  f.type = 'bandpass'; f.frequency.value = freq; s.buffer = buf; g.gain.value = vol;
+  s.connect(f).connect(g).connect(AC.destination); s.start(AC.currentTime + when);
+}
+// Scala pentatonica maggiore: il tono sale con il valore della tessera (2 -> Do4 ... 2048 -> Do6 circa).
+const PENTA = [0, 2, 4, 7, 9];
+const noteFreq = v => { const idx = Math.max(0, levelOf(v) - 1); return 261.63 * 2 ** ((PENTA[idx % 5] + 12 * Math.floor(idx / 5)) / 12); };
+const sfx = {
+  slide: () => noise(0.07, 0.05, 900),
+  merge: (v, mult, i) => { const f = Math.min(noteFreq(v), 2400), w = i * 0.045; tone(f, 0.3, 'triangle', 0.13, w); tone(f * 2, 0.2, 'sine', 0.04, w + 0.01); if (mult > 1) tone(f * 1.5, 0.24, 'sine', 0.05, w + 0.03); },
+  deny: () => tone(150, 0.09, 'sine', 0.06, 0, 110),
+  hammer: () => { noise(0.14, 0.3, 1800); tone(110, 0.2, 'square', 0.07, 0, 60); },
+  undo: () => tone(520, 0.12, 'sine', 0.08, 0, 330),
+  bonus: () => [0, 7, 12].forEach((s, i) => tone(523.25 * 2 ** (s / 12), 0.22, 'sine', 0.1, i * 0.07)),
+  win: () => { [0, 4, 7, 12, 16].forEach((s, i) => tone(523.25 * 2 ** (s / 12), 0.4, 'triangle', 0.13, i * 0.11)); [0, 4, 7, 12].forEach(s => tone(523.25 * 2 ** (s / 12), 0.8, 'sine', 0.06, 0.6)); },
+  over: () => [0, -3, -7, -12].forEach((s, i) => tone(392 * 2 ** (s / 12), 0.38, 'triangle', 0.12, i * 0.14)),
+};
+const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
+
+/* ---------------------------------------------------------------- 5) PARTITA */
+const bestKey = () => (mode === 'daily' ? dailyKey : 'rad_best');
+const canMove = () => {
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    if (!grid[r][c]) return true;
+    if (c + 1 < N && grid[r][c + 1] && grid[r][c + 1].v === grid[r][c].v) return true;
+    if (r + 1 < N && grid[r + 1][c] && grid[r + 1][c].v === grid[r][c].v) return true;
+  }
+  return false;
+};
+function spawn() {
+  const empty = [];
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!grid[r][c]) empty.push([r, c]);
+  if (!empty.length) return null;
+  const [r, c] = empty[Math.floor(rand() * empty.length)];
+  return makeTile(rand() < 0.9 ? 2 : 4, r, c, true);
+}
+function snapshot() {
+  const cells = []; eachTile(t => cells.push({ v: t.v, r: t.r, c: t.c }));
+  return { cells, score, streak, maxStreak, hammers, maxTile, moves, rs, won };
+}
+function restore(s) {
+  clearBoard();
+  s.cells.forEach(c => makeTile(c.v, c.r, c.c, false));
+  score = s.score; streak = s.streak; maxStreak = s.maxStreak; hammers = s.hammers; maxTile = s.maxTile; moves = s.moves; rs = s.rs; won = s.won;
+}
+
+function render(pulseScore) {
+  const sc = $('score');
+  sc.textContent = score.toLocaleString('it-IT');
+  if (pulseScore && !reduceMotion) { sc.classList.remove('bump'); void sc.offsetWidth; sc.classList.add('bump'); }
+  $('best').textContent = best.toLocaleString('it-IT');
+  $('bestLbl').textContent = mode === 'daily' ? 'Oggi' : 'Record';
+  const ch = $('chain'), m = multOf(streak);
+  ch.classList.toggle('on', running && streak > 0);
+  ch.textContent = 'Catena ' + streak + (m > 1 ? ' · ×' + m : '');
+  $('hammerN').textContent = hammers;
+  $('hammer').disabled = !running || (hammers < 1 && !hammerMode);
+  $('hammer').classList.toggle('armed', hammerMode);
+  $('undo').disabled = !running || !undoSnap;
+  boardEl.classList.toggle('hammer', hammerMode);
+}
+function refreshMenu() {
+  $('menuBest').textContent = store.get('rad_best', 0).toLocaleString('it-IT');
+  const d = store.get(dailyKey, null);
+  $('menuDaily').textContent = d === null ? '—' : d.toLocaleString('it-IT');
+  $('daily').textContent = 'Sfida del giorno · ' + todayLabel;
+}
+function bumpBest() {
+  if (score > best) { best = score; store.set(bestKey(), best); }
+}
+function setHammer(on) {
+  hammerMode = on && hammers > 0 && running && !busy;
+  render();
+  if (hammerMode) toast('Tocca una tessera da rompere');
+}
+
+function start(m) {
+  ac(); lastMode = m; mode = m; gen++;
+  rs = m === 'daily' ? hashStr('raddoppio-' + today) : (Math.random() * 4294967296) >>> 0;
+  clearBoard();
+  score = 0; streak = 0; maxStreak = 0; hammers = 0; maxTile = 0; moves = 0; won = false;
+  running = true; over = false; busy = false; hammerMode = false; pending = null; undoSnap = null;
+  best = store.get(bestKey(), 0); prevBest = best;
+  spawn(); spawn();
+  $('menu').hidden = true; $('over').hidden = true; $('win').hidden = true;
+  armRestart(false);
+  render();
+}
+
+function doMove(dir) {
+  const before = snapshot();
+  const mt = [];                                   // fusioni: { surv, dead, newV }
+  const target = emptyGrid();
+  let changed = false, gainedTotal = 0;
+  for (let line = 0; line < N; line++) {
+    const order = [], vals = [];
+    for (let i = 0; i < N; i++) { const [r, c] = cellAt(dir, line, i); order.push(grid[r][c]); vals.push(grid[r][c] ? grid[r][c].v : 0); }
+    const p = planLine(vals), surv = [null, null, null, null];
+    for (let i = 0; i < N; i++) {
+      const t = order[i]; if (!t) continue;
+      const k = p.to[i], [nr, nc] = cellAt(dir, line, k);
+      if (p.absorbed[i]) {
+        mt.push({ surv: surv[k], dead: t, newV: p.out[k] });
+        t.r = nr; t.c = nc; t.el.classList.add('dying'); changed = true;
+      } else {
+        surv[k] = t;
+        if (t.r !== nr || t.c !== nc) changed = true;
+        t.r = nr; t.c = nc; target[nr][nc] = t;
+      }
+    }
+    gainedTotal += p.gained;
+  }
+  if (!changed) {                                  // mossa non valida: niente spawn, niente snapshot
+    // le tessere non si sono mosse davvero: ripristina le coordinate (non sono cambiate) e dai un segnale
+    bump(dir); sfx.deny();
+    return false;
+  }
+  undoSnap = before;
+  grid = target; moves++;
+  streak = mt.length ? streak + 1 : 0;
+  maxStreak = Math.max(maxStreak, streak);
+  const mult = multOf(streak), pts = gainedTotal * mult;
+  busy = true;
+  eachTile(place); mt.forEach(m => place(m.dead));
+  sfx.slide(); buzz(6);
+  const g = gen;
+  setTimeout(() => {
+    if (g !== gen) return;
+    const merged = mt.slice().sort((a, b) => a.newV - b.newV);
+    merged.forEach((m, i) => {
+      m.dead.el.remove();
+      m.surv.v = m.newV; face(m.surv); restartAnim(m.surv, 'pop');
+      sparks(m.surv, 5 + Math.min(8, levelOf(m.newV)));
+      sfx.merge(m.newV, mult, Math.min(i, 3));
+      if (m.newV > maxTile) {
+        maxTile = m.newV;
+        if (m.newV >= HAMMER_FROM && hammers < MAX_HAMMERS) { hammers++; setTimeout(() => { if (g === gen) { sfx.bonus(); toast('Martello guadagnato!'); } }, 220 * TS); }
+        else if (m.newV >= HAMMER_FROM) setTimeout(() => { if (g === gen) toast('Nuovo record: ' + m.newV); }, 220 * TS);
+      }
+    });
+    if (mt.length) {
+      const top = merged[merged.length - 1].surv;
+      floatPts(top, '+' + pts + (mult > 1 ? ' ×' + mult : ''));
+      buzz(14);
+    }
+    score += pts; bumpBest();
+    spawn();
+    if (!won && maxTile >= WIN_AT) { won = true; showWin(); }
+    busy = false;
+    render(pts > 0);
+    if (!canMove()) {
+      if (hammers > 0) { $('hammer').classList.add('pulse'); toast('Nessuna mossa: usa il martello!'); }
+      else { finish(); return; }
+    } else $('hammer').classList.remove('pulse');
+    if (pending && !over) { const d = pending; pending = null; input(d); }
+  }, Math.round(SLIDE_MS() * TS));
+  render();
+  return true;
+}
+const SLIDE_MS = () => (reduceMotion ? 10 : 120);
+
+function input(dir) {
+  if (!running || over || !$('win').hidden) return;
+  if (busy) { pending = dir; return; }
+  if (hammerMode) setHammer(false);
+  doMove(dir);
+}
+
+function useHammer(t) {
+  if (!running || busy || !hammerMode || !t || t.dying) return;
+  undoSnap = snapshot();
+  grid[t.r][t.c] = null;
+  hammers--; hammerMode = false;
+  sparks(t, 12); restartAnim(t, 'out');
+  sfx.hammer(); buzz(30);
+  const g = gen;
+  setTimeout(() => { if (g === gen) t.el.remove(); }, 230 * TS);
+  $('hammer').classList.remove('pulse');
+  render();
+  if (!canMove() && hammers === 0) setTimeout(() => { if (g === gen && !over) finish(); }, 260 * TS);
+}
+
+function undo() {
+  if (!running || busy || !undoSnap) return;
+  restore(undoSnap); undoSnap = null; pending = null; hammerMode = false;
+  $('hammer').classList.remove('pulse');
+  sfx.undo();
+  bumpBest(); render();
+}
+
+function finish() {
+  over = true; running = false; hammerMode = false; $('win').hidden = true;
+  bumpBest();
+  const isRecord = score > prevBest && score > 0;
+  $('overMode').textContent = mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : 'Partita libera';
+  $('overScore').textContent = score.toLocaleString('it-IT');
+  $('newRecord').hidden = !isRecord;
+  $('newRecord').textContent = mode === 'daily' ? 'Il tuo migliore di oggi' : 'Nuovo record';
+  $('stTile').textContent = maxTile || 2;
+  $('stMoves').textContent = moves;
+  $('stChain').textContent = maxStreak;
+  $('share').hidden = mode !== 'daily';
+  $('share').textContent = 'Copia risultato';
+  $('shareBox').hidden = true;
+  sfx.over(); buzz(80);
+  render();
+  const g = gen;
+  setTimeout(() => { if (g === gen) { $('over').hidden = false; $('again').focus({ preventScroll: true }); } }, 450 * TS);
+}
+function showWin() {
+  sfx.win(); buzz([20, 40, 20]);
+  const g = gen;
+  setTimeout(() => { if (g === gen && running) { $('win').hidden = false; $('winGo').focus({ preventScroll: true }); } }, 300 * TS);
+}
+
+/* ---------------------------------------------------------------- 6) INPUT E SCHERMATE */
+let restartArmed = 0;
+function armRestart(on) {
+  const b = $('restart'); b.classList.toggle('ask', on); b.textContent = on ? 'Sicuro?' : 'Nuova';
+  const g = ++restartArmed;
+  if (on) setTimeout(() => { if (g === restartArmed) armRestart(false); }, 2500);
+}
+$('play').addEventListener('click', () => start('free'));
+$('daily').addEventListener('click', () => start('daily'));
+$('again').addEventListener('click', () => start(lastMode));
+$('toMenu').addEventListener('click', () => { refreshMenu(); $('over').hidden = true; $('menu').hidden = false; });
+$('winGo').addEventListener('click', () => { $('win').hidden = true; });
+$('winNew').addEventListener('click', () => start(lastMode));
+$('restart').addEventListener('click', () => {
+  if (!running) return;
+  if (score === 0 || $('restart').classList.contains('ask')) start(lastMode); else armRestart(true);
+});
+$('undo').addEventListener('click', undo);
+$('hammer').addEventListener('click', () => { if (!running || busy) return; if (hammerMode) setHammer(false); else if (hammers > 0) setHammer(true); });
+$('share').addEventListener('click', () => {
+  const txt = 'Raddoppio · sfida del ' + todayLabel + '\n' + score.toLocaleString('it-IT') + ' punti · tessera ' + (maxTile || 2) + ' · ' + moves + ' mosse · catena max ' + maxStreak;
+  const fallback = () => { const b = $('shareBox'); b.value = txt; b.hidden = false; b.focus(); b.select(); $('share').textContent = 'Seleziona e copia il testo'; };
+  try { navigator.clipboard.writeText(txt).then(() => { $('share').textContent = 'Copiato'; }, fallback); } catch (e) { fallback(); }
+});
+const muteBtn = $('mute');
+const syncMute = () => { muteBtn.textContent = muted ? 'Muto' : 'Suono'; };
+muteBtn.addEventListener('click', () => { muted = !muted; store.set('rad_mute', muted); ac(); syncMute(); });
+syncMute();
+
+const KEYMAP = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down', a: 'left', d: 'right', w: 'up', s: 'down', A: 'left', D: 'right', W: 'up', S: 'down' };
+window.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = e.target && e.target.tagName;
+  if (tag === 'TEXTAREA' || tag === 'INPUT') return;
+  const dir = KEYMAP[e.key];
+  if (dir) { if (running) { ac(); input(dir); } e.preventDefault(); return; }
+  if (!running) return;
+  if (e.key === 'z' || e.key === 'Z') { undo(); e.preventDefault(); }
+  else if (e.key === 'h' || e.key === 'H') { $('hammer').click(); e.preventDefault(); }
+});
+
+// Swipe: scatta appena il dito supera la soglia (risposta immediata). Un tocco breve con il martello colpisce la tessera sotto il dito.
+const stage = $('stage');
+let ptr = null;
+stage.addEventListener('pointerdown', e => {
+  ac();
+  const tileEl = e.target.closest && e.target.closest('.tile');
+  ptr = { x: e.clientX, y: e.clientY, id: e.pointerId, fired: false, tile: tileEl ? tileEl._t : null };
+});
+stage.addEventListener('pointermove', e => {
+  if (!ptr || ptr.fired || e.pointerId !== ptr.id) return;
+  const dx = e.clientX - ptr.x, dy = e.clientY - ptr.y, th = Math.max(22, boardEl.getBoundingClientRect().width * 0.07);
+  if (Math.max(Math.abs(dx), Math.abs(dy)) < th) return;
+  ptr.fired = true;
+  input(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
+});
+stage.addEventListener('pointerup', e => {
+  if (!ptr || e.pointerId !== ptr.id) return;
+  if (!ptr.fired && hammerMode && Math.hypot(e.clientX - ptr.x, e.clientY - ptr.y) < 14) useHammer(ptr.tile);
+  ptr = null;
+});
+stage.addEventListener('pointercancel', () => { ptr = null; });
+
+/* Interfaccia di prova (usata dai test automatici; innocua per il gioco). */
+window.__R = {
+  planLine, cellAt, multOf,
+  get S() { return { score, best, streak, maxStreak, hammers, maxTile, moves, running, over, busy, won, hammerMode, mode, rs }; },
+  values() { return grid.map(row => row.map(t => (t ? t.v : 0))); },
+  setGrid(rows, opts = {}) { clearBoard(); rows.forEach((row, r) => row.forEach((v, c) => { if (v) makeTile(v, r, c, false); })); if (opts.hammers !== undefined) hammers = opts.hammers; if (opts.streak !== undefined) streak = opts.streak; if (opts.maxTile !== undefined) maxTile = opts.maxTile; render(); },
+  move: input, start, undo, finish, canMove, useHammerAt(r, c) { setHammer(true); useHammer(grid[r][c]); },
+  setTimescale(x) { TS = x; boardEl.style.setProperty('--slide', Math.max(1, Math.round(SLIDE_MS() * x)) + 'ms'); },
+};
+
+best = store.get('rad_best', 0);
+clearBoard();
+// tabellone di esempio dietro al menu
+[[0, 0, 2], [0, 1, 4], [0, 2, 8], [1, 0, 16], [1, 1, 32], [1, 2, 64], [2, 0, 128], [2, 1, 256], [3, 3, 512]].forEach(([r, c, v]) => makeTile(v, r, c, false));
+refreshMenu(); render();
+})();
+},
   };
 
   const launcher = document.getElementById('lx-launcher');
@@ -3411,7 +4034,7 @@ window.__M7 = {
   }
 
   // ---------- conteggio per il test: quale gioco viene rigiocato di più ----------
-  const NAMES = { bilancia: 'Bilancia', quadrante: 'Quadrante', primo: 'Primo', resto: 'Resto', girasette: 'Girasette' };
+  const NAMES = { bilancia: 'Bilancia', quadrante: 'Quadrante', primo: 'Primo', resto: 'Resto', girasette: 'Girasette', raddoppio: 'Raddoppio' };
   const KEYS = Object.keys(NAMES);
   const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   const ls = {

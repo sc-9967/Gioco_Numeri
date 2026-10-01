@@ -1,6 +1,6 @@
 # Numeri in Tasca
 
-Cinque giochi di numeri da partite brevi, pensati per il telefono. Sono tutti dentro un unico file HTML, `index.html`, senza dipendenze: si apre nel browser.
+Sei giochi di numeri da partite brevi, pensati per il telefono. Sono tutti dentro un unico file HTML, `index.html`, senza dipendenze: si apre nel browser.
 
 | Gioco | In breve |
 |---|---|
@@ -9,8 +9,9 @@ Cinque giochi di numeri da partite brevi, pensati per il telefono. Sono tutti de
 | **Primo** | Scomponi in fattori primi i blocchi che cadono prima che la torre tocchi il soffitto. |
 | **Resto** | Alla cassa: calcola il resto e consegnalo con monete e banconote, meglio se con meno pezzi. |
 | **Girasette** | Fondi tre o più tessere uguali su una griglia esagonale fino al 7. Finiti i tre pezzi, gli anelli della plancia girano. |
+| **Raddoppio** | Scorri la griglia 4×4 e fondi le tessere uguali. Le catene di fusioni moltiplicano i punti, il martello rompe una tessera. |
 
-`index.html` è il launcher con tutti e cinque i giochi (la copia `Numeri in Tasca.html` è identica). I file singoli dei giochi sono stati eliminati: ogni gioco si apre direttamente con `index.html#bilancia`, `#quadrante`, `#primo`, `#resto`, `#girasette`.
+`index.html` è il launcher con tutti e sei i giochi (la copia `Numeri in Tasca.html` è identica). I file singoli dei giochi sono stati eliminati: ogni gioco si apre direttamente con `index.html#bilancia`, `#quadrante`, `#primo`, `#resto`, `#girasette`, `#raddoppio`.
 
 ## Come provarli
 
@@ -29,6 +30,18 @@ Puzzle di fusione su griglia esagonale (raggio 3, 37 celle, coordinate assiali).
 - Regola propria del gioco: finiti i tre pezzi, i tre anelli esterni ruotano di un passo (quello interno e quello esterno in un verso, quello medio nel verso opposto). Le fusioni causate dal giro valgono doppio. Con un solo pezzo rimasto, delle frecce mostrano dove andrà ogni tessera.
 - Pezzi doppi: si ruotano toccandoli, con il pulsante "Ruota" o con il tasto R.
 
+## Raddoppio
+
+Puzzle a scorrimento su griglia 4×4, della stessa famiglia di regole dei classici "2048" (vedi `docs/giochi-simili.md`).
+
+- Le tessere scivolano fino in fondo; due tessere uguali adiacenti si fondono e raddoppiano. Ogni tessera si fonde al massimo una volta per mossa: `[2,2,2,2]` verso sinistra dà `[4,4,0,0]`.
+- Dopo ogni mossa valida compare un 2 (90%) o un 4 (10%).
+- **Catena:** fusioni in mosse consecutive moltiplicano i punti (×2 dalla seconda, ×3 dalla quarta, ×4 dalla sesta). Una mossa senza fusioni azzera la catena.
+- **Martello:** ogni nuova tessera record da 64 in su regala un martello (massimo 3). Si tocca il pulsante e poi una tessera per romperla.
+- **Annulla:** ripristina anche il generatore casuale, quindi rifare la stessa mossa dà lo stesso risultato (non serve a "ritirare i dadi").
+- Vittoria a 2048 con possibilità di continuare; game over solo senza mosse e senza martelli.
+- Comandi: frecce o WASD, swipe, Z per annullare, H per il martello.
+
 ## Test
 
 I test usano Playwright e si trovano in `tests/`:
@@ -43,6 +56,8 @@ node girasette-logica.js      # anelli, giro, moltiplicatori
 node girasette-giro.js        # fusione causata dal giro
 node girasette-bot.js         # partite automatiche di Girasette
 node launcher-girasette.js    # Girasette dentro il launcher
+node raddoppio-logica.js      # scorrimento, fusioni, undo, catena, martello, vittoria, game over
+node launcher-raddoppio.js    # Raddoppio dentro il launcher
 ```
 
 Risultati e misure del 30/09/2026 in `docs/risultati-test.md`. L'analisi dei giochi simili è in `docs/giochi-simili.md`.

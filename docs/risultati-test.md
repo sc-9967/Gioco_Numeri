@@ -43,3 +43,16 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 - **Partite a mosse casuali (8):** da 65 a 287 mosse, nessun errore.
 - **Bot che sceglie la mossa migliore:** oltre 700 mosse senza finire, con 12-15 tessere in plancia. Il gioco ha una rampa di difficoltà (ogni 25 pezzi i valori alti diventano più frequenti), ma un giocatore esperto non arriva naturalmente al game over: la partita si gioca per punteggio.
 - **Nel launcher:** menu, partita, rigioca, ritorno, record sulla carta, conteggio e apertura diretta con `#girasette`, senza errori.
+
+## Raddoppio
+
+- **Scorrimento e fusione** (`raddoppio-logica.js`): `[2,2,2,2]` → `[4,4,0,0]`, `[2,2,4,4]` → `[4,8,0,0]`, `[8,8,8,0]` → `[16,8,0,0]`, `[4,2,2,0]` → `[4,4,0,0]`; punti 8 e 12 per i primi due casi. Le quattro direzioni sulla griglia danno il risultato atteso.
+- **Partite casuali:** 12 partite, circa 1.500-2.000 mosse valide, nessuna violazione: dopo ogni mossa la somma delle tessere cresce esattamente di 2 o 4 (la tessera comparsa), tutte le tessere sono potenze di 2, una mossa nulla non cambia la griglia. Tutte le partite arrivano al game over.
+- **Annulla deterministico:** su 60 prove, 60 volte la stessa mossa dopo l'annulla dà la stessa griglia e lo stesso punteggio.
+- **Sfida del giorno:** due avvii producono la stessa griglia iniziale.
+- **Catena:** 12 punti alla prima fusione (×1), 16 alla seconda consecutiva (8 × 2).
+- **Martello:** compare al raggiungimento del 64, rompe la tessera scelta e si consuma.
+- **Vittoria:** a 2048 compare il modale e "Continua" lo chiude. **Game over:** griglia bloccata senza martelli mostra il pannello finale.
+- **Nel launcher:** scheda, menu, partita, game over, rigioca, ritorno, record sulla carta, conteggio e `#raddoppio`, senza errori. Nessun residuo di stili o elementi del gioco dopo l'uscita.
+- **Schermi:** 360×640, 390×844, 844×390 e 1280×800 senza scorrimento orizzontale.
+- **Limite:** i bot giocano a caso. Non è stato misurato quanto sia difficile o divertente per una persona; il martello e la catena sono tarati a intuito.
