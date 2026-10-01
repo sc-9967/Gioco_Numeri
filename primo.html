@@ -1,0 +1,555 @@
+<title>Primo</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: one-screen arcade. A tower of number blocks grows from the floor; the prime keys sit under the thumb. */
+:root{
+  --ground:#e6e8ed;
+  --ground-2:#d6dae2;
+  --ink:#141824;
+  --muted:#5f6678;
+  --line:#c2c7d1;
+  --panel:#f6f7f9;
+  --slab:#2b3140;
+  --slab-2:#3b4458;
+  --slab-text:#f3f4f7;
+  --cobalt:#2446d8;
+  --cobalt-ink:#ffffff;
+  --warn:#d33f26;
+  --scrim:rgba(20,24,36,.55);
+  --display:"Big Shoulders Display","Oswald","Arial Narrow",Impact,sans-serif;
+  --ui:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#11141b; --ground-2:#1a1f2a; --ink:#edf0f6; --muted:#8e95a8; --line:#2d3444; --panel:#1a1f2b;
+  --slab:#d9dde6; --slab-2:#f1f3f8; --slab-text:#131722; --cobalt:#5d7fff; --cobalt-ink:#0b0e1a; --warn:#ff6b4f;
+  --scrim:rgba(0,0,0,.62); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --ground:#11141b; --ground-2:#1a1f2a; --ink:#edf0f6; --muted:#8e95a8; --line:#2d3444; --panel:#1a1f2b;
+  --slab:#d9dde6; --slab-2:#f1f3f8; --slab-text:#131722; --cobalt:#5d7fff; --cobalt-ink:#0b0e1a; --warn:#ff6b4f;
+  --scrim:rgba(0,0,0,.62); color-scheme:dark;
+}
+html,body{height:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--ui);overflow:hidden;
+  -webkit-user-select:none;user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.app{height:100%;display:flex;flex-direction:column;position:relative;
+  background:linear-gradient(180deg,var(--ground) 0%,var(--ground-2) 100%)}
+.hud{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:8px;padding:12px 16px 4px;width:100%;max-width:760px;margin-inline:auto;box-sizing:border-box}
+.stat{display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat.mid{align-items:center}
+.stat.right{align-items:flex-end}
+.lbl{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.val{font-family:var(--display);font-weight:900;font-size:32px;line-height:1;font-variant-numeric:tabular-nums}
+.streak{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--cobalt-ink);background:var(--cobalt);border-radius:99px;padding:2px 9px;visibility:hidden;white-space:nowrap}
+.streak.on{visibility:visible}
+.stage{flex:1;position:relative;min-height:0}
+canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
+.keys{display:flex;flex-direction:column;gap:8px;padding:8px 16px 6px;max-width:640px;width:100%;margin:0 auto;box-sizing:border-box}
+.primes{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}
+.key{font:inherit;cursor:pointer;border-radius:12px;border:none;transition:transform .05s}
+.key:active{transform:translateY(2px)}
+.key:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.pk{height:clamp(52px,8.5vh,64px);background:var(--cobalt);color:var(--cobalt-ink);font-family:var(--display);font-weight:900;font-size:clamp(26px,4.4vh,34px);box-shadow:0 4px 0 color-mix(in srgb,var(--cobalt) 55%,var(--ink))}
+.pk:active{box-shadow:0 1px 0 color-mix(in srgb,var(--cobalt) 55%,var(--ink))}
+.isprime{height:clamp(44px,7vh,54px);background:var(--ink);color:var(--ground);font-weight:700;font-size:17px;letter-spacing:.12em;text-transform:uppercase}
+.key.err{animation:err .3s}
+@keyframes err{0%,100%{transform:none}25%{transform:translateX(-5px);background:var(--warn)}75%{transform:translateX(5px);background:var(--warn)}}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:2px 16px 12px;color:var(--muted);font-size:12px;width:100%;max-width:760px;margin-inline:auto;box-sizing:border-box}
+.foot button{font:inherit;color:var(--muted);background:none;border:1px solid var(--line);border-radius:99px;padding:5px 12px;cursor:pointer}
+
+.overlay{position:absolute;inset:0;display:grid;place-items:center;padding:16px;background:var(--scrim);z-index:5}
+.panel{width:100%;max-width:360px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:24px 22px 20px;display:flex;flex-direction:column;gap:16px;box-shadow:0 24px 60px rgba(0,0,0,.3)}
+.eyebrow{margin:0;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-family:var(--display);font-weight:900;font-size:76px;line-height:.85;letter-spacing:.01em;text-transform:uppercase}
+h1 span{color:var(--cobalt)}
+h2{margin:0;font-family:var(--display);font-weight:900;font-size:40px;line-height:.95;text-transform:uppercase;text-wrap:balance}
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.35}
+.rules li{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center}
+.chip{font-family:var(--display);font-weight:900;font-size:19px;text-align:center;border-radius:8px;padding:3px 0;background:var(--cobalt);color:var(--cobalt-ink)}
+.chip.slab{background:var(--slab);color:var(--slab-text)}
+.chip.ink{background:var(--ink);color:var(--ground);font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.08em;padding:6px 0}
+.btns{display:flex;flex-direction:column;gap:10px}
+.btn{font:inherit;font-weight:700;font-size:17px;border-radius:12px;padding:15px 16px;cursor:pointer;border:2px solid var(--cobalt)}
+.btn.primary{background:var(--cobalt);color:var(--cobalt-ink)}
+.btn.secondary{background:transparent;color:var(--cobalt)}
+.btn.link{border:none;background:none;color:var(--muted);font-weight:600;font-size:15px;padding:6px}
+.btn:focus-visible,.foot button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.small{margin:0;font-size:13px;color:var(--muted);text-align:center}
+.small b{color:var(--ink);font-variant-numeric:tabular-nums}
+.bigscore{font-family:var(--display);font-weight:900;font-size:76px;line-height:.9;color:var(--cobalt);font-variant-numeric:tabular-nums}
+.record{align-self:flex-start;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cobalt-ink);background:var(--cobalt);border-radius:99px;padding:3px 10px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats div{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line);padding-top:8px}
+.stats b{font-family:var(--display);font-weight:900;font-size:28px;font-variant-numeric:tabular-nums}
+.stats span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.last{margin:0;font-size:14px;color:var(--muted)}
+.last b{color:var(--ink);font-variant-numeric:tabular-nums}
+#shareBox{width:100%;box-sizing:border-box;font:13px/1.4 var(--ui);color:var(--ink);background:var(--ground);border:1px solid var(--line);border-radius:10px;padding:8px;resize:none}
+/* telefono in orizzontale: torre a sinistra, tasti a destra */
+@media (orientation:landscape) and (max-height:560px){
+  .app{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,44%);grid-template-rows:auto minmax(0,1fr) auto}
+  .hud,.foot{grid-column:1 / -1;max-width:none}
+  .stage{grid-column:1;grid-row:2}
+  .keys{grid-column:2;grid-row:2;justify-content:center;max-width:none;padding:6px 16px}
+  .primes{grid-template-columns:repeat(3,1fr)}
+  .pk{height:clamp(42px,17vh,64px)}
+  .isprime{height:clamp(38px,14vh,54px)}
+}
+@media (max-height:520px){
+  .hud{padding-top:6px}.val{font-size:24px}.foot{padding-bottom:6px}
+  .panel{padding:16px 18px;gap:10px}h1{font-size:54px}h2{font-size:28px}.rules{font-size:13px;gap:6px}
+  .btn{padding:10px 14px;font-size:15px}.bigscore{font-size:52px}
+}
+/* tablet e computer */
+@media (min-width:700px) and (min-height:760px){
+  .val{font-size:40px}.lbl{font-size:12px}.foot{font-size:14px}
+  .pk{height:clamp(64px,8vh,84px);font-size:clamp(34px,4.4vh,44px);border-radius:16px}
+  .isprime{height:clamp(54px,6.5vh,66px);font-size:20px;border-radius:16px}
+  .primes{gap:10px}
+  .panel{max-width:420px}
+}
+@media (prefers-reduced-motion:reduce){.key.err{animation:none;background:var(--warn)}}
+</style>
+
+<div class="app" id="app">
+  <header class="hud">
+    <div class="stat"><span class="lbl">Punti</span><span class="val" id="score">0</span></div>
+    <div class="stat mid"><span class="lbl">Livello</span><span class="val" id="level">1</span><span class="streak" id="streak">serie 8 · ×2</span></div>
+    <div class="stat right"><span class="lbl" id="bestLbl">Record</span><span class="val" id="best">0</span></div>
+  </header>
+  <div class="stage" id="stage"><canvas id="cv"></canvas></div>
+  <div class="keys">
+    <div class="primes" id="primes"></div>
+    <button class="key isprime" id="isPrime" type="button">È primo!</button>
+  </div>
+  <footer class="foot"><span>Tasti 2 3 5 7 · Q=11 · W=13 · spazio</span><button id="mute" type="button">Suono: sì</button></footer>
+
+  <section class="overlay" id="menu">
+    <div class="panel">
+      <p class="eyebrow">Gioco di numeri · scomposizione rapida</p>
+      <h1>Pri<span>mo</span></h1>
+      <ul class="rules">
+        <li><span class="chip slab">84</span><span>La torre cresce. Lavori sempre sul blocco più in basso.</span></li>
+        <li><span class="chip">2</span><span>Tocca un primo che lo divide: 84 → 42 → 21 → 7…</span></li>
+        <li><span class="chip ink">È PRIMO</span><span>Quando resta un numero primo, come 7 o 23, frantumalo.</span></li>
+        <li><span class="chip slab">✕</span><span>Un errore fa cadere un blocco in più. Se la torre tocca il soffitto, hai perso.</span></li>
+      </ul>
+      <div class="btns">
+        <button class="btn primary" id="play" type="button">Gioca</button>
+        <button class="btn secondary" id="daily" type="button">Sfida del giorno</button>
+      </div>
+      <p class="small">Record: <b id="menuBest">0</b> · Sfida di oggi: <b id="menuDaily">—</b></p>
+    </div>
+  </section>
+
+  <section class="overlay" id="over" hidden>
+    <div class="panel">
+      <p class="eyebrow" id="overMode">Partita libera</p>
+      <h2>La torre ha toccato il soffitto</h2>
+      <div class="bigscore" id="overScore">0</div>
+      <span class="record" id="overRecord" hidden>Nuovo record</span>
+      <div class="stats">
+        <div><b id="stBlocks">0</b><span>Blocchi</span></div>
+        <div><b id="stStreak">0</b><span>Serie max</span></div>
+        <div><b id="stLevel">1</b><span>Livello</span></div>
+      </div>
+      <p class="last" id="stLast"></p>
+      <div class="btns">
+        <button class="btn primary" id="again" type="button">Rigioca</button>
+        <button class="btn secondary" id="share" type="button" hidden>Copia risultato</button>
+        <textarea id="shareBox" rows="3" readonly hidden></textarea>
+        <button class="btn link" id="toMenu" type="button">Menu</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const stage = $('stage'), cv = $('cv'), ctx = cv.getContext('2d');
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+  // colori letti dai token CSS, riletti quando cambia il tema
+  let C = {}, DISPLAY = '', UI = '';
+  function readTokens() {
+    const cs = getComputedStyle(document.documentElement), v = n => cs.getPropertyValue(n).trim();
+    C = { ground: v('--ground'), ink: v('--ink'), muted: v('--muted'), line: v('--line'), slab: v('--slab'), slab2: v('--slab-2'),
+      slabText: v('--slab-text'), cobalt: v('--cobalt'), warn: v('--warn') };
+    DISPLAY = v('--display'); UI = v('--ui');
+  }
+  readTokens();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readTokens);
+  new MutationObserver(readTokens).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  const store = {
+    get(k, d) { try { const x = localStorage.getItem(k); return x === null ? d : JSON.parse(x); } catch (e) { return d; } },
+    set(k, x) { try { localStorage.setItem(k, JSON.stringify(x)); } catch (e) {} },
+  };
+  const today = (() => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); })();
+  const todayLabel = today.slice(8, 10) + '/' + today.slice(5, 7);
+  const dailyKey = 'primo_d_' + today;
+  function mulberry(seed) { let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function hashStr(s) { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+
+  // ---------- numeri ----------
+  const KEYS = [2, 3, 5, 7, 11, 13];
+  const BIG = [17, 19, 23, 29, 31, 37, 41, 43, 47];
+  const isPrime = n => { if (n < 2) return false; for (let d = 2; d * d <= n; d++) if (n % d === 0) return false; return true; };
+  const BLOCKS_PER_LEVEL = 8;
+  function genNumber(idx, r) {
+    const lv = 1 + Math.floor(idx / BLOCKS_PER_LEVEL);
+    const pool = lv >= 4 ? KEYS : lv === 3 ? KEYS.slice(0, 5) : lv === 2 ? KEYS.slice(0, 4) : KEYS.slice(0, 3);
+    for (let tries = 0; tries < 20; tries++) {
+      let k, n = 1;
+      const x = r();
+      if (lv >= 3 && x < 0.18) {
+        n = BIG[Math.floor(r() * BIG.length)];
+        k = Math.floor(r() * 3);
+      } else {
+        const y = r();
+        k = lv === 1 ? 2 : lv === 2 ? (y < 0.5 ? 2 : 3) : lv === 3 ? 3 : lv === 4 ? (y < 0.5 ? 3 : 4) : (y < 0.3 ? 3 : y < 0.75 ? 4 : 5);
+      }
+      for (let i = 0; i < k; i++) n *= pool[Math.floor(r() * pool.length)];
+      if (n > 1 && n <= 9999) return n;
+    }
+    return 2 * 3 * 5;
+  }
+
+  // ---------- stato ----------
+  let S;
+  function newState(mode) {
+    S = {
+      mode, rnd: mode === 'daily' ? mulberry(hashStr('primo-' + today)) : Math.random,
+      spawned: 0, stack: [], score: 0, streak: 0, maxStreak: 0, done: 0, level: 1,
+      spawnT: 0, running: false, over: false, shards: [], popups: [], shake: 0, flash: 0, lastBlock: null,
+    };
+  }
+  function spawnBlock(instant) {
+    const n = genNumber(S.spawned++, S.rnd);
+    const g = geo(), i = S.stack.length;
+    const b = { n, orig: n, factors: [], y: instant ? slotY(g, i) : g.topY - g.bh - 30, vy: 0, pulse: 0, land: 0 };
+    S.stack.push(b);
+    if (S.running && S.stack.length > g.slots) collapse();
+  }
+  const interval = () => Math.max(1.3, 4.0 - 0.25 * (S.level - 1));
+
+  // ---------- audio ----------
+  let AC = null, muted = store.get('primo_mute', false);
+  function ac() {
+    if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC = null; } }
+    if (AC && AC.state === 'suspended') AC.resume().catch(() => {});
+    return AC;
+  }
+  function tone(freq, dur, type = 'sine', vol = 0.2, when = 0, slide = 0) {
+    if (muted || !AC) return;
+    const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime + when;
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(AC.destination); o.start(t); o.stop(t + dur + 0.03);
+  }
+  function noise(dur, vol, when = 0) {
+    if (muted || !AC) return;
+    const len = Math.floor(AC.sampleRate * dur), buf = AC.createBuffer(1, len, AC.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 2;
+    const s = AC.createBufferSource(), g = AC.createGain(), f = AC.createBiquadFilter();
+    f.type = 'lowpass'; f.frequency.value = 2200;
+    s.buffer = buf; g.gain.value = vol; s.connect(f).connect(g).connect(AC.destination); s.start(AC.currentTime + when);
+  }
+  const sfx = {
+    chip: p => { tone(300 + KEYS.indexOf(p) * 90, 0.07, 'square', 0.07); noise(0.05, 0.15); },
+    smash: big => { noise(0.28, 0.4); tone(big ? 90 : 120, 0.25, 'triangle', 0.35, 0, 45); if (big) [0, 7, 12].forEach((s, i) => tone(660 * 2 ** (s / 12), 0.25, 'triangle', 0.1, 0.05 + i * 0.05)); },
+    err: () => tone(110, 0.25, 'sawtooth', 0.14, 0, 80),
+    land: () => tone(70, 0.08, 'sine', 0.2),
+    level: () => [0, 4, 7, 12].forEach((s, i) => tone(523 * 2 ** (s / 12), 0.22, 'triangle', 0.1, i * 0.06)),
+    end: () => { noise(0.8, 0.5); tone(160, 0.8, 'sawtooth', 0.12, 0, 40); },
+  };
+  function buzz(ms) { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} }
+
+  // ---------- tasti ----------
+  const primesEl = $('primes');
+  const keyBtns = {};
+  KEYS.forEach(p => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'key pk'; b.id = 'k' + p; b.textContent = p;
+    b.setAttribute('aria-label', 'Dividi per ' + p);
+    b.addEventListener('click', () => { ac(); divide(p); });
+    primesEl.appendChild(b); keyBtns[p] = b;
+  });
+  keyBtns.prime = $('isPrime');
+  keyBtns.prime.addEventListener('click', () => { ac(); smashPrime(); });
+  function flashErr(b) { b.classList.remove('err'); void b.offsetWidth; b.classList.add('err'); }
+
+  // ---------- azioni ----------
+  const mult = () => 1 + Math.floor(S.streak / 8);
+  function divide(p) {
+    if (!S.running || S.over || !S.stack.length) return;
+    const b = S.stack[0];
+    if (b.n % p !== 0) return mistake(keyBtns[p], b.n + ' non è divisibile per ' + p);
+    b.n /= p; b.factors.push(p); b.pulse = 1;
+    S.streak++; S.maxStreak = Math.max(S.maxStreak, S.streak);
+    S.score += p * mult();
+    if (b.n === 1) shatter(false); else { sfx.chip(p); buzz(6); }
+  }
+  function smashPrime() {
+    if (!S.running || S.over || !S.stack.length) return;
+    const b = S.stack[0];
+    if (!isPrime(b.n)) return mistake(keyBtns.prime, b.n + ' non è primo');
+    const big = b.n > 13;
+    b.factors.push(b.n); b.n = 1;
+    S.streak++; S.maxStreak = Math.max(S.maxStreak, S.streak);
+    shatter(big);
+  }
+  function shatter(big) {
+    const g = geo(), b = S.stack.shift();
+    const pts = (b.factors.length * 10 + (big ? 40 : 0)) * mult();
+    S.score += pts; S.done++;
+    S.lastBlock = b;
+    const cx = g.cx, cy = b.y + g.bh / 2;
+    const n = reduceMotion ? 6 : 22;
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, sp = 120 + Math.random() * 320;
+      S.shards.push({ x: cx + (Math.random() - 0.5) * g.bw * 0.8, y: cy + (Math.random() - 0.5) * g.bh * 0.6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 180,
+        w: 6 + Math.random() * 16, h: 5 + Math.random() * 12, r: Math.random() * 6, vr: (Math.random() - 0.5) * 14, life: 1 });
+    }
+    S.popups.push({ t: 0, text: big ? 'Primo! +' + pts : '+' + pts, sub: b.orig + ' = ' + b.factors.join(' × '), y: cy });
+    sfx.smash(big); buzz(big ? [10, 30, 20] : 16);
+    const lv = 1 + Math.floor(S.done / BLOCKS_PER_LEVEL);
+    if (lv !== S.level) {
+      S.level = lv; setTimeout(sfx.level, 200);
+      S.popups.push({ t: -0.4, text: 'Livello ' + lv, sub: levelNote(lv), y: g.topY + g.bh * 1.2, big: true });
+    }
+    if (!S.stack.length) { spawnBlock(false); S.spawnT = 0; }
+  }
+  function levelNote(lv) {
+    if (lv === 2) return 'arriva il 7';
+    if (lv === 3) return 'arrivano l\'11 e i primi grandi';
+    if (lv === 4) return 'arriva il 13';
+    return 'la torre cresce più in fretta';
+  }
+  function mistake(btn, why) {
+    S.streak = 0; flashErr(btn);
+    S.shake = reduceMotion ? 0 : 0.6; S.flash = 1;
+    S.popups.push({ t: 0, text: 'Sbagliato', sub: why, y: slotY(geo(), 0), bad: true });
+    sfx.err(); buzz(90);
+    spawnBlock(false);
+  }
+  function collapse() {
+    if (S.over) return;
+    S.over = true; S.shake = reduceMotion ? 0 : 1.2;
+    sfx.end(); buzz(250);
+    setTimeout(showOver, 1000);
+  }
+
+  // ---------- schermate ----------
+  const el = { score: $('score'), level: $('level'), streak: $('streak'), best: $('best'), bestLbl: $('bestLbl'), menu: $('menu'), over: $('over') };
+  const bestFor = mode => mode === 'daily' ? store.get(dailyKey, 0) : store.get('primo_best', 0);
+  function refreshMenu() {
+    $('menuBest').textContent = store.get('primo_best', 0).toLocaleString('it-IT');
+    const d = store.get(dailyKey, null);
+    $('menuDaily').textContent = d === null ? '—' : d.toLocaleString('it-IT');
+    $('daily').textContent = 'Sfida del giorno · ' + todayLabel;
+  }
+  let lastMode = 'free';
+  function start(mode) {
+    ac(); lastMode = mode;
+    newState(mode);
+    spawnBlock(true); spawnBlock(true);
+    S.running = true;
+    el.menu.hidden = true; el.over.hidden = true;
+    el.bestLbl.textContent = mode === 'daily' ? 'Oggi' : 'Record';
+    hud = {};
+  }
+  function showOver() {
+    S.running = false;
+    const key = S.mode === 'daily' ? dailyKey : 'primo_best';
+    const prev = store.get(key, 0), isRecord = S.score > prev;
+    if (isRecord) store.set(key, S.score);
+    $('overMode').textContent = S.mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : 'Partita libera';
+    $('overScore').textContent = S.score.toLocaleString('it-IT');
+    $('overRecord').hidden = !isRecord || S.score === 0;
+    $('overRecord').textContent = S.mode === 'daily' ? 'Il tuo migliore di oggi' : 'Nuovo record';
+    $('stBlocks').textContent = S.done;
+    $('stStreak').textContent = S.maxStreak;
+    $('stLevel').textContent = S.level;
+    const lb = S.lastBlock;
+    $('stLast').innerHTML = lb ? 'Ultimo blocco: <b>' + lb.orig + ' = ' + lb.factors.join(' × ') + '</b>' : '';
+    $('share').hidden = S.mode !== 'daily';
+    $('share').textContent = 'Copia risultato';
+    $('shareBox').hidden = true;
+    el.over.hidden = false;
+    $('again').focus({ preventScroll: true });
+  }
+  $('play').addEventListener('click', () => start('free'));
+  $('daily').addEventListener('click', () => start('daily'));
+  $('again').addEventListener('click', () => start(lastMode));
+  $('toMenu').addEventListener('click', () => { refreshMenu(); el.over.hidden = true; el.menu.hidden = false; });
+  $('share').addEventListener('click', () => {
+    const txt = 'Primo · sfida del ' + todayLabel + '\n' + S.score.toLocaleString('it-IT') + ' punti · ' + S.done + ' blocchi · serie ' + S.maxStreak + ' · livello ' + S.level;
+    const fallback = () => { const b = $('shareBox'); b.value = txt; b.hidden = false; b.focus(); b.select(); $('share').textContent = 'Seleziona e copia il testo'; };
+    try { navigator.clipboard.writeText(txt).then(() => { $('share').textContent = 'Copiato'; }, fallback); } catch (e) { fallback(); }
+  });
+  const muteBtn = $('mute');
+  const syncMute = () => { muteBtn.textContent = muted ? 'Suono: no' : 'Suono: sì'; };
+  muteBtn.addEventListener('click', () => { muted = !muted; store.set('primo_mute', muted); ac(); syncMute(); });
+  syncMute();
+  window.addEventListener('keydown', e => {
+    if (e.repeat) return;
+    const map = { '2': 2, '3': 3, '5': 5, '7': 7, 'q': 11, 'Q': 11, 'w': 13, 'W': 13 };
+    if (map[e.key]) { ac(); divide(map[e.key]); }
+    else if (e.key === ' ' && el.menu.hidden && el.over.hidden) { e.preventDefault(); ac(); smashPrime(); }
+  });
+
+  // ---------- geometria e disegno ----------
+  let W = 0, H = 0, DPR = 1, K = 1, VW = 0, VH = 0;
+  function resize() {
+    const r = stage.getBoundingClientRect();
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = r.width; H = r.height;
+    // torre disegnata in unità virtuali e scalata allo schermo
+    K = clamp(Math.min(W / 380, H / 540), 0.72, 1.7); VW = W / K; VH = H / K;
+    cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+  }
+  window.addEventListener('resize', resize);
+  function geo() {
+    const bw = Math.min(VW - 48, 300), bh = clamp(VH * 0.1, 46, 70), gap = 6;
+    const topY = 34, floorY = VH - 8;
+    const slots = Math.max(4, Math.floor((floorY - topY + gap) / (bh + gap)));
+    return { cx: VW / 2, bw, bh, gap, topY, floorY, slots };
+  }
+  const slotY = (g, i) => g.floorY - (i + 1) * g.bh - i * g.gap;
+  function rr(x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  function draw() {
+    ctx.setTransform(DPR * K, 0, 0, DPR * K, 0, 0);
+    ctx.clearRect(0, 0, VW, VH);
+    if (S.shake > 0) ctx.translate((Math.random() - 0.5) * 14 * S.shake, (Math.random() - 0.5) * 8 * S.shake);
+    const g = geo(), x0 = g.cx - g.bw / 2;
+
+    // soffitto
+    const ceil = slotY(g, g.slots - 1) - 6;
+    const danger = S.stack.length >= g.slots - 1;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x0 - 8, ceil - 10, g.bw + 16, 10); ctx.clip();
+    ctx.strokeStyle = danger ? C.warn : C.line; ctx.lineWidth = 3;
+    for (let x = x0 - 20; x < x0 + g.bw + 20; x += 10) { ctx.beginPath(); ctx.moveTo(x, ceil); ctx.lineTo(x + 10, ceil - 10); ctx.stroke(); }
+    ctx.restore();
+    ctx.fillStyle = danger ? C.warn : C.line; ctx.fillRect(x0 - 8, ceil, g.bw + 16, 2);
+
+    // barra del prossimo blocco
+    if (S.running && !S.over) {
+      const f = clamp(S.spawnT / interval(), 0, 1);
+      ctx.fillStyle = C.line; rr(x0, 10, g.bw, 6, 3); ctx.fill();
+      ctx.fillStyle = f > 0.8 ? C.warn : C.muted; rr(x0, 10, Math.max(6, g.bw * f), 6, 3); ctx.fill();
+      ctx.fillStyle = C.muted; ctx.font = '600 10px ' + UI; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.fillText('PROSSIMO BLOCCO', x0, 30);
+    }
+
+    // pavimento
+    ctx.fillStyle = C.line; ctx.fillRect(x0 - 8, g.floorY + 2, g.bw + 16, 3);
+
+    // blocchi
+    S.stack.forEach((b, i) => {
+      const active = i === 0 && !S.over;
+      const s = 1 + 0.05 * b.pulse, sq = b.land * 0.08;
+      const w = g.bw * s * (1 + sq), h = g.bh * s * (1 - sq);
+      const x = g.cx - w / 2, y = b.y + (g.bh - h);
+      ctx.fillStyle = active ? C.slab2 : C.slab;
+      rr(x, y, w, h, 10); ctx.fill();
+      if (active) { ctx.strokeStyle = C.cobalt; ctx.lineWidth = 3; ctx.stroke(); }
+      else if (i >= g.slots - 2) { ctx.strokeStyle = C.warn; ctx.lineWidth = 2; ctx.stroke(); }
+      // crepe man mano che si divide
+      if (b.factors.length) {
+        ctx.strokeStyle = C.slabText; ctx.globalAlpha = 0.25; ctx.lineWidth = 1.2;
+        for (let c = 0; c < Math.min(b.factors.length, 4); c++) {
+          const cx0 = x + w * (0.15 + 0.22 * c);
+          ctx.beginPath(); ctx.moveTo(cx0, y); ctx.lineTo(cx0 + 6, y + h * 0.35); ctx.lineTo(cx0 - 3, y + h * 0.6); ctx.lineTo(cx0 + 4, y + h); ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+      }
+      ctx.fillStyle = C.slabText; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const showTrail = active && b.factors.length > 0;
+      ctx.font = '900 ' + Math.round(h * 0.62) + 'px ' + DISPLAY;
+      ctx.fillText(String(b.n), g.cx, y + h * (showTrail ? 0.42 : 0.52));
+      if (showTrail) {
+        ctx.font = '600 ' + Math.round(clamp(h * 0.2, 10, 13)) + 'px ' + UI; ctx.globalAlpha = 0.7;
+        ctx.fillText(b.orig + ' = ' + b.factors.join(' × ') + ' × ' + b.n, g.cx, y + h * 0.82);
+        ctx.globalAlpha = 1;
+      }
+    });
+
+    // schegge
+    for (const q of S.shards) {
+      ctx.save(); ctx.globalAlpha = clamp(q.life, 0, 1); ctx.translate(q.x, q.y); ctx.rotate(q.r);
+      ctx.fillStyle = C.slab; ctx.fillRect(-q.w / 2, -q.h / 2, q.w, q.h); ctx.restore();
+    }
+    // messaggi
+    for (const p of S.popups) {
+      if (p.t < 0) continue;
+      const a = p.t < 0.7 ? 1 : 1 - (p.t - 0.7) / 0.3, y = p.y - 10 - p.t * 50;
+      ctx.save(); ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = '900 ' + (p.big ? 44 : 36) + 'px ' + DISPLAY; ctx.lineWidth = 6; ctx.strokeStyle = C.ground; ctx.lineJoin = 'round';
+      ctx.strokeText(p.text, g.cx, y); ctx.fillStyle = p.bad ? C.warn : C.cobalt; ctx.fillText(p.text, g.cx, y);
+      ctx.font = '600 14px ' + UI; ctx.lineWidth = 5;
+      ctx.strokeText(p.sub, g.cx, y + 28); ctx.fillStyle = C.ink; ctx.fillText(p.sub, g.cx, y + 28);
+      ctx.restore();
+    }
+    if (S.flash > 0) { ctx.globalAlpha = S.flash * 0.18; ctx.fillStyle = C.warn; ctx.fillRect(-20, -20, VW + 40, VH + 40); ctx.globalAlpha = 1; }
+  }
+
+  // ---------- ciclo ----------
+  let hud = {};
+  const setText = (node, k, v) => { if (hud[k] !== v) { hud[k] = v; node.textContent = v; } };
+  function update(dt) {
+    const g = geo();
+    if (S.running && !S.over) {
+      S.spawnT += dt;
+      if (S.spawnT >= interval()) { S.spawnT = 0; spawnBlock(false); }
+    }
+    S.stack.forEach((b, i) => {
+      const ty = slotY(g, i);
+      if (b.y < ty) {
+        b.vy += 2600 * dt; b.y += b.vy * dt;
+        if (b.y >= ty) { b.y = ty; if (b.vy > 350) { b.land = 1; if (S.running) sfx.land(); } b.vy = 0; }
+      } else { b.y = ty; b.vy = 0; }
+      b.pulse = Math.max(0, b.pulse - dt * 6);
+      b.land = Math.max(0, b.land - dt * 7);
+    });
+    for (const q of S.shards) { q.vy += 900 * dt; q.x += q.vx * dt; q.y += q.vy * dt; q.r += q.vr * dt; q.life -= dt * 1.4; }
+    S.shards = S.shards.filter(q => q.life > 0);
+    for (const p of S.popups) p.t += dt / 1.1;
+    S.popups = S.popups.filter(p => p.t < 1);
+    S.shake = Math.max(0, S.shake - dt * 2.5);
+    S.flash = Math.max(0, S.flash - dt * 4);
+
+    setText(el.score, 's', S.score.toLocaleString('it-IT'));
+    setText(el.level, 'l', String(S.level));
+    setText(el.best, 'b', bestFor(S.mode).toLocaleString('it-IT'));
+    const on = S.running && S.streak >= 5;
+    if (hud.on !== on) { hud.on = on; el.streak.classList.toggle('on', on); }
+    setText(el.streak, 'st', 'serie ' + S.streak + ' · ×' + mult());
+  }
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.033, (now - last) / 1000); last = now;
+    update(dt); draw();
+    requestAnimationFrame(frame);
+  }
+
+  // stato di esempio dietro al menu
+  resize();
+  newState('free');
+  [84, 45, 230, 21].forEach((n, i) => S.stack.push({ n, orig: n, factors: [], y: slotY(geo(), i), vy: 0, pulse: 0, land: 0 }));
+  S.stack[0].orig = 168; S.stack[0].factors = [2];
+  refreshMenu();
+  requestAnimationFrame(frame);
+})();
+</script>
