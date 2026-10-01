@@ -1,0 +1,4 @@
+node_modules/
+tests/shots/
+tests/nit-test.html
+tests/package-lock.json

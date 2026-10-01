@@ -1,3 +1,4 @@
+<!doctype html><html lang="it"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Resto</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -335,7 +336,8 @@ h2{margin:0;font-family:var(--receipt);font-weight:700;font-size:34px;line-heigh
     S.queue = [genCustomer(0, S.rnd), genCustomer(1, S.rnd), genCustomer(2, S.rnd)];
   }
   const level = () => levelOf(S.cust ? S.cust.idx : 0);
-  const mult = () => 1 + Math.floor(S.streak / 3);
+  // moltiplicatore con tetto ×5: punteggi confrontabili tra giocatori
+  const mult = () => Math.min(5, 1 + Math.floor(S.streak / 3));
 
   // ---------- audio ----------
   let AC = null, muted = store.get('resto_mute', false);
@@ -596,3 +598,4 @@ h2{margin:0;font-family:var(--receipt);font-weight:700;font-size:34px;line-heigh
   requestAnimationFrame(frame);
 })();
 </script>
+</body></html>

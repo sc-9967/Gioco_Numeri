@@ -1,3 +1,4 @@
+<!doctype html><html lang="it"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Quadrante</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -191,7 +192,8 @@ h2{margin:0;font-family:var(--display);font-weight:800;font-size:32px;line-heigh
 
   // ---------- difficoltà ----------
   const targetsFor = lv => Math.min(3, 1 + Math.floor(lv / 2));
-  const lifeFor = lv => Math.max(3.5, 8.5 - 0.6 * (lv - 1));
+  // ore accese più durature: il calcolo modulo 12 a mente richiede tempo
+  const lifeFor = lv => Math.max(4.5, 10.5 - 0.5 * (lv - 1));
   const hazardsFor = lv => lv < 2 ? 0 : lv < 5 ? 1 : 2;
   const HITS_PER_LEVEL = 6;
 
@@ -576,3 +578,4 @@ h2{margin:0;font-family:var(--display);font-weight:800;font-size:32px;line-heigh
   requestAnimationFrame(frame);
 })();
 </script>
+</body></html>
