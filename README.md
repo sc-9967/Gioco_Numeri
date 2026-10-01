@@ -20,6 +20,8 @@ Apri `index.html` in un browser. Su GitHub Pages basta attivare Pages sul ramo `
 
 **Nome del giocatore:** nella schermata iniziale va scritto il proprio nome (massimo 20 caratteri) prima di giocare. Resta salvato sul dispositivo e compare nei risultati che si condividono (Bilancia, Quadrante, Primo, Resto, Raddoppio, Sentiero). Non viene mai incluso nelle statistiche anonime inviate all'autore. Con un link diretto (`#sentiero?c=…`) si apre la home finché il nome non è stato scritto.
 
+**Record salvati:** ogni partita conclusa viene registrata sul dispositivo per gioco e per giorno (giorno di Roma). Il pulsante "I miei record" mostra il migliore di oggi, della settimana (da lunedì), dell'anno e di sempre per tutti i giochi. Per non perderli (cambio telefono, dati del sito cancellati) c'è il **backup**: "Copia backup" o "Scarica file" producono un testo che inizia con `NIT1.`; "Ripristina" lo incolla e lo fonde con i record presenti, tenendo sempre il valore più alto. Il browser viene anche invitato a proteggere i dati dalla cancellazione automatica. Se non permette di salvare (navigazione privata) compare un avviso. I record restano sul dispositivo: una classifica condivisa richiederebbe un server.
+
 Ogni gioco ha record locale, sfida del giorno (stessa sequenza per tutti, risultato condivisibile) e rigioco immediato.
 
 Nel launcher, l'ordine delle carte è casuale per ogni persona e la pagina conta, in forma anonima, aperture, partite, giorni di gioco e minuti per gioco. Il conteggio automatico verso un database funziona solo quando la pagina è ospitata come Artifact su claude.ai. In ogni altro caso (file locale, GitHub Pages) compare il pulsante "Copia le mie statistiche", che prepara un testo da inviare a mano.
@@ -75,6 +77,7 @@ node sentiero-logica.js       # percorso ottimo, generatore, codici sfida, recor
 node sentiero-partita.js      # partita completa, una sola sfida al giorno, condivisione
 node launcher-sentiero.js     # Sentiero dentro il launcher
 node launcher-nome.js         # nome obbligatorio, testi condivisi, statistiche anonime
+node launcher-record.js       # storico, periodi, backup e ripristino, avviso archiviazione
 ```
 
 Risultati e misure del 30/09/2026 in `docs/risultati-test.md`. L'analisi dei giochi simili è in `docs/giochi-simili.md`.

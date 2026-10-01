@@ -77,3 +77,13 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 - I testi condivisi iniziano con il nome (verificati Sentiero e Raddoppio; gli altri quattro usano la stessa funzione). Il link di sfida di Sentiero porta il nome di chi sfida.
 - Il nome non compare né nelle statistiche copiate né in `nit_stats`.
 - I test esistenti ora impostano un nome prima di aprire il launcher.
+
+## Record salvati e backup
+
+- Ogni partita conclusa (Sentiero, Raddoppio verificati con partite vere) viene registrata per gioco e giorno: migliore, numero di partite, somma. Il riepilogo della sfida del giorno di Sentiero non viene contato una seconda volta.
+- Il pannello "I miei record" mostra per tutti i sette giochi il migliore di oggi, della settimana, dell'anno e di sempre, più il numero di partite registrate.
+- **Backup:** il testo `NIT1.…` (225 caratteri con due giochi) viene prodotto e, incollato in un contesto vuoto, ripristina record, record sulle carte e nome (se mancante). Il testo viene riconosciuto anche circondato da altre parole.
+- **Il ripristino non abbassa i record:** per ogni giorno si tiene il valore più alto.
+- **Backup non validi:** testo senza prefisso, versione sconosciuta o dati danneggiati vengono rifiutati con un messaggio. Valori assurdi (negativi, oltre 10⁹, nomi di gioco con caratteri strani, serie oltre 500) vengono scartati.
+- **Archiviazione non disponibile** (scrittura che fallisce, come in navigazione privata): compare l'avviso in home.
+- **Limiti:** la protezione del browser (`navigator.storage.persist`) viene richiesta ma la decide il browser; in prova risultava "no". I record restano su un solo dispositivo, il backup è manuale. I punteggi non sono verificabili.

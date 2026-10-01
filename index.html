@@ -148,6 +148,24 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 .lx-hello{margin:0;font-size:15px}
 .lx-hello button{font:inherit;font-size:13px;margin-left:8px;border:none;background:none;color:var(--l-muted);text-decoration:underline;cursor:pointer;padding:2px}
 .lx-who.need{outline:3px solid #c0392b;outline-offset:2px}
+.lx-storewarn{margin:8px 0 0;font-size:13px;font-weight:700;color:#c0392b}
+.lx-recbtn{align-self:flex-start;font:inherit;font-size:15px;font-weight:800;color:var(--l-ink);background:var(--l-card);border:2px solid var(--l-ink);border-radius:99px;padding:9px 18px;cursor:pointer}
+.lx-recbtn:focus-visible,.lx-modal button:focus-visible{outline:3px solid var(--l-ink);outline-offset:2px}
+.lx-modal{position:fixed;inset:0;z-index:50;background:rgba(15,20,28,.6);display:grid;place-items:center;padding:16px}
+.lx-modal[hidden]{display:none}
+.lx-modalcard{width:100%;max-width:440px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--l-card);color:var(--l-ink);border-radius:20px;padding:20px 18px;display:flex;flex-direction:column;gap:10px;box-shadow:0 24px 60px rgba(0,0,0,.4)}
+.lx-modalcard h2{margin:0;font-size:24px}
+.lx-recwho,.lx-recnote{margin:0;font-size:13px;color:var(--l-muted);line-height:1.4}
+.lx-rectable{width:100%;border-collapse:collapse;font-size:14px}
+.lx-rectable th{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--l-muted);text-align:right;padding:4px 3px}
+.lx-rectable th:first-child,.lx-rectable td:first-child{text-align:left}
+.lx-rectable td{padding:7px 3px;border-top:1px solid var(--l-line);text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.lx-rectable td:first-child{font-weight:800}
+.lx-recbtns{display:flex;gap:8px}
+.lx-recbtns button,.lx-recclose{font:inherit;font-weight:800;font-size:14px;padding:10px 12px;border-radius:12px;border:2px solid var(--l-ink);background:var(--l-card);color:var(--l-ink);cursor:pointer;flex:1}
+.lx-recclose{background:var(--l-ink);color:var(--l-bg)}
+#lx-recbox{width:100%;box-sizing:border-box;font:12px/1.4 var(--lx-ui);border:1px solid var(--l-line);border-radius:10px;padding:8px;background:var(--l-bg);color:var(--l-ink);resize:none}
+.lx-recmsg{margin:0;min-height:18px;font-size:13px;font-weight:700}
 /* aggiunte dentro i giochi */
 .lx-copy{margin:0;font-size:12px;opacity:.7;text-align:center}
 .lx-give{margin:0;font-size:13px;text-align:center;opacity:.85}
@@ -173,7 +191,26 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
       <p class="lx-whohint">Compare nei risultati che condividi con gli amici. Resta sul tuo dispositivo; le statistiche inviate all'autore restano anonime.</p>
     </form>
     <p class="lx-hello" id="lx-hello" hidden>Ciao, <b id="lx-helloname"></b> <button type="button" id="lx-namechange">Cambia</button></p>
+    <p class="lx-storewarn" id="lx-storewarn" role="alert" hidden>Questo browser non permette di salvare i dati: record e nome andranno persi alla chiusura. Esci dalla navigazione privata o consenti i dati del sito.</p>
   </section>
+  <button class="lx-recbtn" id="lx-recbtn" type="button">I miei record</button>
+
+  <div class="lx-modal" id="lx-recpanel" role="dialog" aria-modal="true" aria-labelledby="lx-rectitle" hidden>
+    <div class="lx-modalcard">
+      <h2 id="lx-rectitle">I miei record</h2>
+      <p class="lx-recwho" id="lx-recwho"></p>
+      <table class="lx-rectable"><thead><tr><th>Gioco</th><th>Oggi</th><th>Sett.</th><th>Anno</th><th>Sempre</th></tr></thead><tbody id="lx-recrows"></tbody></table>
+      <p class="lx-recnote" id="lx-recnote"></p>
+      <div class="lx-recbtns">
+        <button type="button" id="lx-recbackup">Copia backup</button>
+        <button type="button" id="lx-recdl">Scarica file</button>
+      </div>
+      <textarea id="lx-recbox" rows="3" placeholder="Per ripristinare: incolla qui un backup che inizia con NIT1." spellcheck="false"></textarea>
+      <div class="lx-recbtns"><button type="button" id="lx-recrestore">Ripristina</button></div>
+      <p class="lx-recmsg" id="lx-recmsg" role="status"></p>
+      <button class="lx-recclose" id="lx-recclose" type="button">Chiudi</button>
+    </div>
+  </div>
 
   <main class="lx-grid">
     <button class="lx-card g-bil" type="button" data-game="bilancia">
@@ -1413,6 +1450,75 @@ td:first-child{font-family:var(--ui);font-weight:700}
   const cleanName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
   const playerName = () => { try { return cleanName(JSON.parse(localStorage.getItem('nit_name'))); } catch (e) { return ''; } };
   const withName = txt => { const n = playerName(); return n ? n + ' · ' + txt : txt; };
+  // ---------- record salvati sul dispositivo: storico per gioco e per giorno (giorno di Roma) ----------
+  const REC_KEY = 'nit_hist', BEST_KEYS = ['bil_best', 'quad_best', 'primo_best', 'resto_best', 'girasette_best', 'rad_best', 'sent_best'];
+  const romeDate = d => { d = d || new Date(); try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d); } catch (e) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); } };
+  const shiftDay = (ds, k) => { const d = new Date(ds + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + k); return d.toISOString().slice(0, 10); };
+  const mondayOf = ds => shiftDay(ds, -((new Date(ds + 'T00:00:00Z').getUTCDay() + 6) % 7));
+  const isDay = k => /^\d{4}-\d{2}-\d{2}$/.test(k);
+  const sane = n => typeof n === 'number' && isFinite(n) && n >= 0 && n <= 1e9;
+  function recLoad() { try { const o = JSON.parse(localStorage.getItem(REC_KEY)); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; } catch (e) { return {}; } }
+  function recSave(o) { try { localStorage.setItem(REC_KEY, JSON.stringify(o)); return true; } catch (e) { return false; } }
+  function recAdd(game, score) {
+    if (!sane(score) || score <= 0) return;
+    const h = recLoad(), d = romeDate(), g = h[game] || (h[game] = {}), r = g[d] || (g[d] = { b: 0, n: 0, s: 0 });
+    r.b = Math.max(r.b, score); r.n++; r.s += score;
+    recSave(h);
+  }
+  // Migliore e numero di partite per periodo (oggi, settimana da lunedi', anno, sempre).
+  function recAgg(h, game, today) {
+    const g = h[game] || {}, ws = mondayOf(today), we = shiftDay(ws, 6), out = { day: null, week: null, year: null, all: null };
+    const take = (k, r) => { const o = out[k] || (out[k] = { best: 0, plays: 0 }); o.best = Math.max(o.best, r.b); o.plays += r.n; };
+    Object.keys(g).filter(isDay).forEach(d => {
+      const r = g[d]; if (!r || !sane(r.b) || !sane(r.n)) return;
+      take('all', r);
+      if (d.slice(0, 4) === today.slice(0, 4)) take('year', r);
+      if (d >= ws && d <= we) take('week', r);
+      if (d === today) take('day', r);
+    });
+    return out;
+  }
+  // Unione di due storici: per ogni giorno si tiene il valore piu' alto (un ripristino non puo' mai abbassare un record).
+  function recMerge(a, b) {
+    const out = JSON.parse(JSON.stringify(a || {}));
+    Object.keys(b || {}).forEach(game => {
+      if (!/^[a-z]{3,12}$/.test(game) || !b[game] || typeof b[game] !== 'object') return;
+      Object.keys(b[game]).filter(isDay).forEach(d => {
+        const r = b[game][d]; if (!r || !sane(r.b) || !sane(r.n) || !sane(r.s)) return;
+        const g = out[game] || (out[game] = {}), m = g[d] || (g[d] = { b: 0, n: 0, s: 0 });
+        m.b = Math.max(m.b, r.b); m.n = Math.max(m.n, r.n); m.s = Math.max(m.s, r.s);
+      });
+    });
+    return out;
+  }
+  const b64e = t => btoa(unescape(encodeURIComponent(t)));
+  const b64d = t => decodeURIComponent(escape(atob(t)));
+  function backupCode() {
+    const best = {}; BEST_KEYS.forEach(k => { try { const v = JSON.parse(localStorage.getItem(k)); if (sane(v) && v > 0) best[k] = v; } catch (e) {} });
+    let sent = {}; try { sent = JSON.parse(localStorage.getItem('sent_hist')) || {}; } catch (e) {}
+    return 'NIT1.' + b64e(JSON.stringify({ v: 1, name: playerName(), hist: recLoad(), best, sent }));
+  }
+  // Ripristina fondendo: restituisce { ok, msg }.
+  function restoreCode(text) {
+    const m = /NIT1\.([A-Za-z0-9+\/=]+)/.exec(String(text || ''));
+    if (!m) return { ok: false, msg: 'Backup non riconosciuto: deve iniziare con NIT1.' };
+    let d; try { d = JSON.parse(b64d(m[1])); } catch (e) { return { ok: false, msg: 'Backup danneggiato o incompleto.' }; }
+    if (!d || d.v !== 1 || typeof d !== 'object') return { ok: false, msg: 'Versione del backup non supportata.' };
+    if (!recSave(recMerge(recLoad(), d.hist))) return { ok: false, msg: 'Il browser non permette di salvare.' };
+    BEST_KEYS.forEach(k => {
+      const v = d.best && d.best[k]; if (!sane(v)) return;
+      let cur = 0; try { cur = JSON.parse(localStorage.getItem(k)) || 0; } catch (e) {}
+      if (v > cur) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    });
+    if (d.sent && typeof d.sent === 'object') {
+      let cur = {}; try { cur = JSON.parse(localStorage.getItem('sent_hist')) || {}; } catch (e) {}
+      Object.keys(d.sent).filter(isDay).forEach(day => { const r = d.sent[day]; if (r && sane(r.t) && r.t <= 500 && (!cur[day] || r.t > cur[day].t)) cur[day] = { t: r.t, g: Array.isArray(r.g) ? r.g.filter(sane).slice(0, 5) : [] }; });
+      try { localStorage.setItem('sent_hist', JSON.stringify(cur)); } catch (e) {}
+    }
+    if (!playerName() && d.name) { try { localStorage.setItem('nit_name', JSON.stringify(cleanName(d.name))); } catch (e) {} }
+    return { ok: true, msg: 'Record ripristinati (si tiene sempre il valore più alto).' };
+  }
+  function storageOK() { try { const k = 'nit_probe'; localStorage.setItem(k, '1'); const ok = localStorage.getItem(k) === '1'; localStorage.removeItem(k); return ok; } catch (e) { return false; } }
 
   const GAMES = {
     bilancia: function (window, requestAnimationFrame, setTimeout) {
@@ -4437,7 +4543,7 @@ function resetGrid() {
   render();
 }
 function start(m, code) {
-  ac(); gen++;
+  ac(); gen++; delete $('over').dataset.replay;
   mode = m; challenge = null; last = null;
   if (m === 'daily') {
     if (hist[today]) { showSummary(); return; }
@@ -4534,6 +4640,7 @@ function showSummary() {
   const h = hist[today];
   last = { mode: 'daily', total: h.t, pcts: Array.isArray(h.g) && h.g.length === SERIES ? h.g : [0, 0, 0, 0, 0], seed36: 'D' + today, date: today, target: null };
   running = false;
+  $('over').dataset.replay = '1';
   showOver(false);
   $('over').hidden = false;
 }
@@ -4565,7 +4672,7 @@ function openRec() {
 $('daily').addEventListener('click', () => start('daily'));
 $('play').addEventListener('click', () => start('free'));
 $('again').addEventListener('click', () => start('free'));
-$('toMenu').addEventListener('click', () => { refreshMenu(); $('over').hidden = true; $('menu').hidden = false; });
+$('toMenu').addEventListener('click', () => { refreshMenu(); $('over').hidden = true; $('menu').hidden = false; delete $('over').dataset.replay; });
 $('recBtn').addEventListener('click', openRec);
 $('recBtn2').addEventListener('click', openRec);
 $('recClose').addEventListener('click', () => { $('rec').hidden = true; });
@@ -4822,7 +4929,11 @@ grids = gridsFor('sentiero-demo'); gi = 0; path = [[0, 0]]; sols = []; buildBoar
     track.open(key);
     ['play', 'daily', 'again'].forEach(id => { const b = holder.querySelector('#' + id); if (b) b.addEventListener('click', () => track.start(key)); });
     const over = holder.querySelector('#over'), overScore = holder.querySelector('#overScore');
-    if (over && overScore) new MutationObserver(() => { if (!over.hidden) track.finish(key, overScore.textContent); })
+    if (over && overScore) new MutationObserver(() => {
+      if (over.hidden || over.dataset.replay) return;           // i riepiloghi di una partita gia' registrata non contano due volte
+      track.finish(key, overScore.textContent);
+      recAdd(key, parseInt(String(overScore.textContent).replace(/\D/g, ''), 10) || 0);
+    })
       .observe(over, { attributes: true, attributeFilter: ['hidden'] });
     window.scrollTo(0, 0);
   }
@@ -4868,8 +4979,62 @@ grids = gridsFor('sentiero-demo'); gi = 0; path = [[0, 0]]; sols = []; buildBoar
   });
   document.getElementById('lx-namechange').addEventListener('click', () => { renderWho(true); whoIn.focus(); whoIn.select(); });
   renderWho(false);
+  // ---------- pannello dei record, backup e protezione dell'archiviazione ----------
+  const recPanel = document.getElementById('lx-recpanel');
+  const recMsg = (t, bad) => { const m = document.getElementById('lx-recmsg'); m.textContent = t; m.style.color = bad ? '#c0392b' : 'inherit'; };
+  async function persistState() {
+    try {
+      if (!navigator.storage || !navigator.storage.persisted) return 'non disponibile in questo browser';
+      let p = await navigator.storage.persisted();
+      if (!p && navigator.storage.persist) p = await navigator.storage.persist();
+      return p ? 'sì' : 'no (il browser potrebbe cancellarli se manca spazio)';
+    } catch (e) { return 'non disponibile in questo browser'; }
+  }
+  async function openRec() {
+    const h = recLoad(), today = romeDate(), tb = document.getElementById('lx-recrows');
+    document.getElementById('lx-recwho').textContent = (playerName() ? playerName() + ' · ' : '') + 'record per giorno (fuso Europa/Roma), settimana da lunedì, anno e sempre.';
+    tb.textContent = '';
+    let total = 0;
+    KEYS.forEach(k => {
+      const a = recAgg(h, k, today), tr = document.createElement('tr');
+      const cell = x => { const td = document.createElement('td'); td.textContent = x; tr.appendChild(td); };
+      cell(NAMES[k]);
+      ['day', 'week', 'year', 'all'].forEach(p => cell(a[p] ? a[p].best.toLocaleString('it-IT') : '—'));
+      total += a.all ? a.all.plays : 0;
+      tb.appendChild(tr);
+    });
+    document.getElementById('lx-recnote').textContent = 'Partite registrate: ' + total + '. I record sono salvati su questo dispositivo; per spostarli o metterli al sicuro usa il backup. Archiviazione protetta dal browser: ' + (await persistState()) + '.';
+    recMsg('');
+    document.getElementById('lx-recbox').value = '';
+    recPanel.hidden = false;
+    document.getElementById('lx-recclose').focus();
+  }
+  const closeRec = () => { recPanel.hidden = true; };
+  document.getElementById('lx-recbtn').addEventListener('click', openRec);
+  document.getElementById('lx-recclose').addEventListener('click', closeRec);
+  recPanel.addEventListener('click', e => { if (e.target === recPanel) closeRec(); });
+  document.getElementById('lx-recbackup').addEventListener('click', () => {
+    const code = backupCode(), box = document.getElementById('lx-recbox');
+    const fallback = () => { box.value = code; box.focus(); box.select(); recMsg('Seleziona e copia il testo qui sopra, poi conservalo (messaggio a te stesso, note).'); };
+    try { navigator.clipboard.writeText(code).then(() => recMsg('Backup copiato: incollalo in un posto sicuro.'), fallback); } catch (e) { fallback(); }
+  });
+  document.getElementById('lx-recdl').addEventListener('click', () => {
+    try {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([backupCode()], { type: 'text/plain' }));
+      a.download = 'numeri-in-tasca-record.txt'; document.body.appendChild(a); a.click(); a.remove();
+      recMsg('File scaricato. Per ripristinare apri il file e incolla il contenuto qui sotto.');
+    } catch (e) { recMsg('Il download non è disponibile qui: usa "Copia backup".', true); }
+  });
+  document.getElementById('lx-recrestore').addEventListener('click', () => {
+    const r = restoreCode(document.getElementById('lx-recbox').value);
+    recMsg(r.msg, !r.ok);
+    if (r.ok) { refreshBest(); renderWho(false); openRec().then(() => recMsg(r.msg)); }
+  });
+  if (!storageOK()) document.getElementById('lx-storewarn').hidden = false;
+  else if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   document.querySelectorAll('[data-game]').forEach(b => b.addEventListener('click', () => go(b.dataset.game)));
-  window.addEventListener('keydown', e => { if (e.key === 'Escape' && current) unmount(); });
+  window.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!recPanel.hidden) closeRec(); else if (current) unmount(); } });
   refreshBest();
   const hashKey = () => (location.hash || '').slice(1).split('?')[0];
   const start = hashKey();
