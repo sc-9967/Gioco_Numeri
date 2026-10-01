@@ -4,12 +4,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!--
   Numeri in Tasca: Bilancia, Quadrante, Primo, Resto, Girasette.
-  © 2026 Silvio Chiaverini. Tutti i diritti riservati.
+  © 2026 Silvio Chiaverini.
   Giochi ideati e realizzati da Silvio Chiaverini.
-  È vietata la riproduzione, la distribuzione o la modifica, anche parziale, senza autorizzazione scritta dell'autore.
+  Licenza: GNU GPL v3 (vedi LICENSE).
 -->
 <meta name="author" content="Silvio Chiaverini">
-<meta name="copyright" content="© 2026 Silvio Chiaverini. Tutti i diritti riservati.">
+<meta name="copyright" content="© 2026 Silvio Chiaverini.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Figtree:wght@400;600;800&family=Bodoni+Moda:ital,wght@0,600;0,800;1,800&family=Work+Sans:wght@400;600;800&family=Big+Shoulders+Display:wght@800;900&family=IBM+Plex+Sans:wght@400;600;700&family=Archivo:wght@400;600;800&family=Courier+Prime:wght@400;700&family=Share+Tech+Mono&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
@@ -200,8 +200,8 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
   <textarea class="lx-statsbox" id="lx-statsbox" rows="4" readonly hidden aria-label="Le tue statistiche"></textarea>
 
   <footer class="lx-foot">
-    <p><strong>© 2026 Silvio Chiaverini. Tutti i diritti riservati.</strong></p>
-    <p>Bilancia, Quadrante, Primo, Resto e Girasette sono giochi ideati e realizzati da Silvio Chiaverini. È vietata la riproduzione, la distribuzione o la modifica, anche parziale, senza autorizzazione scritta dell'autore.</p>
+    <p><strong>© 2026 Silvio Chiaverini.</strong></p>
+    <p>Bilancia, Quadrante, Primo, Resto e Girasette sono giochi ideati e realizzati da Silvio Chiaverini. Codice rilasciato con licenza GNU GPL v3 (vedi LICENSE).</p>
   </footer>
 </div>
 
@@ -1009,7 +1009,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 </div></template>
 
 <script>
-/* © 2026 Silvio Chiaverini. Tutti i diritti riservati. */
+/* © 2026 Silvio Chiaverini. */
 (() => {
   // Pulsante "Dona" di PayPal (contributo volontario, non un acquisto).
   // Incolla qui il codice hosted_button_id che PayPal ti dà quando crei il pulsante Dona.
@@ -3554,7 +3554,7 @@ window.__M7 = {
     menuPanel.querySelector('.btns').appendChild(back());
     overPanel.querySelector('.btns').appendChild(back());
     const copy = document.createElement('p');
-    copy.className = 'lx-copy'; copy.textContent = '© 2026 ' + AUTHOR + ' · Tutti i diritti riservati';
+    copy.className = 'lx-copy'; copy.textContent = '© 2026 ' + AUTHOR;
     menuPanel.appendChild(copy);
     const give = document.createElement('p'); give.className = 'lx-give';
     if (payReady && SHOW_DONATE) {
