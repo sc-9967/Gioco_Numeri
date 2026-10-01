@@ -37,10 +37,7 @@
 }
 [hidden]{display:none!important}
 body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)}
-.lx-holder{height:100%;box-sizing:border-box;padding-top:34px;position:relative;background:#0c1118}
-.lx-topbar{position:absolute;top:0;left:0;right:0;height:34px;display:flex;align-items:center;padding:0 8px;z-index:20}
-.lx-topbar button{font:inherit;font-size:15px;font-weight:600;color:#c9d3df;background:none;border:none;padding:6px 8px;cursor:pointer}
-.lx-topbar button:focus-visible{outline:3px solid #fff;outline-offset:1px}
+.lx-holder{height:100%}
 .lx-page{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:28px 32px;display:flex;flex-direction:column;gap:22px;box-sizing:border-box}
 .lx-eyebrow{margin:0;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--l-muted)}
 .lx-title{margin:4px 0 0;font-weight:800;font-size:clamp(40px,9vw,64px);line-height:.95;letter-spacing:-.02em;text-wrap:balance}
@@ -4913,9 +4910,6 @@ grids = gridsFor('sentiero-demo'); gi = 0; path = [[0, 0]]; sols = []; buildBoar
     const holder = document.createElement('div');
     holder.className = 'lx-holder';
     holder.appendChild(tpl.content.cloneNode(true));
-    const bar = document.createElement('div'); bar.className = 'lx-topbar';
-    const home = document.createElement('button'); home.type = 'button'; home.id = 'lx-home'; home.textContent = '← Tutti i giochi'; home.addEventListener('click', unmount);
-    bar.appendChild(home); holder.appendChild(bar);
     launcher.hidden = true;
     document.body.appendChild(holder);
     decorate(holder);
