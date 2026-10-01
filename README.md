@@ -18,7 +18,7 @@ Sette giochi di numeri da partite brevi, pensati per il telefono. Sono tutti den
 
 Apri `index.html` in un browser. Su GitHub Pages basta attivare Pages sul ramo `main`.
 
-**Ritorno al menu:** in ogni gioco, sempre visibile in alto, c'è il pulsante "← Menu principale" (vale anche durante la partita; Esc fa lo stesso su tastiera).
+**Ritorno al menu:** in ogni gioco, sempre visibile in alto, c'è il pulsante "← Tutti i giochi" (vale anche durante la partita; Esc fa lo stesso su tastiera).
 
 **Nome del giocatore:** nella schermata iniziale va scritto il proprio nome (massimo 20 caratteri) prima di giocare. Resta salvato sul dispositivo e compare nei risultati che si condividono (Bilancia, Quadrante, Primo, Resto, Raddoppio, Sentiero). Non viene mai incluso nelle statistiche anonime inviate all'autore. Con un link diretto (`#sentiero?c=…`) si apre la home finché il nome non è stato scritto.
 
@@ -80,7 +80,7 @@ node sentiero-partita.js      # partita completa, una sola sfida al giorno, cond
 node launcher-sentiero.js     # Sentiero dentro il launcher
 node launcher-nome.js         # nome obbligatorio, testi condivisi, statistiche anonime
 node launcher-record.js       # storico, periodi, backup e ripristino, avviso archiviazione
-node launcher-menu.js         # pulsante "Menu principale" in ogni gioco, anche durante la partita
+node launcher-menu.js         # pulsante "Tutti i giochi" in ogni gioco, anche durante la partita
 ```
 
 Risultati e misure del 30/09/2026 in `docs/risultati-test.md`. L'analisi dei giochi simili è in `docs/giochi-simili.md`.

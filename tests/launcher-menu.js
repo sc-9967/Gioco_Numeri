@@ -1,4 +1,4 @@
-// Ogni gioco ha il pulsante "Menu principale" sempre visibile, anche durante la partita; nessuna sovrapposizione orizzontale.
+// Ogni gioco ha il pulsante "Tutti i giochi" sempre visibile, anche durante la partita; nessuna sovrapposizione orizzontale.
 const { chromium } = require('playwright');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 (async () => {
