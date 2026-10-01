@@ -4,7 +4,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const b = await chromium.launch();
   const page = await (await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 })).newPage();
   const errs = []; page.on('pageerror', e => errs.push(e.message));
-  await page.goto('file://' + __dirname + '/../girasette.html'); await sleep(600);
+  await page.goto('file://' + __dirname + '/../index.html#girasette'); await sleep(600);
   // schermata con frecce (un pezzo rimasto) su una plancia realistica
   await page.evaluate(() => {
     const M = window.__M7, k = M.key; const bd = new Map();

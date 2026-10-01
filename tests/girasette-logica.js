@@ -4,7 +4,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const b = await chromium.launch();
   const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
   const page = await ctx.newPage(); const errs = []; page.on('pageerror', e => errs.push(e.message)); page.on('console', m => m.type()==='error' && errs.push(m.text()));
-  await page.goto('file://' + __dirname + '/../girasette.html'); await sleep(600);
+  await page.goto('file://' + __dirname + '/../index.html#girasette'); await sleep(600);
   const logic = await page.evaluate(() => {
     const M = window.__M7, out = {};
     // anelli: lunghezze, adiacenza consecutiva, copertura completa

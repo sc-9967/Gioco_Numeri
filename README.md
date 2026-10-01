@@ -1,20 +1,20 @@
 # Numeri in Tasca
 
-Cinque giochi di numeri da partite brevi, pensati per il telefono. Ogni gioco è un singolo file HTML, senza dipendenze: si apre nel browser.
+Cinque giochi di numeri da partite brevi, pensati per il telefono. Sono tutti dentro un unico file HTML, `index.html`, senza dipendenze: si apre nel browser.
 
-| Gioco | File | In breve |
-|---|---|---|
-| **Bilancia** | `bilancia.html` | Posa i pesi sui due piatti e pareggiali senza superare la portata di 10. |
-| **Quadrante** | `quadrante.html` | Muovi la lancetta di un quadrante a 12 ore con le carte e centra le ore accese prima che si spengano. |
-| **Primo** | `primo.html` | Scomponi in fattori primi i blocchi che cadono prima che la torre tocchi il soffitto. |
-| **Resto** | `resto.html` | Alla cassa: calcola il resto e consegnalo con monete e banconote, meglio se con meno pezzi. |
-| **Girasette** | `girasette.html` | Fondi tre o più tessere uguali su una griglia esagonale fino al 7. Finiti i tre pezzi, gli anelli della plancia girano. |
+| Gioco | In breve |
+|---|---|
+| **Bilancia** | Posa i pesi sui due piatti e pareggiali senza superare la portata di 10. |
+| **Quadrante** | Muovi la lancetta di un quadrante a 12 ore con le carte e centra le ore accese prima che si spengano. |
+| **Primo** | Scomponi in fattori primi i blocchi che cadono prima che la torre tocchi il soffitto. |
+| **Resto** | Alla cassa: calcola il resto e consegnalo con monete e banconote, meglio se con meno pezzi. |
+| **Girasette** | Fondi tre o più tessere uguali su una griglia esagonale fino al 7. Finiti i tre pezzi, gli anelli della plancia girano. |
 
-`index.html` è il launcher con tutti e cinque i giochi (la copia `Numeri in Tasca.html` è identica).
+`index.html` è il launcher con tutti e cinque i giochi (la copia `Numeri in Tasca.html` è identica). I file singoli dei giochi sono stati eliminati: ogni gioco si apre direttamente con `index.html#bilancia`, `#quadrante`, `#primo`, `#resto`, `#girasette`.
 
 ## Come provarli
 
-Apri `index.html` (o un singolo file) in un browser. Su GitHub Pages basta attivare Pages sul ramo `main`.
+Apri `index.html` in un browser. Su GitHub Pages basta attivare Pages sul ramo `main`.
 
 Ogni gioco ha record locale, sfida del giorno (stessa sequenza per tutti, risultato condivisibile) e rigioco immediato.
 
@@ -43,7 +43,6 @@ node girasette-logica.js      # anelli, giro, moltiplicatori
 node girasette-giro.js        # fusione causata dal giro
 node girasette-bot.js         # partite automatiche di Girasette
 node launcher-girasette.js    # Girasette dentro il launcher
-node giochi-singoli.js        # i cinque file aperti da soli
 ```
 
 Risultati e misure del 30/09/2026 in `docs/risultati-test.md`. L'analisi dei giochi simili è in `docs/giochi-simili.md`.
@@ -53,4 +52,4 @@ Risultati e misure del 30/09/2026 in `docs/risultati-test.md`. L'analisi dei gio
 - Il gioco "Cassaforte", descritto nelle prime sessioni di lavoro, non è stato recuperato: non esiste in nessuna delle copie disponibili.
 - Il riquadro del contributo PayPal è nascosto. Per riattivarlo, in `index.html` imposta `SHOW_DONATE = true`.
 
-Copyright © 2026 Silvio Chiaverini. Vedi il file `LICENSE`.
+Copyright © 2026 Silvio Chiaverini. Licenza GNU GPL v3: vedi il file `LICENSE`.

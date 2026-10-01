@@ -16,7 +16,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   console.log('menu nascosto dopo Gioca:', !(await page.isVisible('#menu')));
   await page.evaluate(() => window.__M7.setTimescale(0.03));
   let moves = 0;
-  while (moves < 300) {
+  while (moves < 1500) {
     if (await page.isVisible('#over')) break;
     const st = await page.evaluate(() => window.__M7.busy);
     if (st) { await sleep(8); continue; }

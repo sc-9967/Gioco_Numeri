@@ -5,7 +5,7 @@ const CAP = +(process.env.CAP || 400), N = +(process.env.N || 6), RANDOM = proce
   const b = await chromium.launch();
   const page = await b.newPage({ viewport: { width: 390, height: 844 } });
   const errs = []; page.on('pageerror', e => errs.push(e.message));
-  await page.goto('file://' + __dirname + '/../girasette.html'); await sleep(400);
+  await page.goto('file://' + __dirname + '/../index.html#girasette'); await sleep(400);
   await page.evaluate(() => window.__M7.setTimescale(0.02));
   const runs = [];
   for (let g = 0; g < N; g++) {
