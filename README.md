@@ -1,6 +1,6 @@
 # Numeri in Tasca
 
-Sei giochi di numeri da partite brevi, pensati per il telefono. Sono tutti dentro un unico file HTML, `index.html`, senza dipendenze: si apre nel browser.
+Sette giochi di numeri da partite brevi, pensati per il telefono. Sono tutti dentro un unico file HTML, `index.html`, senza dipendenze: si apre nel browser.
 
 | Gioco | In breve |
 |---|---|
@@ -9,9 +9,10 @@ Sei giochi di numeri da partite brevi, pensati per il telefono. Sono tutti dentr
 | **Primo** | Scomponi in fattori primi i blocchi che cadono prima che la torre tocchi il soffitto. |
 | **Resto** | Alla cassa: calcola il resto e consegnalo con monete e banconote, meglio se con meno pezzi. |
 | **Girasette** | Fondi tre o più tessere uguali su una griglia esagonale fino al 7. Finiti i tre pezzi, gli anelli della plancia girano. |
+| **Sentiero** | Da in alto a sinistra a in basso a destra di una griglia 5×5: ogni casella somma, moltiplica o sottrae. Trova il percorso che dà il valore più alto. Una serie di 5 griglie al giorno, uguale per tutti. |
 | **Raddoppio** | Scorri la griglia 4×4 e fondi le tessere uguali. Le catene di fusioni moltiplicano i punti, il martello rompe una tessera. |
 
-`index.html` è il launcher con tutti e sei i giochi (la copia `Numeri in Tasca.html` è identica). I file singoli dei giochi sono stati eliminati: ogni gioco si apre direttamente con `index.html#bilancia`, `#quadrante`, `#primo`, `#resto`, `#girasette`, `#raddoppio`.
+`index.html` è il launcher con tutti e sette i giochi (la copia `Numeri in Tasca.html` è identica). I file singoli dei giochi sono stati eliminati: ogni gioco si apre direttamente con `index.html#bilancia`, `#quadrante`, `#primo`, `#resto`, `#girasette`, `#raddoppio`, `#sentiero`.
 
 ## Come provarli
 
@@ -42,6 +43,16 @@ Puzzle a scorrimento su griglia 4×4, della stessa famiglia di regole dei classi
 - Vittoria a 2048 con possibilità di continuare; game over solo senza mosse e senza martelli.
 - Comandi: frecce o WASD, swipe, Z per annullare, H per il martello.
 
+## Sentiero
+
+Puzzle di calcolo: griglia 5×5, si parte da 1 in alto a sinistra e si arriva in basso a destra muovendosi solo a destra o in basso. Ogni casella applica +n, ×n o −n. Ci sono 70 percorsi possibili.
+
+- **Punteggio:** per ogni griglia è la percentuale del valore ottimo (0-100); una serie di 5 griglie vale al massimo 500. Finita la griglia si vede il percorso ottimo in blu.
+- **Sfida del giorno:** stesse 5 griglie per tutti (il seme è la data di Roma), un solo tentativo ufficiale al giorno. Più allenamenti liberi con griglie casuali.
+- **Record** per giorno, settimana (da lunedì), anno e sempre, con migliore, media e giorni giocati, più la serie di giorni consecutivi. Sono calcolati dallo storico salvato **sul dispositivo**: senza un server non esiste una classifica condivisa.
+- **Con gli amici, senza server:** il risultato si copia come testo con le caselle colorate; dopo un allenamento il testo contiene un codice sfida `SEN-…-punti` (e, se la pagina è online, un link `#sentiero?c=…`). Chi lo incolla nella schermata iniziale gioca le stesse 5 griglie e vede se ha battuto il punteggio.
+- **Limite:** i punteggi non sono verificabili. Va bene tra amici, non per una classifica pubblica.
+
 ## Test
 
 I test usano Playwright e si trovano in `tests/`:
@@ -58,6 +69,9 @@ node girasette-bot.js         # partite automatiche di Girasette
 node launcher-girasette.js    # Girasette dentro il launcher
 node raddoppio-logica.js      # scorrimento, fusioni, undo, catena, martello, vittoria, game over
 node launcher-raddoppio.js    # Raddoppio dentro il launcher
+node sentiero-logica.js       # percorso ottimo, generatore, codici sfida, record per periodo
+node sentiero-partita.js      # partita completa, una sola sfida al giorno, condivisione
+node launcher-sentiero.js     # Sentiero dentro il launcher
 ```
 
 Risultati e misure del 30/09/2026 in `docs/risultati-test.md`. L'analisi dei giochi simili è in `docs/giochi-simili.md`.

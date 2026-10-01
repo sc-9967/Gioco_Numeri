@@ -34,6 +34,13 @@ Raddoppio ha le stesse regole di base di 2048. Non è un caso fortuito: è la st
 - **Aggiunte, e quanto valgono.** Il martello e l'annulla esistono già in molte varianti (2048 Legends, 2048 Merge Puzzle, Merge Block). Anche i moltiplicatori di combo esistono in vari titoli di fusione. Non sono quindi novità assolute. Le parti proprie sono la **catena legata alle mosse consecutive**, il **martello guadagnato con le tessere record**, l'**annulla che ripristina il generatore casuale** e la **sfida del giorno**. Non è stata trovata una variante con esattamente questa combinazione, ma la ricerca non lo prova.
 - **Rischio residuo.** [Probabile] Basso sul piano legale se resta gratuito, con nome e grafica propri. Più alto se lo si pubblica negli store: lì contano le segnalazioni per "copycat" e il giudizio sull'impressione complessiva.
 
+## Sentiero: cosa esiste e cosa no
+
+- **Idea scartata.** Mettere numeri casuali in ordine crescente senza spostarli è già saturo: [20 Number Challenge](https://play.gameonfamily.com/number-challenge/), [Numble](https://www.numble.dev/en), [Ordrly](https://ordrlygame.com/), [Ordinal](https://www.ordinal.fyi/). Le equazioni quotidiane sono di [Nerdle](https://www.nerdlegame.com/), che ha anche duelli.
+- **Il più vicino:** [Vector](https://apps.apple.com/us/app/vector-math-puzzle/id6757619221), una griglia in cui si massimizza un numero con le quattro operazioni. Differenze: lì si visitano tutte le caselle, si parte da qualsiasi punto, in 8 direzioni, e l'operazione dipende dalla direzione del passo. In Sentiero l'operazione sta nella casella, il percorso è monotono (solo destra e basso) e il punteggio è la percentuale dell'ottimo.
+- **Meccanica generale.** Il cammino su griglia con somma massima è un esercizio classico di programmazione dinamica (non è un'opera protetta). Non è stata trovata una versione giornaliera con operazioni per casella e punteggio in percentuale dell'ottimo; la ricerca non lo esclude. [Ipotesi]
+- **Rischio:** basso. Nome, grafica (carta millimetrata) e regole sono propri.
+
 ## Fonti
 
 - [Make7! Hexa Puzzle - App Store](https://apps.apple.com/us/app/make7-hexa-puzzle/id1095539172)

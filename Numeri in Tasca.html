@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!--
-  Numeri in Tasca: Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio.
+  Numeri in Tasca: Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio, Sentiero.
   © 2026 Silvio Chiaverini.
   Giochi ideati e realizzati da Silvio Chiaverini.
   Licenza: GNU GPL v3 (vedi LICENSE).
@@ -79,6 +79,10 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 .g-rad .lx-name{font-family:"Fredoka",system-ui,sans-serif;font-weight:700;font-size:26px;color:#ffffff}
 .g-rad .lx-name i{font-style:normal;color:#ff7a59}
 .g-rad .lx-play{background:#ff7a59;color:#2a0d04}
+.g-sen{background:#f4ecd8;background-image:linear-gradient(rgba(31,42,36,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(31,42,36,.07) 1px,transparent 1px);background-size:18px 18px;color:#1f2a24;border:2px solid #1f2a24}
+.g-sen .lx-name{font-family:"Archivo",system-ui,sans-serif;font-weight:800;font-size:30px;color:#1f2a24}
+.g-sen .lx-name i{font-style:normal;color:#1f7a5a}
+.g-sen .lx-play{background:#1f7a5a;color:#ffffff}
 .lx-grid>:last-child:nth-child(odd){grid-column:1 / -1}   /* l'ultima carta dispari occupa tutta la riga */
 
 .lx-donate{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;background:var(--l-card);border:1px solid var(--l-line);border-radius:18px;padding:14px 16px}
@@ -142,7 +146,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 
 <div id="lx-launcher" class="lx-page">
   <header>
-    <p class="lx-eyebrow">Sei giochi di numeri</p>
+    <p class="lx-eyebrow">Sette giochi di numeri</p>
     <h1 class="lx-title">Numeri <span>in Tasca</span></h1>
     <p class="lx-sub">Partite da un minuto. Scegli un gioco e batti il tuo record.</p>
   </header>
@@ -178,6 +182,11 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
       <span class="lx-desc">Scorri e fondi le tessere uguali. Le catene moltiplicano i punti, il martello salva.</span>
       <span class="lx-best"><span>Record <b data-best="rad_best">0</b></span><span class="lx-play">Gioca</span></span>
     </button>
+    <button class="lx-card g-sen" type="button" data-game="sentiero">
+      <span class="lx-name">Sent<i>iero</i></span>
+      <span class="lx-desc">Da in alto a sinistra a in basso a destra: trova il percorso che dà il valore più alto. Una sfida al giorno.</span>
+      <span class="lx-best"><span>Record <b data-best="sent_best">0</b></span><span class="lx-play">Gioca</span></span>
+    </button>
   </main>
 
   <aside class="lx-donate" aria-label="Contributo volontario" hidden>
@@ -210,7 +219,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 
   <footer class="lx-foot">
     <p><strong>© 2026 Silvio Chiaverini.</strong></p>
-    <p>Bilancia, Quadrante, Primo, Resto, Girasette e Raddoppio sono giochi ideati e realizzati da Silvio Chiaverini. Codice rilasciato con licenza GNU GPL v3 (vedi LICENSE).</p>
+    <p>Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio e Sentiero sono giochi ideati e realizzati da Silvio Chiaverini. Codice rilasciato con licenza GNU GPL v3 (vedi LICENSE).</p>
   </footer>
 </div>
 
@@ -1186,6 +1195,181 @@ h1 span{color:var(--accent)}
         <textarea id="shareBox" rows="3" readonly hidden></textarea>
         <button class="btn link" id="toMenu" type="button">Menu</button>
       </div>
+    </div>
+  </section>
+</div></template>
+<template id="tpl-sentiero"><style>
+/* SENTIERO. Layout: HUD in alto, valore corrente, tabellone 5x5 quadrato, barra comandi. Tema chiaro "carta millimetrata", unico nella raccolta (gli altri giochi sono scuri o a colori pieni). */
+:root{
+  --bg:#f4ecd8; --bg2:#fbf6e8; --ink:#1f2a24; --muted:#6d7668; --panel:#fffaf0; --line:#d9ceb2;
+  --accent:#1f7a5a; --accent-ink:#ffffff; --gold:#e0a526; --blue:#2b6fd6;
+  --add:#d3eee2; --add-ink:#14583f; --mul:#fbe7b0; --mul-ink:#6e4a00; --sub:#f6d3c9; --sub-ink:#8a2f1c;
+  --ui:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif; --num:"Courier Prime","Courier New",monospace;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overflow:hidden;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+.app{height:100%;display:flex;flex-direction:column;position:relative;
+  background-image:linear-gradient(rgba(31,42,36,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(31,42,36,.05) 1px,transparent 1px);
+  background-size:24px 24px;background-color:var(--bg)}
+.hud{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:8px;padding:12px 16px 2px;width:100%;max-width:560px;margin-inline:auto;box-sizing:border-box}
+.stat{display:flex;flex-direction:column;min-width:0}
+.stat.r{align-items:flex-end}
+.lbl{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.stat b{font-family:var(--num);font-size:26px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.01em;line-height:1}
+h1 span{color:var(--accent)}
+.valbar{display:flex;justify-content:center;align-items:baseline;gap:10px;height:54px;padding-top:4px}
+.valbar .lbl{font-size:12px}
+.valbar b{font-family:var(--num);font-size:42px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;transition:color .2s}
+.valbar b.up{animation:vup .28s ease-out;color:var(--accent)}
+.valbar b.down{animation:vdown .28s ease-out;color:#c0482f}
+@keyframes vup{40%{transform:scale(1.25)}}
+@keyframes vdown{40%{transform:scale(.85)}}
+.stage{flex:1;min-height:0;position:relative;display:grid;place-items:center;container-type:size;padding:0 14px 8px}
+.board{position:relative;width:min(100cqw,100cqh,480px);aspect-ratio:1;container-type:inline-size;display:grid;grid-template-columns:repeat(5,1fr);gap:2.2cqw}
+.cell{position:relative;border:none;border-radius:2.6cqw;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4cqw;padding:0;cursor:pointer;
+  font:inherit;font-family:var(--num);font-weight:700;font-size:7.6cqw;line-height:1;color:var(--ink);
+  box-shadow:0 .6cqw 0 rgba(31,42,36,.18);transition:transform .08s,box-shadow .08s,background .15s}
+.cell small{font-size:3.3cqw;font-weight:700;opacity:.85;min-height:3.4cqw}
+.cell.add{background:var(--add);color:var(--add-ink)}
+.cell.mul{background:var(--mul);color:var(--mul-ink)}
+.cell.sub{background:var(--sub);color:var(--sub-ink)}
+.cell.start{background:var(--ink);color:#fff;font-size:5.4cqw}
+.cell.on{box-shadow:inset 0 0 0 .9cqw var(--accent),0 .6cqw 0 rgba(31,42,36,.18)}
+.cell.cur{box-shadow:inset 0 0 0 1.1cqw var(--accent),0 0 0 .8cqw rgba(31,122,90,.28);animation:cur 1s ease-in-out infinite alternate}
+@keyframes cur{to{transform:scale(1.05)}}
+.cell.nx{box-shadow:inset 0 0 0 .6cqw rgba(31,42,36,.55),0 .6cqw 0 rgba(31,42,36,.18)}
+.cell:active{transform:translateY(.5cqw)}
+.cell.opt::after{content:attr(data-o);position:absolute;top:-1.2cqw;right:-1.2cqw;min-width:5cqw;height:5cqw;border-radius:99px;background:var(--blue);color:#fff;font-size:3.2cqw;display:grid;place-items:center;font-family:var(--ui);font-weight:800}
+.cell.opt{box-shadow:inset 0 0 0 .8cqw var(--blue),0 .6cqw 0 rgba(31,42,36,.18)}
+.cell.shake{animation:shake .25s}
+@keyframes shake{25%{transform:translateX(-1.4cqw)}75%{transform:translateX(1.4cqw)}}
+.legend{display:flex;gap:6px;justify-content:center;padding-inline:14px;font-size:12px;color:var(--muted);padding-bottom:2px}
+.legend i{font-style:normal;font-family:var(--num);font-weight:700;border-radius:6px;padding:1px 7px}
+.legend .a{background:var(--add);color:var(--add-ink)}.legend .m{background:var(--mul);color:var(--mul-ink)}.legend .s{background:var(--sub);color:var(--sub-ink)}
+.bar{display:flex;gap:8px;justify-content:center;padding:6px 16px calc(12px + env(safe-area-inset-bottom,0px));width:100%;max-width:560px;margin-inline:auto;box-sizing:border-box}
+.btn{font:inherit;font-weight:700;font-size:15px;color:var(--ink);background:var(--panel);border:2px solid var(--ink);border-radius:12px;padding:10px 8px;cursor:pointer;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 3px 0 var(--ink)}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.btn:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.link{border:none;background:none;box-shadow:none;color:var(--muted);font-weight:600}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:6;padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px));background:var(--panel);border-top:3px solid var(--ink);
+  border-radius:20px 20px 0 0;box-shadow:0 -10px 30px rgba(31,42,36,.2);display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center;animation:sheet .25s ease-out}
+@keyframes sheet{from{transform:translateY(40%);opacity:0}}
+.sheet[hidden]{display:none}
+.sheet .pct{font-family:var(--num);font-size:44px;font-weight:700;line-height:1;color:var(--accent)}
+.sheet .pct.low{color:#c0482f}
+.sheet .msg{font-size:15px;max-width:420px}
+.sheet .msg b{font-family:var(--num)}
+.sheet .btn{max-width:360px;width:100%;flex:none}
+#menu,#over,#rec{position:absolute;inset:0;display:grid;place-items:center;padding:16px;background:rgba(244,236,216,.94);z-index:8}
+#menu[hidden],#over[hidden],#rec[hidden]{display:none}
+.card{width:100%;max-width:360px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--panel);border:2px solid var(--ink);border-radius:20px;padding:22px 20px 18px;display:flex;flex-direction:column;gap:12px;text-align:center;box-shadow:0 8px 0 var(--ink)}
+.card h1{font-size:42px}
+.card h2{margin:0;font-size:30px;font-weight:800}
+.card .eyebrow{margin:0;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;font-size:14.5px;line-height:1.35;text-align:left}
+.rules li{display:grid;grid-template-columns:46px 1fr;gap:12px;align-items:center}
+.chip{font-family:var(--num);font-weight:700;font-size:15px;text-align:center;border-radius:9px;padding:5px 0}
+.chip.a{background:var(--add);color:var(--add-ink)}.chip.m{background:var(--mul);color:var(--mul-ink)}.chip.p{background:var(--ink);color:#fff}
+.btns{display:flex;flex-direction:column;gap:10px}
+.btns .btn{flex:none;font-size:16px;padding:12px 14px}
+.card .small{margin:0;font-size:13px;color:var(--muted)}
+.card .small b{color:var(--ink)}
+.codebox{display:flex;gap:8px}
+.codebox input{flex:1;min-width:0;font:inherit;font-size:14px;padding:9px 10px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);-webkit-user-select:text;user-select:text}
+.codebox .btn{flex:none;padding:9px 14px;font-size:14px}
+.err{color:#c0482f;font-size:13px;min-height:16px;margin:0}
+.big{font-family:var(--num);font-size:68px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;color:var(--accent)}
+.big small{font-size:22px;color:var(--muted);font-weight:400}
+.rec{align-self:center;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:var(--gold);color:var(--ink);border-radius:99px;padding:3px 12px}
+.rec[hidden]{display:none}
+.strip{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.strip div{border-radius:10px;padding:6px 0;font-family:var(--num);font-weight:700;font-size:17px;border:2px solid var(--ink)}
+.strip .g4{background:#bfe8cf}.strip .g3{background:#f7e49a}.strip .g2{background:#f8c98f}.strip .g1{background:#f1b3a6}
+.strip span{display:block;font-family:var(--ui);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.cmp{margin:0;font-size:15px;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;text-align:right;padding:4px 4px}
+th:first-child,td:first-child{text-align:left}
+td{padding:7px 4px;border-top:1px solid var(--line);text-align:right;font-family:var(--num);font-weight:700;font-variant-numeric:tabular-nums}
+td:first-child{font-family:var(--ui);font-weight:700}
+#shareBox{width:100%;box-sizing:border-box;font:13px/1.4 var(--ui);color:var(--ink);background:#fff;border:2px solid var(--line);border-radius:10px;padding:8px;resize:none;-webkit-user-select:text;user-select:text}
+@media (max-height:600px){.hud{padding-top:6px}.stat b{font-size:20px}h1{font-size:20px}.valbar{height:40px}.valbar b{font-size:30px}.bar{padding-bottom:8px}.card{padding:14px 16px;gap:8px}.card h1{font-size:32px}.big{font-size:46px}.rules{font-size:13px;gap:6px}.legend{display:none}}
+@media (prefers-reduced-motion:reduce){.cell,.cell.cur,.sheet,.valbar b{animation:none!important;transition:none!important}}
+</style><div class="app" id="app">
+  <header class="hud">
+    <div class="stat"><span class="lbl" id="gridLbl">Griglia</span><b id="gridNo">1/5</b></div>
+    <h1>Sent<span>iero</span></h1>
+    <div class="stat r"><span class="lbl">Totale</span><b id="total">0</b></div>
+  </header>
+  <div class="valbar"><span class="lbl">Valore</span><b id="val">1</b></div>
+  <div class="stage" id="stage"><div class="board" id="board" aria-label="Griglia 5 per 5"></div></div>
+  <div class="legend"><i class="a">+n</i><i class="m">×n</i><i class="s">−n</i><span>solo verso → e ↓</span></div>
+  <footer class="bar">
+    <button class="btn" id="back" type="button" disabled>Indietro</button>
+    <button class="btn" id="reset" type="button" disabled>Da capo</button>
+    <button class="btn" id="mute" type="button">Suono</button>
+  </footer>
+
+  <div class="sheet" id="sheet" hidden>
+    <div class="pct" id="pct">0%</div>
+    <div class="msg" id="msg"></div>
+    <button class="btn primary" id="next" type="button">Prossima griglia</button>
+  </div>
+
+  <section id="menu">
+    <div class="card">
+      <p class="eyebrow">Puzzle di calcolo · una serie al giorno</p>
+      <h1>Sent<span>iero</span></h1>
+      <ul class="rules">
+        <li><span class="chip p">→↓</span><span>Parti da 1 in alto a sinistra e arriva in basso a destra, muovendoti solo a destra o in basso.</span></li>
+        <li><span class="chip a">+5</span><span>Ogni casella cambia il tuo valore: somma, moltiplica o sottrae. L'ordine conta.</span></li>
+        <li><span class="chip m">87%</span><span>Prendi il valore più alto che puoi: il punteggio è la percentuale del percorso ottimo. 5 griglie, massimo 500.</span></li>
+      </ul>
+      <div class="btns">
+        <button class="btn primary" id="daily" type="button">Sfida del giorno</button>
+        <button class="btn" id="play" type="button">Allenamento</button>
+        <button class="btn" id="recBtn" type="button">Record</button>
+      </div>
+      <div class="codebox"><input id="codeIn" type="text" placeholder="Codice sfida: SEN-…" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="btn" id="codeGo" type="button">Sfida</button></div>
+      <p class="err" id="codeErr"></p>
+      <p class="small" id="menuInfo">Oggi: —</p>
+    </div>
+  </section>
+
+  <section id="over" hidden>
+    <div class="card">
+      <p class="eyebrow" id="overMode">Allenamento</p>
+      <h2 id="overTitle">Serie conclusa</h2>
+      <div class="big"><span id="overScore">0</span><small> / 500</small></div>
+      <span class="rec" id="newRecord" hidden>Nuovo record</span>
+      <div class="strip" id="strip"></div>
+      <p class="cmp" id="cmp" hidden></p>
+      <p class="small" id="overInfo"></p>
+      <div class="btns">
+        <button class="btn primary" id="share" type="button">Copia risultato</button>
+        <textarea id="shareBox" rows="4" readonly hidden></textarea>
+        <button class="btn" id="again" type="button">Altra serie libera</button>
+        <button class="btn" id="recBtn2" type="button">Record</button>
+        <button class="btn link" id="toMenu" type="button">Menu</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="rec" hidden>
+    <div class="card">
+      <p class="eyebrow">Sfide del giorno · fuso Europa/Roma</p>
+      <h2>Record</h2>
+      <table>
+        <thead><tr><th>Periodo</th><th>Migliore</th><th>Media</th><th>Giorni</th></tr></thead>
+        <tbody id="recRows"></tbody>
+      </table>
+      <p class="small" id="recInfo"></p>
+      <div class="btns"><button class="btn primary" id="recClose" type="button">Chiudi</button></div>
     </div>
   </section>
 </div></template>
@@ -4010,6 +4194,395 @@ clearBoard();
 refreshMenu(); render();
 })();
 },
+    sentiero: function (window, requestAnimationFrame, setTimeout) {
+/* ============================================================================
+   SENTIERO: puzzle di calcolo su griglia 5x5, una serie di 5 griglie al giorno uguale per tutti.
+   Si va da in alto a sinistra (valore 1) a in basso a destra muovendosi solo a destra o in basso; ogni
+   casella applica +n, xn o -n. Il punteggio di una griglia e' la percentuale del valore ottimo (0-100),
+   quello della serie e' la somma delle 5 percentuali (0-500).
+   Le operazioni non decrescono mai al crescere del valore, quindi il percorso ottimo si trova con una
+   programmazione dinamica semplice (e il test lo confronta con tutti i 70 percorsi).
+   Social senza server: stessa sfida del giorno per tutti (seme = data, fuso Europa/Roma), codici sfida
+   "SEN-seme-punti" da incollare, risultato condivisibile. I record per giorno/settimana/anno/sempre
+   sono calcolati dallo storico salvato sul dispositivo.
+   Struttura: 1) logica pura  2) date e record  3) stato  4) tabellone  5) audio  6) flusso e schermate
+   ============================================================================ */
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const N = 5, SERIES = 5;
+
+/* ---------------------------------------------------------------- 1) LOGICA PURA */
+function mulberry(seed) { let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hashStr(s) { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const apply = (v, c) => (c.t === '+' ? v + c.n : c.t === '*' ? v * c.n : c.t === '-' ? v - c.n : v);
+const label = c => (c.t === 's' ? '1' : (c.t === '+' ? '+' : c.t === '*' ? '×' : '−') + c.n);
+
+// Percorso ottimo: valore massimo per cella (le operazioni non decrescono col valore, quindi la sottostruttura e' ottima).
+function solve(grid) {
+  const best = [], from = [];
+  for (let r = 0; r < N; r++) { best.push([]); from.push([]); }
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    if (!r && !c) { best[0][0] = 1; from[0][0] = null; continue; }
+    const up = r > 0 ? best[r - 1][c] : -Infinity, left = c > 0 ? best[r][c - 1] : -Infinity;
+    if (left >= up) { best[r][c] = apply(left, grid[r][c]); from[r][c] = 'L'; } else { best[r][c] = apply(up, grid[r][c]); from[r][c] = 'U'; }
+  }
+  const path = []; let r = N - 1, c = N - 1;
+  while (true) { path.push([r, c]); const f = from[r][c]; if (!f) break; if (f === 'L') c--; else r--; }
+  return { opt: best[N - 1][N - 1], path: path.reverse() };
+}
+// Tutti i percorsi (C(8,4) = 70): serve ai test e a verificare la programmazione dinamica.
+function allPaths() {
+  const out = [];
+  (function rec(r, c, p) { p = p.concat([[r, c]]); if (r === N - 1 && c === N - 1) { out.push(p); return; } if (c + 1 < N) rec(r, c + 1, p); if (r + 1 < N) rec(r + 1, c, p); })(0, 0, []);
+  return out;
+}
+const valueOfPath = (grid, p) => p.slice(1).reduce((v, [r, c]) => apply(v, grid[r][c]), 1);
+// Giocatore "ingordo": a ogni passo sceglie la casella che da' subito il valore piu' alto.
+function greedy(grid) {
+  let r = 0, c = 0, v = 1;
+  while (r < N - 1 || c < N - 1) {
+    const R = c + 1 < N ? apply(v, grid[r][c + 1]) : -Infinity, D = r + 1 < N ? apply(v, grid[r + 1][c]) : -Infinity;
+    if (R >= D) { v = R; c++; } else { v = D; r++; }
+  }
+  return v;
+}
+// Griglia: 45% somme (1-9), 30% moltiplicazioni (x2 al 70%, x3), 25% sottrazioni (1-6).
+// Si scartano le griglie banali: serve che l'ottimo sia almeno 30 e che il percorso ingordo non sia gia' quasi ottimo.
+function makeGrid(rand) {
+  let g = null;
+  for (let att = 0; att < 400; att++) {
+    g = Array.from({ length: N }, (_, r) => Array.from({ length: N }, (_, c) => {
+      if (!r && !c) return { t: 's', n: 1 };
+      const x = rand();
+      if (x < 0.45) return { t: '+', n: 1 + Math.floor(rand() * 9) };
+      if (x < 0.75) return { t: '*', n: rand() < 0.7 ? 2 : 3 };
+      return { t: '-', n: 1 + Math.floor(rand() * 6) };
+    }));
+    const flat = g.flat(), subs = flat.filter(c => c.t === '-').length, muls = flat.filter(c => c.t === '*').length;
+    if (subs > 9 || muls < 4) continue;
+    const s = solve(g);
+    if (s.opt < 30 || greedy(g) > s.opt * 0.88) continue;
+    return g;
+  }
+  return g;
+}
+const gridsFor = seedStr => Array.from({ length: SERIES }, (_, i) => makeGrid(mulberry(hashStr(seedStr + ':' + i))));
+const pctOf = (final, opt) => (final >= opt ? 100 : Math.max(0, Math.floor(100 * final / opt)));
+const band = p => (p >= 100 ? 4 : p >= 90 ? 3 : p >= 70 ? 2 : 1);
+const EMOJI = { 4: '🟩', 3: '🟨', 2: '🟧', 1: '🟥' };
+const rankOf = t => (t >= 475 ? 'Fenomeno' : t >= 425 ? 'Maestro' : t >= 350 ? 'Bravo' : t >= 250 ? 'In crescita' : 'Si impara giocando');
+const encodeCode = (seed36, score) => 'SEN-' + seed36 + '-' + score;
+function parseCode(text) {
+  const m = /SEN-([0-9a-z]{1,8})-(\d{1,3})/i.exec(String(text || ''));
+  if (!m) return null;
+  const target = parseInt(m[2], 10);
+  return target <= SERIES * 100 ? { seed36: m[1].toLowerCase(), target } : null;
+}
+
+/* ---------------------------------------------------------------- 2) DATE E RECORD */
+// Il "giorno" e' sempre quello di Roma, cosi' la sfida cambia alla stessa ora per tutti.
+function dateStr(d) {
+  d = d || new Date();
+  try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d); }
+  catch (e) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+}
+const addDays = (ds, k) => { const d = new Date(ds + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + k); return d.toISOString().slice(0, 10); };
+const weekStart = ds => addDays(ds, -((new Date(ds + 'T00:00:00Z').getUTCDay() + 6) % 7));   // lunedi'
+function aggregate(hist, today) {
+  const days = Object.keys(hist).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k) && hist[k] && typeof hist[k].t === 'number');
+  const mk = list => { const v = list.map(k => hist[k].t); return v.length ? { best: Math.max(...v), avg: Math.round(v.reduce((a, b) => a + b, 0) / v.length), days: v.length } : null; };
+  const ws = weekStart(today), we = addDays(ws, 6);
+  return {
+    day: mk(days.filter(k => k === today)),
+    week: mk(days.filter(k => k >= ws && k <= we)),
+    year: mk(days.filter(k => k.slice(0, 4) === today.slice(0, 4))),
+    all: mk(days),
+  };
+}
+function streakOf(hist, today) {
+  let d = hist[today] ? today : addDays(today, -1), n = 0;
+  while (hist[d]) { n++; d = addDays(d, -1); }
+  return n;
+}
+
+/* ---------------------------------------------------------------- 3) STATO */
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+let today = dateStr();
+let hist = store.get('sent_hist', {});
+if (!hist || typeof hist !== 'object' || Array.isArray(hist)) hist = {};
+let bestAll = store.get('sent_best', 0);
+let mode = 'daily', seed36 = '', playDate = today, challenge = null;
+let grids = [], sols = [], gi = 0, path = [], val = 1, results = [];
+let running = false, locked = false, prevBest = 0, last = null;   // last: risultato dell'ultima serie (per condividere)
+let TS = 1, gen = 0;
+
+/* ---------------------------------------------------------------- 4) TABELLONE */
+const boardEl = $('board');
+let cellEl = [];
+function buildBoard() {
+  boardEl.textContent = '';
+  cellEl = [];
+  for (let r = 0; r < N; r++) {
+    cellEl.push([]);
+    for (let c = 0; c < N; c++) {
+      const cell = grids[gi][r][c], b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'cell ' + (cell.t === 's' ? 'start' : cell.t === '+' ? 'add' : cell.t === '*' ? 'mul' : 'sub');
+      b.dataset.r = r; b.dataset.c = c;
+      b.setAttribute('aria-label', cell.t === 's' ? 'Partenza' : (cell.t === '+' ? 'Somma ' : cell.t === '*' ? 'Moltiplica per ' : 'Sottrai ') + cell.n);
+      b.innerHTML = '<span></span><small></small>';
+      b.firstChild.textContent = cell.t === 's' ? 'VIA' : label(cell);
+      b.addEventListener('click', () => tap(r, c));
+      boardEl.appendChild(b);
+      cellEl[r].push(b);
+    }
+  }
+}
+function renderBoard() {
+  const sums = [], cur = path[path.length - 1];
+  let v = 1;
+  path.forEach(([r, c], i) => { if (i) v = apply(v, grids[gi][r][c]); sums[r * N + c] = v; });
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const el = cellEl[r][c], idx = path.findIndex(p => p[0] === r && p[1] === c);
+    const isCur = !locked && cur[0] === r && cur[1] === c;
+    const nx = !locked && ((r === cur[0] && c === cur[1] + 1) || (r === cur[0] + 1 && c === cur[1]));
+    el.classList.toggle('on', idx >= 0 && !isCur);
+    el.classList.toggle('cur', isCur || (locked && idx === path.length - 1));
+    el.classList.toggle('nx', nx);
+    el.lastChild.textContent = idx > 0 ? '=' + sums[r * N + c] : '';
+  }
+}
+function setVal(v, dir) {
+  const el = $('val'); el.textContent = v;
+  el.classList.remove('up', 'down'); void el.offsetWidth;
+  if (dir && !reduceMotion) el.classList.add(dir > 0 ? 'up' : 'down');
+}
+function render() {
+  $('gridNo').textContent = Math.min(gi + 1, SERIES) + '/' + SERIES;
+  $('total').textContent = results.reduce((a, b) => a + b.pct, 0);
+  $('back').disabled = !running || locked || path.length < 2;
+  $('reset').disabled = !running || locked || path.length < 2;
+  renderBoard();
+}
+
+/* ---------------------------------------------------------------- 5) AUDIO */
+let AC = null, muted = store.get('sent_mute', false);
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC = null; } }
+  if (AC && AC.state === 'suspended') AC.resume().catch(() => {});
+  return AC;
+}
+function tone(freq, dur, type = 'sine', vol = 0.13, when = 0, slide = 0) {
+  if (muted || !AC) return;
+  const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime + when;
+  o.type = type; o.frequency.setValueAtTime(freq, t);
+  if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(AC.destination); o.start(t); o.stop(t + dur + 0.03);
+}
+const sfx = {
+  add: i => tone(440 + i * 38, 0.14, 'triangle', 0.13),
+  mul: i => { tone(330 + i * 38, 0.16, 'square', 0.06); tone(660 + i * 76, 0.18, 'triangle', 0.08, 0.03); },
+  sub: i => tone(300 - i * 8, 0.18, 'sine', 0.13, 0, 200),
+  back: () => tone(520, 0.08, 'sine', 0.07, 0, 340),
+  deny: () => tone(140, 0.09, 'sine', 0.07, 0, 100),
+  grid: p => { const n = p >= 100 ? 5 : p >= 90 ? 4 : p >= 70 ? 3 : 2; for (let i = 0; i < n; i++) tone(392 * 2 ** ([0, 4, 7, 12, 16][i] / 12), 0.28, 'triangle', 0.12, i * 0.08); },
+  end: t => [0, 4, 7, 12].forEach((s, i) => tone(392 * 2 ** (s / 12) * (t >= 350 ? 1 : 0.84), 0.34, 'triangle', 0.12, i * 0.1)),
+};
+const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
+
+/* ---------------------------------------------------------------- 6) FLUSSO E SCHERMATE */
+function resetGrid() {
+  gen++;
+  path = [[0, 0]]; val = 1; locked = false;
+  buildBoard();
+  $('sheet').hidden = true;
+  setVal(1, 0);
+  render();
+}
+function start(m, code) {
+  ac(); gen++;
+  mode = m; challenge = null; last = null;
+  if (m === 'daily') {
+    if (hist[today]) { showSummary(); return; }
+    playDate = today; seed36 = 'D' + today;
+  } else if (m === 'chal') {
+    seed36 = code.seed36; challenge = { target: code.target };
+  } else {
+    seed36 = ((Math.random() * 4294967296) >>> 0).toString(36);
+  }
+  const seedStr = m === 'daily' ? 'sentiero-' + today : 'x' + seed36;
+  grids = gridsFor(seedStr); sols = grids.map(solve);
+  gi = 0; results = []; running = true; prevBest = bestAll;
+  $('menu').hidden = true; $('over').hidden = true; $('rec').hidden = true;
+  resetGrid();
+}
+function tap(r, c) {
+  if (!running || locked) return;
+  const cur = path[path.length - 1];
+  const at = path.findIndex(p => p[0] === r && p[1] === c);
+  if (at >= 0 && at < path.length - 1) { retractTo(at); return; }                   // tocco su una casella gia' percorsa: si torna li'
+  const ok = (r === cur[0] && c === cur[1] + 1) || (r === cur[0] + 1 && c === cur[1]);
+  if (!ok) {
+    sfx.deny(); const el = cellEl[r][c]; el.classList.remove('shake'); void el.offsetWidth; if (!reduceMotion) el.classList.add('shake');
+    return;
+  }
+  const cell = grids[gi][r][c], before = val;
+  val = apply(val, cell); path.push([r, c]);
+  (cell.t === '+' ? sfx.add : cell.t === '*' ? sfx.mul : sfx.sub)(path.length);
+  buzz(6);
+  setVal(val, val > before ? 1 : -1);
+  if (r === N - 1 && c === N - 1) { render(); finishGrid(); } else render();
+}
+function retractTo(at) {
+  path = path.slice(0, at + 1);
+  val = path.slice(1).reduce((v, [r, c]) => apply(v, grids[gi][r][c]), 1);
+  sfx.back(); setVal(val, 0); render();
+}
+function back() { if (running && !locked && path.length > 1) retractTo(path.length - 2); }
+function finishGrid() {
+  locked = true;
+  const opt = sols[gi].opt, pct = pctOf(val, opt);
+  results.push({ final: val, opt, pct });
+  sols[gi].path.forEach(([r, c], i) => { const el = cellEl[r][c]; el.classList.add('opt'); el.dataset.o = i === 0 ? '' : i; });
+  sols[gi].path.slice(0, 1).forEach(([r, c]) => cellEl[r][c].classList.remove('opt'));
+  const p = $('pct'); p.textContent = pct + '%'; p.classList.toggle('low', pct < 70);
+  $('msg').innerHTML = '';
+  const m = document.createElement('span');
+  m.append(pct >= 100 ? 'Percorso perfetto! ' : pct >= 90 ? 'Quasi perfetto. ' : pct >= 70 ? 'Buon percorso. ' : 'Il percorso migliore era un altro. ');
+  m.append('Tu ', Object.assign(document.createElement('b'), { textContent: val }), ' · ottimo ', Object.assign(document.createElement('b'), { textContent: opt }), '. In blu il percorso ottimo.');
+  $('msg').appendChild(m);
+  $('next').textContent = gi < SERIES - 1 ? 'Prossima griglia' : 'Vedi il totale';
+  sfx.grid(pct); buzz(pct >= 100 ? [10, 30, 10] : 14);
+  render();
+  const g = gen;
+  setTimeout(() => { if (g === gen && running) { $('sheet').hidden = false; $('next').focus({ preventScroll: true }); } }, Math.round(350 * TS));
+}
+function nextGrid() {
+  if (!running || !locked) return;
+  if (gi < SERIES - 1) { gi++; resetGrid(); } else finishSeries();
+}
+function finishSeries() {
+  running = false;
+  const pcts = results.map(r => r.pct), total = pcts.reduce((a, b) => a + b, 0);
+  if (mode === 'daily') { hist[playDate] = { t: total, g: pcts }; store.set('sent_hist', hist); }
+  const isRecord = total > prevBest && total > 0;
+  if (total > bestAll) { bestAll = total; store.set('sent_best', bestAll); }
+  last = { mode, total, pcts, seed36, date: playDate, target: challenge ? challenge.target : null };
+  sfx.end(total); buzz(40);
+  $('sheet').hidden = true;
+  showOver(isRecord);
+}
+function showOver(isRecord) {
+  const L = last, label = L.mode === 'daily' ? 'Sfida del giorno · ' + L.date.slice(8, 10) + '/' + L.date.slice(5, 7) : L.mode === 'chal' ? 'Sfida di un amico' : 'Allenamento';
+  $('overMode').textContent = label;
+  $('overTitle').textContent = rankOf(L.total);
+  $('overScore').textContent = L.total;
+  $('newRecord').hidden = !isRecord;
+  const strip = $('strip'); strip.textContent = '';
+  L.pcts.forEach((p, i) => { const d = document.createElement('div'); d.className = 'g' + band(p); d.textContent = p; const s = document.createElement('span'); s.textContent = 'G' + (i + 1); d.appendChild(s); strip.appendChild(d); });
+  const cmp = $('cmp');
+  cmp.hidden = L.target === null;
+  if (L.target !== null) cmp.textContent = L.total > L.target ? 'Hai battuto la sfida: ' + L.total + ' contro ' + L.target + '!' : L.total === L.target ? 'Pareggio: ' + L.total + ' a ' + L.target + '.' : 'Sfida persa: ' + L.total + ' contro ' + L.target + '.';
+  const st = streakOf(hist, today);
+  $('overInfo').textContent = L.mode === 'daily' ? 'Prossima sfida a mezzanotte (Roma) · serie di ' + st + (st === 1 ? ' giorno' : ' giorni') : 'Il codice della sfida è nel testo che copi con il pulsante qui sotto.';
+  $('share').textContent = 'Copia risultato'; $('shareBox').hidden = true;
+  $('menu').hidden = true; $('rec').hidden = true;
+  const g = gen;
+  setTimeout(() => { if (g === gen) $('over').hidden = false; }, Math.round(250 * TS));
+}
+function showSummary() {
+  const h = hist[today];
+  last = { mode: 'daily', total: h.t, pcts: Array.isArray(h.g) && h.g.length === SERIES ? h.g : [0, 0, 0, 0, 0], seed36: 'D' + today, date: today, target: null };
+  running = false;
+  showOver(false);
+  $('over').hidden = false;
+}
+function shareText() {
+  const L = last, ems = L.pcts.map(p => EMOJI[band(p)]).join('');
+  if (L.mode === 'daily') return 'Sentiero · ' + L.date.slice(8, 10) + '/' + L.date.slice(5, 7) + '\n' + L.total + '/500 ' + ems + '\nSerie di ' + streakOf(hist, today) + (streakOf(hist, today) === 1 ? ' giorno' : ' giorni');
+  const code = encodeCode(L.seed36, L.total);
+  const href = (() => { try { const h = window.location.href.split('#')[0]; return /^https?:/.test(h) ? h + '#sentiero?c=' + code : ''; } catch (e) { return ''; } })();
+  return 'Sentiero · ' + L.total + '/500 ' + ems + '\nBatti il mio punteggio: ' + code + (href ? '\n' + href : '');
+}
+function refreshMenu() {
+  const h = hist[today], st = streakOf(hist, today);
+  $('daily').textContent = h ? 'Sfida del giorno · fatta (' + h.t + ')' : 'Sfida del giorno · ' + today.slice(8, 10) + '/' + today.slice(5, 7);
+  $('menuInfo').textContent = (h ? 'Oggi: ' + h.t + '/500' : 'Oggi: da giocare') + ' · serie ' + st + (st === 1 ? ' giorno' : ' giorni') + ' · record ' + bestAll;
+}
+function openRec() {
+  const A = aggregate(hist, today), rows = [['Oggi', A.day], ['Questa settimana', A.week], ['Quest\'anno', A.year], ['Sempre', A.all]];
+  const tb = $('recRows'); tb.textContent = '';
+  rows.forEach(([name, a]) => {
+    const tr = document.createElement('tr');
+    [name, a ? a.best : '—', a ? a.avg : '—', a ? a.days : '—'].forEach(x => { const td = document.createElement('td'); td.textContent = x; tr.appendChild(td); });
+    tb.appendChild(tr);
+  });
+  const st = streakOf(hist, today);
+  $('recInfo').textContent = 'Serie attuale: ' + st + (st === 1 ? ' giorno' : ' giorni') + ' · miglior serie in assoluto (anche allenamento): ' + bestAll + '/500. I record sono salvati su questo dispositivo.';
+  $('rec').hidden = false;
+}
+
+$('daily').addEventListener('click', () => start('daily'));
+$('play').addEventListener('click', () => start('free'));
+$('again').addEventListener('click', () => start('free'));
+$('toMenu').addEventListener('click', () => { refreshMenu(); $('over').hidden = true; $('menu').hidden = false; });
+$('recBtn').addEventListener('click', openRec);
+$('recBtn2').addEventListener('click', openRec);
+$('recClose').addEventListener('click', () => { $('rec').hidden = true; });
+$('codeGo').addEventListener('click', () => {
+  const code = parseCode($('codeIn').value);
+  if (!code) { $('codeErr').textContent = 'Codice non valido. Deve contenere qualcosa come SEN-k3f9a-412.'; return; }
+  $('codeErr').textContent = '';
+  start('chal', code);
+});
+$('codeIn').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') $('codeGo').click(); });
+$('back').addEventListener('click', back);
+$('reset').addEventListener('click', () => { if (running && !locked && path.length > 1) retractTo(0); });
+$('next').addEventListener('click', nextGrid);
+$('share').addEventListener('click', () => {
+  const txt = shareText();
+  const fallback = () => { const b = $('shareBox'); b.value = txt; b.hidden = false; b.focus(); b.select(); $('share').textContent = 'Seleziona e copia il testo'; };
+  try { navigator.clipboard.writeText(txt).then(() => { $('share').textContent = 'Copiato'; }, fallback); } catch (e) { fallback(); }
+});
+const muteBtn = $('mute');
+const syncMute = () => { muteBtn.textContent = muted ? 'Muto' : 'Suono'; };
+muteBtn.addEventListener('click', () => { muted = !muted; store.set('sent_mute', muted); ac(); syncMute(); });
+syncMute();
+window.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey || !running) return;
+  const tag = e.target && e.target.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+  if (locked) { if (e.key === 'Enter' && !$('sheet').hidden) { nextGrid(); e.preventDefault(); } return; }
+  const cur = path[path.length - 1];
+  if (e.key === 'ArrowRight') { tap(cur[0], cur[1] + 1); e.preventDefault(); }
+  else if (e.key === 'ArrowDown') { tap(cur[0] + 1, cur[1]); e.preventDefault(); }
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'Backspace') { back(); e.preventDefault(); }
+});
+
+/* Interfaccia di prova (usata dai test automatici; innocua per il gioco). */
+window.__SN = {
+  solve, allPaths, valueOfPath, greedy, makeGrid, gridsFor, pctOf, aggregate, streakOf, weekStart, addDays, parseCode, encodeCode, dateStr, mulberry, hashStr,
+  get state() { return { mode, gi, val, path, results, running, locked, bestAll, seed36 }; },
+  get grids() { return grids; },
+  tap, back, start, nextGrid, setHist(h) { hist = h; store.set('sent_hist', hist); refreshMenu(); },
+  setTimescale(x) { TS = x; },
+};
+
+// Sfida ricevuta con un link (#sentiero?c=SEN-...): precompila il codice.
+try {
+  const h = window.location.hash || '', m = /[?&]c=([^&]+)/.exec(h), code = m && parseCode(decodeURIComponent(m[1]));
+  if (code) { $('codeIn').value = encodeCode(code.seed36, code.target); $('codeErr').textContent = 'Sfida ricevuta: batti ' + code.target + ' punti. Premi Sfida.'; }
+} catch (e) {}
+// Tabellone di esempio dietro al menu.
+grids = gridsFor('sentiero-demo'); gi = 0; path = [[0, 0]]; sols = []; buildBoard(); render(); refreshMenu();
+})();
+},
   };
 
   const launcher = document.getElementById('lx-launcher');
@@ -4034,7 +4607,7 @@ refreshMenu(); render();
   }
 
   // ---------- conteggio per il test: quale gioco viene rigiocato di più ----------
-  const NAMES = { bilancia: 'Bilancia', quadrante: 'Quadrante', primo: 'Primo', resto: 'Resto', girasette: 'Girasette', raddoppio: 'Raddoppio' };
+  const NAMES = { bilancia: 'Bilancia', quadrante: 'Quadrante', primo: 'Primo', resto: 'Resto', girasette: 'Girasette', raddoppio: 'Raddoppio', sentiero: 'Sentiero' };
   const KEYS = Object.keys(NAMES);
   const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   const ls = {
@@ -4234,9 +4807,10 @@ refreshMenu(); render();
   document.querySelectorAll('[data-game]').forEach(b => b.addEventListener('click', () => mount(b.dataset.game)));
   window.addEventListener('keydown', e => { if (e.key === 'Escape' && current) unmount(); });
   refreshBest();
-  const start = (location.hash || '').slice(1);
+  const hashKey = () => (location.hash || '').slice(1).split('?')[0];
+  const start = hashKey();
   if (GAMES[start]) mount(start);
-  window.addEventListener('hashchange', () => { const k = location.hash.slice(1); if (GAMES[k]) mount(k); else if (!k) unmount(); });
+  window.addEventListener('hashchange', () => { const k = hashKey(); if (GAMES[k]) mount(k); else if (!k) unmount(); });
 })();
 </script>
 

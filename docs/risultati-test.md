@@ -56,3 +56,15 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 - **Nel launcher:** scheda, menu, partita, game over, rigioca, ritorno, record sulla carta, conteggio e `#raddoppio`, senza errori. Nessun residuo di stili o elementi del gioco dopo l'uscita.
 - **Schermi:** 360×640, 390×844, 844×390 e 1280×800 senza scorrimento orizzontale.
 - **Limite:** i bot giocano a caso. Non è stato misurato quanto sia difficile o divertente per una persona; il martello e la catena sono tarati a intuito.
+
+## Sentiero
+
+- **Percorso ottimo:** su 300 griglie generate, la programmazione dinamica coincide sempre con il massimo su tutti i 70 percorsi. In 240 griglie l'ottimo è unico, in 60 ci sono pari merito.
+- **Difficoltà misurata:** valore ottimo da 30 a 2.592 (media 264). Un percorso scelto a caso vale in media il 27% dell'ottimo; il percorso "ingordo" (a ogni passo la casella migliore) il 53%. Le griglie con ingordo oltre l'88% dell'ottimo vengono scartate.
+- **Generazione:** 300 griglie in circa 50-75 ms; stessa data = stesse griglie, date diverse = griglie diverse.
+- **Date e record:** il giorno è quello di Roma (31/12 alle 23:30 UTC risulta già 01/01); settimana da lunedì; migliore/media/giorni per oggi, settimana, anno e sempre; serie dei giorni consecutivi (anche a partire da ieri).
+- **Partita con tocchi reali:** il percorso ottimo dà 100% per 5 griglie, totale 500. Indietro, da capo, tocco su una casella già percorsa e tastiera funzionano; una mossa non adiacente non cambia nulla.
+- **Una sola sfida al giorno:** dopo la prima serie, "Sfida del giorno" mostra solo il riepilogo. Dopo la ricarica il record resta.
+- **Codici sfida:** il codice nel testo di condivisione riproduce le stesse 5 griglie; codici malformati o con punteggio oltre 500 vengono rifiutati; il confronto dice "battuta", "pareggio" o "persa".
+- **Nel launcher:** scheda, menu, sfida, altra serie, ritorno, record, conteggio, rotta `#sentiero?c=…` con codice precompilato, nessun residuo dopo l'uscita, nessun errore. Nessuno scorrimento orizzontale su 360×640, 390×844, 844×390 e 1280×800.
+- **Limiti:** i punteggi sono salvati sul dispositivo e non sono verificabili; non è stato misurato il gradimento reale, né la difficoltà percepita da persone vere (i bot misurano solo il divario tra scelta casuale, ingorda e ottima).
