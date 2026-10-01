@@ -4,6 +4,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const b = await chromium.launch();
   const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, deviceScaleFactor: 2 });
   const page = await ctx.newPage(); const errs = [];
+  await page.addInitScript(() => localStorage.setItem('nit_name', JSON.stringify('Prova')));  // il launcher chiede il nome prima di giocare
   page.on('pageerror', e => errs.push('pageerror: ' + e.message)); page.on('console', m => m.type() === 'error' && !/ERR_CERT|Failed to load resource/.test(m.text()) && errs.push(m.text()));
   await page.goto('file://' + __dirname + '/../index.html'); await sleep(700);
   console.log('carte:', await page.evaluate(() => [...document.querySelectorAll('.lx-grid [data-game]')].map(b => b.dataset.game).join(',')));

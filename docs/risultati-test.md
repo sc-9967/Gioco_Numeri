@@ -68,3 +68,12 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 - **Codici sfida:** il codice nel testo di condivisione riproduce le stesse 5 griglie; codici malformati o con punteggio oltre 500 vengono rifiutati; il confronto dice "battuta", "pareggio" o "persa".
 - **Nel launcher:** scheda, menu, sfida, altra serie, ritorno, record, conteggio, rotta `#sentiero?c=…` con codice precompilato, nessun residuo dopo l'uscita, nessun errore. Nessuno scorrimento orizzontale su 360×640, 390×844, 844×390 e 1280×800.
 - **Limiti:** i punteggi sono salvati sul dispositivo e non sono verificabili; non è stato misurato il gradimento reale, né la difficoltà percepita da persone vere (i bot misurano solo il divario tra scelta casuale, ingorda e ottima).
+
+## Nome del giocatore
+
+- Senza nome il gioco non parte: la home mostra "Scrivi il tuo nome per giocare". Un nome vuoto viene rifiutato.
+- Il nome viene ripulito (caratteri di controllo e `<`/`>` rimossi, spazi ridotti) e limitato a 20 caratteri; resta dopo la ricarica.
+- Dopo il nome parte il gioco che si era scelto; con un link diretto (`#sentiero?c=…&n=Giulia`) la home resta finché il nome non è scritto, poi si apre la sfida e si legge "Sfida di Giulia".
+- I testi condivisi iniziano con il nome (verificati Sentiero e Raddoppio; gli altri quattro usano la stessa funzione). Il link di sfida di Sentiero porta il nome di chi sfida.
+- Il nome non compare né nelle statistiche copiate né in `nit_stats`.
+- I test esistenti ora impostano un nome prima di aprire il launcher.

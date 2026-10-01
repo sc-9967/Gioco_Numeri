@@ -3,6 +3,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 (async () => {
   const b = await chromium.launch();
   const page = await (await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 })).newPage();
+  await page.addInitScript(() => localStorage.setItem('nit_name', JSON.stringify('Prova')));  // il launcher chiede il nome prima di giocare
   const errs = []; page.on('pageerror', e => errs.push(e.message));
   await page.goto('file://' + __dirname + '/../index.html#girasette'); await sleep(600);
   // schermata con frecce (un pezzo rimasto) su una plancia realistica

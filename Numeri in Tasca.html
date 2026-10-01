@@ -137,6 +137,17 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 .lx-copystats{align-self:flex-start;font:inherit;font-size:14px;font-weight:600;color:var(--l-ink);background:none;border:1px solid var(--l-line);border-radius:99px;padding:8px 14px;cursor:pointer}
 .lx-copystats:focus-visible{outline:3px solid var(--l-ink);outline-offset:2px}
 .lx-statsbox{width:100%;box-sizing:border-box;font:13px/1.4 var(--lx-ui);color:var(--l-ink);background:var(--l-card);border:1px solid var(--l-line);border-radius:10px;padding:8px;resize:none}
+.lx-who{background:var(--l-card);border:1px solid var(--l-line);border-radius:16px;padding:14px 16px}
+.lx-who label{display:block;font-weight:800;font-size:16px;margin-bottom:8px}
+.lx-whorow{display:flex;gap:8px}
+.lx-whorow input{flex:1;min-width:0;font:inherit;font-size:16px;padding:10px 12px;border:2px solid var(--l-line);border-radius:12px;background:var(--l-bg);color:var(--l-ink)}
+.lx-whorow input:focus-visible{outline:3px solid var(--l-ink);outline-offset:1px}
+.lx-whorow button{font:inherit;font-weight:800;font-size:15px;padding:10px 16px;border:none;border-radius:12px;background:var(--l-ink);color:var(--l-bg);cursor:pointer}
+.lx-whoerr{margin:6px 0 0;min-height:16px;font-size:13px;font-weight:700;color:#c0392b}
+.lx-whohint{margin:2px 0 0;font-size:12px;color:var(--l-muted);line-height:1.4}
+.lx-hello{margin:0;font-size:15px}
+.lx-hello button{font:inherit;font-size:13px;margin-left:8px;border:none;background:none;color:var(--l-muted);text-decoration:underline;cursor:pointer;padding:2px}
+.lx-who.need{outline:3px solid #c0392b;outline-offset:2px}
 /* aggiunte dentro i giochi */
 .lx-copy{margin:0;font-size:12px;opacity:.7;text-align:center}
 .lx-give{margin:0;font-size:13px;text-align:center;opacity:.85}
@@ -150,6 +161,19 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
     <h1 class="lx-title">Numeri <span>in Tasca</span></h1>
     <p class="lx-sub">Partite da un minuto. Scegli un gioco e batti il tuo record.</p>
   </header>
+
+  <section class="lx-who" id="lx-who" aria-label="Il tuo nome">
+    <form class="lx-whoform" id="lx-whoform" autocomplete="off">
+      <label for="lx-name">Come ti chiami?</label>
+      <div class="lx-whorow">
+        <input id="lx-name" type="text" maxlength="20" placeholder="Il tuo nome" autocomplete="nickname" autocapitalize="words" spellcheck="false">
+        <button type="submit" id="lx-namesave">Conferma</button>
+      </div>
+      <p class="lx-whoerr" id="lx-nameerr" role="alert"></p>
+      <p class="lx-whohint">Compare nei risultati che condividi con gli amici. Resta sul tuo dispositivo; le statistiche inviate all'autore restano anonime.</p>
+    </form>
+    <p class="lx-hello" id="lx-hello" hidden>Ciao, <b id="lx-helloname"></b> <button type="button" id="lx-namechange">Cambia</button></p>
+  </section>
 
   <main class="lx-grid">
     <button class="lx-card g-bil" type="button" data-game="bilancia">
@@ -1385,6 +1409,10 @@ td:first-child{font-family:var(--ui);font-weight:700}
   // Contributo nascosto per ora: metti true per riattivare il riquadro e il link a fine partita.
   const SHOW_DONATE = false;
   const AUTHOR = 'Silvio Chiaverini';
+  // Nome del giocatore: salvato solo sul dispositivo, compare nei testi che si condividono (mai nelle statistiche anonime).
+  const cleanName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
+  const playerName = () => { try { return cleanName(JSON.parse(localStorage.getItem('nit_name'))); } catch (e) { return ''; } };
+  const withName = txt => { const n = playerName(); return n ? n + ' · ' + txt : txt; };
 
   const GAMES = {
     bilancia: function (window, requestAnimationFrame, setTimeout) {
@@ -1578,7 +1606,7 @@ td:first-child{font-family:var(--ui);font-weight:700}
   $('again').addEventListener('click', () => start(lastMode));
   $('toMenu').addEventListener('click', () => { refreshMenu(); el.over.hidden = true; el.menu.hidden = false; });
   $('share').addEventListener('click', () => {
-    const txt = shareText();
+    const txt = withName(shareText());
     const fallback = () => { const b = $('shareBox'); b.value = txt; b.hidden = false; b.focus(); b.select(); $('share').textContent = 'Seleziona e copia il testo'; };
     try {
       navigator.clipboard.writeText(txt).then(() => { $('share').textContent = 'Copiato'; }, fallback);
@@ -2110,7 +2138,7 @@ td:first-child{font-family:var(--ui);font-weight:700}
   $('again').addEventListener('click', () => start(lastMode));
   $('toMenu').addEventListener('click', () => { refreshMenu(); el.over.hidden = true; el.menu.hidden = false; });
   $('share').addEventListener('click', () => {
-    const txt = 'Quadrante · sfida del ' + todayLabel + '\n' + S.score.toLocaleString('it-IT') + ' punti · ' + S.hits + ' colpi · combo ×' + (S.maxCombo || 0) + ' · livello ' + S.level;
+    const txt = withName('Quadrante · sfida del ' + todayLabel + '\n' + S.score.toLocaleString('it-IT') + ' punti · ' + S.hits + ' colpi · combo ×' + (S.maxCombo || 0) + ' · livello ' + S.level);
     const fallback = () => { const b = $('shareBox'); b.value = txt; b.hidden = false; b.focus(); b.select(); $('share').textContent = 'Seleziona e copia il testo'; };
     try { navigator.clipboard.writeText(txt).then(() => { $('share').textContent = 'Copiato'; }, fallback); } catch (e) { fallback(); }
   });
@@ -2516,7 +2544,7 @@ td:first-child{font-family:var(--ui);font-weight:700}
   $('again').addEventListener('click', () => start(lastMode));
   $('toMenu').addEventListener('click', () => { refreshMenu(); el.over.hidden = true; el.menu.hidden = false; });
   $('share').addEventListener('click', () => {
-    const txt = 'Primo · sfida del ' + todayLabel + '\n' + S.score.toLocaleString('it-IT') + ' punti · ' + S.done + ' blocchi · serie ' + S.maxStreak + ' · livello ' + S.level;
+    const txt = withName('Primo · sfida del ' + todayLabel + '\n' + S.score.toLocaleString('it-IT') + ' punti · ' + S.done + ' blocchi · serie ' + S.maxStreak + ' · livello ' + S.level);
     const fallback = () => { const b = $('shareBox'); b.value = txt; b.hidden = false; b.focus(); b.select(); $('share').textContent = 'Seleziona e copia il testo'; };
     try { navigator.clipboard.writeText(txt).then(() => { $('share').textContent = 'Copiato'; }, fallback); } catch (e) { fallback(); }
   });
@@ -2962,7 +2990,7 @@ td:first-child{font-family:var(--ui);font-weight:700}
   $('toMenu').addEventListener('click', () => { refreshMenu(); $('over').hidden = true; $('menu').hidden = false; });
   $('clear').addEventListener('click', () => { if (!S.running || S.busy || !S.given.length) return; S.given = []; sfx.back(); renderGiven(); });
   $('share').addEventListener('click', () => {
-    const txt = 'Resto · sfida del ' + todayLabel + '\n' + S.score.toLocaleString('it-IT') + ' punti · ' + S.served + ' clienti · ' + S.perfects + ' resti perfetti';
+    const txt = withName('Resto · sfida del ' + todayLabel + '\n' + S.score.toLocaleString('it-IT') + ' punti · ' + S.served + ' clienti · ' + S.perfects + ' resti perfetti');
     const fallback = () => { const b = $('shareBox'); b.value = txt; b.hidden = false; b.focus(); b.select(); $('share').textContent = 'Seleziona e copia il testo'; };
     try { navigator.clipboard.writeText(txt).then(() => { $('share').textContent = 'Copiato'; }, fallback); } catch (e) { fallback(); }
   });
@@ -4134,7 +4162,7 @@ $('restart').addEventListener('click', () => {
 $('undo').addEventListener('click', undo);
 $('hammer').addEventListener('click', () => { if (!running || busy) return; if (hammerMode) setHammer(false); else if (hammers > 0) setHammer(true); });
 $('share').addEventListener('click', () => {
-  const txt = 'Raddoppio · sfida del ' + todayLabel + '\n' + score.toLocaleString('it-IT') + ' punti · tessera ' + (maxTile || 2) + ' · ' + moves + ' mosse · catena max ' + maxStreak;
+  const txt = withName('Raddoppio · sfida del ' + todayLabel + '\n' + score.toLocaleString('it-IT') + ' punti · tessera ' + (maxTile || 2) + ' · ' + moves + ' mosse · catena max ' + maxStreak);
   const fallback = () => { const b = $('shareBox'); b.value = txt; b.hidden = false; b.focus(); b.select(); $('share').textContent = 'Seleziona e copia il testo'; };
   try { navigator.clipboard.writeText(txt).then(() => { $('share').textContent = 'Copiato'; }, fallback); } catch (e) { fallback(); }
 });
@@ -4276,8 +4304,11 @@ const encodeCode = (seed36, score) => 'SEN-' + seed36 + '-' + score;
 function parseCode(text) {
   const m = /SEN-([0-9a-z]{1,8})-(\d{1,3})/i.exec(String(text || ''));
   if (!m) return null;
-  const target = parseInt(m[2], 10);
-  return target <= SERIES * 100 ? { seed36: m[1].toLowerCase(), target } : null;
+  const target = parseInt(m[2], 10), t = String(text);
+  let name = '';
+  const nm = /[?&]n=([^&\s]+)/.exec(t), pm = /^(.{1,20}?) · Sentiero/m.exec(t);
+  if (nm) { try { name = decodeURIComponent(nm[1]); } catch (e) { name = nm[1]; } } else if (pm) name = pm[1];
+  return target <= SERIES * 100 ? { seed36: m[1].toLowerCase(), target, name: cleanName(name) } : null;
 }
 
 /* ---------------------------------------------------------------- 2) DATE E RECORD */
@@ -4319,7 +4350,7 @@ let bestAll = store.get('sent_best', 0);
 let mode = 'daily', seed36 = '', playDate = today, challenge = null;
 let grids = [], sols = [], gi = 0, path = [], val = 1, results = [];
 let running = false, locked = false, prevBest = 0, last = null;   // last: risultato dell'ultima serie (per condividere)
-let TS = 1, gen = 0;
+let TS = 1, gen = 0, rivalHint = null;
 
 /* ---------------------------------------------------------------- 4) TABELLONE */
 const boardEl = $('board');
@@ -4412,7 +4443,7 @@ function start(m, code) {
     if (hist[today]) { showSummary(); return; }
     playDate = today; seed36 = 'D' + today;
   } else if (m === 'chal') {
-    seed36 = code.seed36; challenge = { target: code.target };
+    seed36 = code.seed36; challenge = { target: code.target, name: code.name || '' };
   } else {
     seed36 = ((Math.random() * 4294967296) >>> 0).toString(36);
   }
@@ -4473,7 +4504,7 @@ function finishSeries() {
   if (mode === 'daily') { hist[playDate] = { t: total, g: pcts }; store.set('sent_hist', hist); }
   const isRecord = total > prevBest && total > 0;
   if (total > bestAll) { bestAll = total; store.set('sent_best', bestAll); }
-  last = { mode, total, pcts, seed36, date: playDate, target: challenge ? challenge.target : null };
+  last = { mode, total, pcts, seed36, date: playDate, target: challenge ? challenge.target : null, rival: challenge ? challenge.name : '' };
   sfx.end(total); buzz(40);
   $('sheet').hidden = true;
   showOver(isRecord);
@@ -4488,7 +4519,10 @@ function showOver(isRecord) {
   L.pcts.forEach((p, i) => { const d = document.createElement('div'); d.className = 'g' + band(p); d.textContent = p; const s = document.createElement('span'); s.textContent = 'G' + (i + 1); d.appendChild(s); strip.appendChild(d); });
   const cmp = $('cmp');
   cmp.hidden = L.target === null;
-  if (L.target !== null) cmp.textContent = L.total > L.target ? 'Hai battuto la sfida: ' + L.total + ' contro ' + L.target + '!' : L.total === L.target ? 'Pareggio: ' + L.total + ' a ' + L.target + '.' : 'Sfida persa: ' + L.total + ' contro ' + L.target + '.';
+  if (L.target !== null) {
+    const rv = L.rival ? ' (' + L.rival + ')' : '';
+    cmp.textContent = L.total > L.target ? 'Hai battuto la sfida' + rv + ': ' + L.total + ' contro ' + L.target + '!' : L.total === L.target ? 'Pareggio' + rv + ': ' + L.total + ' a ' + L.target + '.' : 'Sfida persa' + rv + ': ' + L.total + ' contro ' + L.target + '.';
+  }
   const st = streakOf(hist, today);
   $('overInfo').textContent = L.mode === 'daily' ? 'Prossima sfida a mezzanotte (Roma) · serie di ' + st + (st === 1 ? ' giorno' : ' giorni') : 'Il codice della sfida è nel testo che copi con il pulsante qui sotto.';
   $('share').textContent = 'Copia risultato'; $('shareBox').hidden = true;
@@ -4507,7 +4541,7 @@ function shareText() {
   const L = last, ems = L.pcts.map(p => EMOJI[band(p)]).join('');
   if (L.mode === 'daily') return 'Sentiero · ' + L.date.slice(8, 10) + '/' + L.date.slice(5, 7) + '\n' + L.total + '/500 ' + ems + '\nSerie di ' + streakOf(hist, today) + (streakOf(hist, today) === 1 ? ' giorno' : ' giorni');
   const code = encodeCode(L.seed36, L.total);
-  const href = (() => { try { const h = window.location.href.split('#')[0]; return /^https?:/.test(h) ? h + '#sentiero?c=' + code : ''; } catch (e) { return ''; } })();
+  const href = (() => { try { const h = window.location.href.split('#')[0]; const nm = playerName(); return /^https?:/.test(h) ? h + '#sentiero?c=' + code + (nm ? '&n=' + encodeURIComponent(nm) : '') : ''; } catch (e) { return ''; } })();
   return 'Sentiero · ' + L.total + '/500 ' + ems + '\nBatti il mio punteggio: ' + code + (href ? '\n' + href : '');
 }
 function refreshMenu() {
@@ -4537,6 +4571,7 @@ $('recBtn2').addEventListener('click', openRec);
 $('recClose').addEventListener('click', () => { $('rec').hidden = true; });
 $('codeGo').addEventListener('click', () => {
   const code = parseCode($('codeIn').value);
+  if (code && !code.name && rivalHint && rivalHint.seed36 === code.seed36 && rivalHint.target === code.target) code.name = rivalHint.name;
   if (!code) { $('codeErr').textContent = 'Codice non valido. Deve contenere qualcosa come SEN-k3f9a-412.'; return; }
   $('codeErr').textContent = '';
   start('chal', code);
@@ -4546,7 +4581,7 @@ $('back').addEventListener('click', back);
 $('reset').addEventListener('click', () => { if (running && !locked && path.length > 1) retractTo(0); });
 $('next').addEventListener('click', nextGrid);
 $('share').addEventListener('click', () => {
-  const txt = shareText();
+  const txt = withName(shareText());
   const fallback = () => { const b = $('shareBox'); b.value = txt; b.hidden = false; b.focus(); b.select(); $('share').textContent = 'Seleziona e copia il testo'; };
   try { navigator.clipboard.writeText(txt).then(() => { $('share').textContent = 'Copiato'; }, fallback); } catch (e) { fallback(); }
 });
@@ -4576,8 +4611,8 @@ window.__SN = {
 
 // Sfida ricevuta con un link (#sentiero?c=SEN-...): precompila il codice.
 try {
-  const h = window.location.hash || '', m = /[?&]c=([^&]+)/.exec(h), code = m && parseCode(decodeURIComponent(m[1]));
-  if (code) { $('codeIn').value = encodeCode(code.seed36, code.target); $('codeErr').textContent = 'Sfida ricevuta: batti ' + code.target + ' punti. Premi Sfida.'; }
+  const h = window.location.hash || '', code = /[?&]c=/.test(h) ? parseCode(h) : null;
+  if (code) { rivalHint = code; $('codeIn').value = encodeCode(code.seed36, code.target); $('codeErr').textContent = (code.name ? 'Sfida di ' + code.name : 'Sfida ricevuta') + ': batti ' + code.target + ' punti. Premi Sfida.'; }
 } catch (e) {}
 // Tabellone di esempio dietro al menu.
 grids = gridsFor('sentiero-demo'); gi = 0; path = [[0, 0]]; sols = []; buildBoard(); render(); refreshMenu();
@@ -4804,13 +4839,42 @@ grids = gridsFor('sentiero-demo'); gi = 0; path = [[0, 0]]; sols = []; buildBoar
     refreshBest();
   }
 
-  document.querySelectorAll('[data-game]').forEach(b => b.addEventListener('click', () => mount(b.dataset.game)));
+  // ---------- nome del giocatore: serve prima di giocare, compare nei risultati condivisi ----------
+  const whoEl = document.getElementById('lx-who'), whoForm = document.getElementById('lx-whoform'), whoIn = document.getElementById('lx-name');
+  const whoHello = document.getElementById('lx-hello'), whoErr = document.getElementById('lx-nameerr');
+  let pendingKey = null;
+  function renderWho(edit) {
+    const n = playerName(), showForm = !n || edit;
+    whoForm.hidden = !showForm; whoHello.hidden = showForm;
+    document.getElementById('lx-helloname').textContent = n;
+    if (showForm) whoIn.value = n;
+    whoEl.classList.remove('need'); whoErr.textContent = '';
+  }
+  function go(key) {
+    if (!playerName()) {
+      pendingKey = key; renderWho(false);
+      whoEl.classList.add('need'); whoErr.textContent = 'Scrivi il tuo nome per giocare.';
+      window.scrollTo(0, 0); whoIn.focus();
+      return;
+    }
+    mount(key);
+  }
+  whoForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const n = cleanName(whoIn.value);
+    if (!n) { whoErr.textContent = 'Scrivi un nome (massimo 20 caratteri).'; whoIn.focus(); return; }
+    ls.set('nit_name', n); renderWho(false);
+    if (pendingKey) { const k = pendingKey; pendingKey = null; mount(k); }
+  });
+  document.getElementById('lx-namechange').addEventListener('click', () => { renderWho(true); whoIn.focus(); whoIn.select(); });
+  renderWho(false);
+  document.querySelectorAll('[data-game]').forEach(b => b.addEventListener('click', () => go(b.dataset.game)));
   window.addEventListener('keydown', e => { if (e.key === 'Escape' && current) unmount(); });
   refreshBest();
   const hashKey = () => (location.hash || '').slice(1).split('?')[0];
   const start = hashKey();
-  if (GAMES[start]) mount(start);
-  window.addEventListener('hashchange', () => { const k = hashKey(); if (GAMES[k]) mount(k); else if (!k) unmount(); });
+  if (GAMES[start]) go(start);
+  window.addEventListener('hashchange', () => { const k = hashKey(); if (GAMES[k]) go(k); else if (!k) unmount(); });
 })();
 </script>
 

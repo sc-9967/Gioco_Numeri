@@ -5,6 +5,7 @@ const FILE = 'file://' + __dirname + '/../index.html#raddoppio';
 (async () => {
   const b = await chromium.launch();
   const page = await (await b.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, deviceScaleFactor: 2 })).newPage(); const errs = [];
+  await page.addInitScript(() => localStorage.setItem('nit_name', JSON.stringify('Prova')));  // il launcher chiede il nome prima di giocare
   page.on('pageerror', e => errs.push(e.message)); page.on('console', m => m.type()==='error' && !/ERR_CERT|Failed to load/.test(m.text()) && errs.push(m.text()));
   await page.goto(FILE); await sleep(500);
   await page.evaluate(() => window.__R.setTimescale(0.03));

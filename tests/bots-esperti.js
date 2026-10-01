@@ -55,6 +55,7 @@ const bots = {
   await Promise.all(games.map(async g => {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
     const page = await ctx.newPage(); const errs = [];
+    await page.addInitScript(() => localStorage.setItem('nit_name', JSON.stringify('Prova')));  // il launcher chiede il nome prima di giocare
     page.on('pageerror', e => errs.push(e.message));
     await page.goto(FILE + '#' + g); await sleep(600);
     await page.click('#play'); await sleep(300);

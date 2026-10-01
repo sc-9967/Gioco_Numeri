@@ -35,6 +35,7 @@ const bots = {
   for (const vp of [{ width: 390, height: 844, tag: 'phone' }]) {
     const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });
     const page = await ctx.newPage();
+    await page.addInitScript(() => localStorage.setItem('nit_name', JSON.stringify('Prova')));  // il launcher chiede il nome prima di giocare
     const errs = [];
     page.on('pageerror', e => errs.push('pageerror: ' + e.message));
     page.on('console', m => { if (m.type() === 'error') errs.push('console: ' + m.text()); });

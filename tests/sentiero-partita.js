@@ -6,6 +6,7 @@ const FILE = 'file://' + __dirname + '/../index.html#sentiero';
   const b = await chromium.launch();
   const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, deviceScaleFactor: 2 });
   const page = await ctx.newPage(); const errs = [];
+  await page.addInitScript(() => localStorage.setItem('nit_name', JSON.stringify('Prova')));  // il launcher chiede il nome prima di giocare
   page.on('pageerror', e => errs.push(e.message)); page.on('console', m => m.type()==='error' && !/ERR_CERT|Failed to load/.test(m.text()) && errs.push(m.text()));
   await page.goto(FILE); await sleep(500);
   await page.evaluate(() => window.__SN.setTimescale(0.05));
