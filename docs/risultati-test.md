@@ -96,3 +96,12 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 - **Bonus:** la stella aggiunge tempo senza far avanzare la sequenza; lo scudo para un errore; un errore costa 8 s e azzera la combo.
 - **Tocchi reali:** 6 su 6 sul numero richiesto; fine partita, record sulla carta, storico e conteggio nel launcher; schermi 360×640, 844×390 e 1280×800 senza scorrimento orizzontale.
 - **Limite:** i punteggi arrivano a centinaia di migliaia per un giocatore perfetto (base 250 × moltiplicatore fino a 7); non è stato provato con persone vere.
+
+## Uscita dalla partita e record per periodo
+
+- **Uscita:** in tutti gli otto giochi il link "← Tutti i giochi" è visibile a partita in corso, dentro lo schermo a 360×700, senza scorrimento orizzontale. In partita la prima pressione chiede conferma e la seconda torna al launcher; la conferma scade dopo 2,5 s; un abbandono non entra nello storico.
+- **Leggibilità:** il colore del link si adatta allo sfondo (chiaro su scuro, scuro su chiaro): in Resto, dove il pannello in basso è scuro, prima era quasi invisibile.
+- **Record per periodo** (storico costruito a mano): oggi, settimana (da lunedì), mese, anno e sempre calcolati correttamente. Il record di sempre include il valore già salvato dal gioco prima dello storico (1.200 con storico a 900).
+- **Dentro ogni gioco:** riga "Record · oggi · settimana · mese · sempre" nel menu e a fine partita, aggiornata dopo ogni partita.
+- **Corretto:** il listener di Lampo su `document` non veniva rimosso all'uscita e poteva dare un errore dopo il ritorno al launcher.
+- **Limite:** i record restano sul dispositivo (backup manuale), i punteggi non sono verificabili, e le partite abbandonate non contano nemmeno come record.

@@ -21,7 +21,9 @@ Apri `index.html` in un browser. Su GitHub Pages basta attivare Pages sul ramo `
 
 **Nome del giocatore:** nella schermata iniziale va scritto il proprio nome (massimo 20 caratteri) prima di giocare. Resta salvato sul dispositivo e compare nei risultati che si condividono (Bilancia, Quadrante, Primo, Resto, Raddoppio, Sentiero). Non viene mai incluso nelle statistiche anonime inviate all'autore. Con un link diretto (`#sentiero?c=…`) si apre la home finché il nome non è stato scritto.
 
-**Record salvati:** ogni partita conclusa viene registrata sul dispositivo per gioco e per giorno (giorno di Roma). Il pulsante "I miei record" mostra il migliore di oggi, della settimana (da lunedì), dell'anno e di sempre per tutti i giochi. Per non perderli (cambio telefono, dati del sito cancellati) c'è il **backup**: "Copia backup" o "Scarica file" producono un testo che inizia con `NIT1.`; "Ripristina" lo incolla e lo fonde con i record presenti, tenendo sempre il valore più alto. Il browser viene anche invitato a proteggere i dati dalla cancellazione automatica. Se non permette di salvare (navigazione privata) compare un avviso. I record restano sul dispositivo: una classifica condivisa richiederebbe un server.
+**Uscire da una partita:** in ogni gioco, in fondo alla schermata, c'è "← Tutti i giochi". In partita chiede una seconda pressione ("Sicuro? Esci dalla partita (non conta)", si annulla da solo dopo 2,5 secondi); dal menu o dalla fine partita esce subito. Una partita abbandonata non viene registrata nei record.
+
+**Record salvati:** ogni partita conclusa viene registrata sul dispositivo per gioco e per giorno (giorno di Roma). Il pulsante "I miei record" mostra, per ciascun gioco, il migliore di oggi, della settimana (da lunedì), del mese, dell'anno e di sempre. La stessa riga (oggi, settimana, mese, sempre) compare dentro ogni gioco, nel menu e a fine partita. Il record "di sempre" non scende mai sotto quello già salvato dal gioco prima dell'introduzione dello storico. Per non perderli (cambio telefono, dati del sito cancellati) c'è il **backup**: "Copia backup" o "Scarica file" producono un testo che inizia con `NIT1.`; "Ripristina" lo incolla e lo fonde con i record presenti, tenendo sempre il valore più alto. Il browser viene anche invitato a proteggere i dati dalla cancellazione automatica. Se non permette di salvare (navigazione privata) compare un avviso. I record restano sul dispositivo: una classifica condivisa richiederebbe un server.
 
 Ogni gioco ha record locale, sfida del giorno (stessa sequenza per tutti, risultato condivisibile) e rigioco immediato.
 
@@ -89,6 +91,7 @@ node sentiero-partita.js      # partita completa, una sola sfida al giorno, cond
 node launcher-sentiero.js     # Sentiero dentro il launcher
 node lampo.js                 # regole, punteggio, partita perfetta, bonus, launcher, schermi
 node launcher-nome.js         # nome obbligatorio, testi condivisi, statistiche anonime
+node launcher-uscita.js       # uscita dalla partita in ogni gioco, record oggi/settimana/mese/anno/sempre
 node launcher-record.js       # storico, periodi, backup e ripristino, avviso archiviazione
 ```
 

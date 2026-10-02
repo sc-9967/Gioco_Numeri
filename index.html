@@ -160,16 +160,23 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 .lx-modalcard{width:100%;max-width:440px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--l-card);color:var(--l-ink);border-radius:20px;padding:20px 18px;display:flex;flex-direction:column;gap:10px;box-shadow:0 24px 60px rgba(0,0,0,.4)}
 .lx-modalcard h2{margin:0;font-size:24px}
 .lx-recwho,.lx-recnote{margin:0;font-size:13px;color:var(--l-muted);line-height:1.4}
-.lx-rectable{width:100%;border-collapse:collapse;font-size:14px}
-.lx-rectable th{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--l-muted);text-align:right;padding:4px 3px}
+.lx-recwrap{overflow-x:auto;margin:0 -4px}
+.lx-rectable{width:100%;border-collapse:collapse;font-size:13px}
+.lx-rectable th{font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--l-muted);text-align:right;padding:4px 3px;white-space:nowrap}
 .lx-rectable th:first-child,.lx-rectable td:first-child{text-align:left}
-.lx-rectable td{padding:7px 3px;border-top:1px solid var(--l-line);text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.lx-rectable td{padding:7px 3px;white-space:nowrap;border-top:1px solid var(--l-line);text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
 .lx-rectable td:first-child{font-weight:800}
 .lx-recbtns{display:flex;gap:8px}
 .lx-recbtns button,.lx-recclose{font:inherit;font-weight:800;font-size:14px;padding:10px 12px;border-radius:12px;border:2px solid var(--l-ink);background:var(--l-card);color:var(--l-ink);cursor:pointer;flex:1}
 .lx-recclose{background:var(--l-ink);color:var(--l-bg)}
 #lx-recbox{width:100%;box-sizing:border-box;font:12px/1.4 var(--lx-ui);border:1px solid var(--l-line);border-radius:10px;padding:8px;background:var(--l-bg);color:var(--l-ink);resize:none}
 .lx-recmsg{margin:0;min-height:18px;font-size:13px;font-weight:700}
+/* uscita dalla partita e record nel gioco */
+.lx-holder footer .lx-leave{flex:0 0 100%!important;width:100%!important;font:inherit!important;font-size:14px!important;font-weight:600!important;color:inherit!important;opacity:.72;background:none!important;border:none!important;box-shadow:none!important;padding:6px 8px!important;margin:0!important;cursor:pointer;text-align:center;text-transform:none!important;letter-spacing:0!important}
+.lx-holder footer .lx-leave:hover{opacity:1}
+.lx-holder footer .lx-leave.ask{opacity:1;color:#ff5368!important;font-weight:800!important}
+.lx-holder footer .lx-leave:focus-visible{outline:3px solid currentColor;outline-offset:2px}
+.lx-recline{margin:0;font-size:12px;opacity:.75;text-align:center;line-height:1.4}
 /* aggiunte dentro i giochi */
 .lx-copy{margin:0;font-size:12px;opacity:.7;text-align:center}
 .lx-give{margin:0;font-size:13px;text-align:center;opacity:.85}
@@ -203,7 +210,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
     <div class="lx-modalcard">
       <h2 id="lx-rectitle">I miei record</h2>
       <p class="lx-recwho" id="lx-recwho"></p>
-      <table class="lx-rectable"><thead><tr><th>Gioco</th><th>Oggi</th><th>Sett.</th><th>Anno</th><th>Sempre</th></tr></thead><tbody id="lx-recrows"></tbody></table>
+      <div class="lx-recwrap"><table class="lx-rectable"><thead><tr><th>Gioco</th><th>Oggi</th><th>Sett.</th><th>Mese</th><th>Anno</th><th>Sempre</th></tr></thead><tbody id="lx-recrows"></tbody></table></div>
       <p class="lx-recnote" id="lx-recnote"></p>
       <div class="lx-recbtns">
         <button type="button" id="lx-recbackup">Copia backup</button>
@@ -1582,17 +1589,27 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
     recSave(h);
   }
   // Migliore e numero di partite per periodo (oggi, settimana da lunedi', anno, sempre).
+  const BEST_OF = { bilancia: 'bil_best', quadrante: 'quad_best', primo: 'primo_best', resto: 'resto_best', girasette: 'girasette_best', raddoppio: 'rad_best', sentiero: 'sent_best', lampo: 'lampo_best' };
   function recAgg(h, game, today) {
-    const g = h[game] || {}, ws = mondayOf(today), we = shiftDay(ws, 6), out = { day: null, week: null, year: null, all: null };
+    const g = h[game] || {}, ws = mondayOf(today), we = shiftDay(ws, 6), out = { day: null, week: null, month: null, year: null, all: null };
     const take = (k, r) => { const o = out[k] || (out[k] = { best: 0, plays: 0 }); o.best = Math.max(o.best, r.b); o.plays += r.n; };
     Object.keys(g).filter(isDay).forEach(d => {
       const r = g[d]; if (!r || !sane(r.b) || !sane(r.n)) return;
       take('all', r);
       if (d.slice(0, 4) === today.slice(0, 4)) take('year', r);
+      if (d.slice(0, 7) === today.slice(0, 7)) take('month', r);
       if (d >= ws && d <= we) take('week', r);
       if (d === today) take('day', r);
     });
+    // il record di sempre non puo' essere piu' basso di quello gia' salvato dal gioco (partite precedenti allo storico)
+    let fl = 0; try { fl = JSON.parse(localStorage.getItem(BEST_OF[game])) || 0; } catch (e) {}
+    if (sane(fl) && fl > 0) { const o = out.all || (out.all = { best: 0, plays: 0 }); o.best = Math.max(o.best, fl); }
     return out;
+  }
+  const fmtRec = a => (a ? a.best.toLocaleString('it-IT') : '—');
+  function recLine(game) {
+    const a = recAgg(recLoad(), game, romeDate());
+    return 'Record · oggi ' + fmtRec(a.day) + ' · settimana ' + fmtRec(a.week) + ' · mese ' + fmtRec(a.month) + ' · sempre ' + fmtRec(a.all);
   }
   // Unione di due storici: per ogni giorno si tiene il valore piu' alto (un ripristino non puo' mai abbassare un record).
   function recMerge(a, b) {
@@ -5246,7 +5263,7 @@ const syncMute = () => { muteBtn.textContent = muted ? 'Muto' : 'Suono'; };
 muteBtn.addEventListener('click', () => { muted = !muted; store.set('lampo_mute', muted); ac(); syncMute(); });
 syncMute();
 window.addEventListener('keydown', e => { if ((e.key === 'p' || e.key === 'P') && state === 'playing') togglePause(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden && state === 'playing') togglePause(true); });
+window.addEventListener('visibilitychange', () => { if (document.hidden && state === 'playing') togglePause(true); });   // su window: il launcher lo toglie all'uscita
 window.__L = {
   RULES, seqVal, comboMult, basePts, recoverAt, drainAt, difficultyAt, dailyRule, hit, start, update, target, spawn, mulberry,
   get S() { return { state, score, idx, combo, maxCombo, hits, timer, fever, feverCD, fire, ice, shield, elapsed, numbers, paused, mode, rule }; },
@@ -5412,7 +5429,7 @@ requestAnimationFrame(frame);
   })();
 
   let current = null;
-  function decorate(holder) {
+  function decorate(holder, key) {
     const back = () => {
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'btn link'; b.textContent = '← Tutti i giochi';
@@ -5434,7 +5451,28 @@ requestAnimationFrame(frame);
       give.append(' (da 1 €)');
     } else give.textContent = '© 2026 ' + AUTHOR;
     overPanel.appendChild(give);
+    // record personali del gioco (oggi, settimana, mese, sempre), nel menu e a fine partita
+    ['lx-recmenu', 'lx-recover'].forEach((cls, i) => { const r = document.createElement('p'); r.className = 'lx-recline ' + cls; r.textContent = recLine(key); (i ? overPanel : menuPanel).insertBefore(r, (i ? give : copy)); });
+    // abbandonare la partita in qualsiasi momento: "← Tutti i giochi" in fondo alla schermata di gioco
+    const foot = holder.querySelector('footer');
+    if (foot) {
+      const l = document.createElement('button'); l.type = 'button'; l.className = 'lx-leave'; l.textContent = '← Tutti i giochi';
+      const idle = () => !holder.querySelector('#menu').hidden || !holder.querySelector('#over').hidden;
+      let t = 0;
+      l.addEventListener('click', () => {
+        if (idle() || l.classList.contains('ask')) { clearTimeout(t); unmount(); return; }
+        l.classList.add('ask'); l.textContent = 'Sicuro? Esci dalla partita (non conta)';
+        t = setTimeout(() => { l.classList.remove('ask'); l.textContent = '← Tutti i giochi'; }, 2500);
+      });
+      foot.style.flexWrap = 'wrap'; foot.appendChild(l);
+      // colore leggibile: chiaro su sfondo scuro, scuro su sfondo chiaro (si risale fino al primo sfondo non trasparente)
+      let el = foot, rgb = null;
+      while (el && !rgb) { const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/.exec(getComputedStyle(el).backgroundColor); if (m && (m[4] === undefined || +m[4] > 0.4)) rgb = [+m[1], +m[2], +m[3]]; el = el.parentElement; }
+      if (!rgb) rgb = [255, 255, 255];
+      l.style.setProperty('color', (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) < 140 ? '#dfe5ee' : '#2a3340', 'important');
+    }
   }
+  function refreshRecLines(holder, key) { holder.querySelectorAll('.lx-recline').forEach(r => { r.textContent = recLine(key); }); }
   function mount(key) {
     if (current) unmount();
     const tpl = document.getElementById('tpl-' + key);
@@ -5444,7 +5482,7 @@ requestAnimationFrame(frame);
     holder.appendChild(tpl.content.cloneNode(true));
     launcher.hidden = true;
     document.body.appendChild(holder);
-    decorate(holder);
+    decorate(holder, key);
     const ctx = { alive: true, listeners: [] };
     const win = new Proxy(window, {
       get(t, k) {
@@ -5465,6 +5503,7 @@ requestAnimationFrame(frame);
       if (over.hidden || over.dataset.replay) return;           // i riepiloghi di una partita gia' registrata non contano due volte
       track.finish(key, overScore.textContent);
       recAdd(key, parseInt(String(overScore.textContent).replace(/\D/g, ''), 10) || 0);
+      refreshRecLines(holder, key);
     })
       .observe(over, { attributes: true, attributeFilter: ['hidden'] });
     window.scrollTo(0, 0);
@@ -5524,14 +5563,14 @@ requestAnimationFrame(frame);
   }
   async function openRec() {
     const h = recLoad(), today = romeDate(), tb = document.getElementById('lx-recrows');
-    document.getElementById('lx-recwho').textContent = (playerName() ? playerName() + ' · ' : '') + 'record per giorno (fuso Europa/Roma), settimana da lunedì, anno e sempre.';
+    document.getElementById('lx-recwho').textContent = (playerName() ? playerName() + ' · ' : '') + 'record per giorno (fuso Europa/Roma), settimana da lunedì, mese, anno e sempre.';
     tb.textContent = '';
     let total = 0;
     KEYS.forEach(k => {
       const a = recAgg(h, k, today), tr = document.createElement('tr');
       const cell = x => { const td = document.createElement('td'); td.textContent = x; tr.appendChild(td); };
       cell(NAMES[k]);
-      ['day', 'week', 'year', 'all'].forEach(p => cell(a[p] ? a[p].best.toLocaleString('it-IT') : '—'));
+      ['day', 'week', 'month', 'year', 'all'].forEach(p => cell(a[p] ? a[p].best.toLocaleString('it-IT') : '—'));
       total += a.all ? a.all.plays : 0;
       tb.appendChild(tr);
     });
