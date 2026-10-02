@@ -87,3 +87,12 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 - **Backup non validi:** testo senza prefisso, versione sconosciuta o dati danneggiati vengono rifiutati con un messaggio. Valori assurdi (negativi, oltre 10⁹, nomi di gioco con caratteri strani, serie oltre 500) vengono scartati.
 - **Archiviazione non disponibile** (scrittura che fallisce, come in navigazione privata): compare l'avviso in home.
 - **Limiti:** la protezione del browser (`navigator.storage.persist`) viene richiesta ma la decide il browser; in prova risultava "no". I record restano su un solo dispositivo, il backup è manuale. I punteggi non sono verificabili.
+
+## Lampo
+
+- **Regole:** sequenze 1,2,3 / 3,6,9 / 2,4,6 / 30,29…1 e poi di nuovo 30; moltiplicatore della combo con tetto ×5 (×1, ×2,5 a 10, ×5 a 100).
+- **La partita finisce sempre:** giocatore simulato perfetto a 1,4 colpi/s: fine dopo 338 s (518 colpi, combo 518, 661.000 punti); a 2,2 colpi/s: 400 s. Il prototipo originale non finiva mai (777 milioni di punti in 10 minuti).
+- **Febbre:** una sola attivazione ogni 28 s circa (8 s attiva, 20 s di pausa); nel prototipo era attiva il 91% del tempo.
+- **Bonus:** la stella aggiunge tempo senza far avanzare la sequenza; lo scudo para un errore; un errore costa 8 s e azzera la combo.
+- **Tocchi reali:** 6 su 6 sul numero richiesto; fine partita, record sulla carta, storico e conteggio nel launcher; schermi 360×640, 844×390 e 1280×800 senza scorrimento orizzontale.
+- **Limite:** i punteggi arrivano a centinaia di migliaia per un giocatore perfetto (base 250 × moltiplicatore fino a 7); non è stato provato con persone vere.

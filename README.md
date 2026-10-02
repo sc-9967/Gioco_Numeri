@@ -1,6 +1,6 @@
 # Numeri in Tasca
 
-Sette giochi di numeri da partite brevi, pensati per il telefono. Sono tutti dentro un unico file HTML, `index.html`, senza dipendenze: si apre nel browser.
+Otto giochi di numeri da partite brevi, pensati per il telefono. Sono tutti dentro un unico file HTML, `index.html`, senza dipendenze: si apre nel browser.
 
 | Gioco | In breve |
 |---|---|
@@ -10,9 +10,10 @@ Sette giochi di numeri da partite brevi, pensati per il telefono. Sono tutti den
 | **Resto** | Alla cassa: calcola il resto e consegnalo con monete e banconote, meglio se con meno pezzi. |
 | **Girasette** | Fondi tre o più tessere uguali su una griglia esagonale fino al 7. Finiti i tre pezzi, gli anelli della plancia girano. |
 | **Sentiero** | Da in alto a sinistra a in basso a destra di una griglia 5×5: ogni casella somma, moltiplica o sottrae. Trova il percorso che dà il valore più alto. Una serie di 5 griglie al giorno, uguale per tutti. |
+| **Lampo** | Gioco di riflessi: tocca i numeri in movimento nell'ordine giusto prima che finisca il tempo. Combo, febbre, bonus e regole diverse. |
 | **Raddoppio** | Scorri la griglia 4×4 e fondi le tessere uguali. Le catene di fusioni moltiplicano i punti, il martello rompe una tessera. |
 
-`index.html` è il launcher con tutti e sette i giochi (la copia `Numeri in Tasca.html` è identica). I file singoli dei giochi sono stati eliminati: ogni gioco si apre direttamente con `index.html#bilancia`, `#quadrante`, `#primo`, `#resto`, `#girasette`, `#raddoppio`, `#sentiero`.
+`index.html` è il launcher con tutti e otto i giochi (la copia `Numeri in Tasca.html` è identica). I file singoli dei giochi sono stati eliminati: ogni gioco si apre direttamente con `index.html#bilancia`, `#quadrante`, `#primo`, `#resto`, `#girasette`, `#raddoppio`, `#sentiero`, `#lampo`.
 
 ## Come provarli
 
@@ -57,6 +58,16 @@ Puzzle di calcolo: griglia 5×5, si parte da 1 in alto a sinistra e si arriva in
 - **Con gli amici, senza server:** il risultato si copia come testo con le caselle colorate; dopo un allenamento il testo contiene un codice sfida `SEN-…-punti` (e, se la pagina è online, un link `#sentiero?c=…`). Chi lo incolla nella schermata iniziale gioca le stesse 5 griglie e vede se ha battuto il punteggio.
 - **Limite:** i punteggi non sono verificabili. Va bene tra amici, non per una classifica pubblica.
 
+## Lampo
+
+Gioco di riflessi su campo in movimento. Si toccano i numeri nell'ordine della regola: Classico (1, 2, 3…), e come regola del giorno multipli di 3, pari o alla rovescia da 30.
+
+- **Tempo:** cala di continuo; un colpo giusto ne restituisce sempre meno col passare dei secondi, uno sbagliato ne toglie 8 e azzera la combo. Quindi la partita finisce sempre (con 1,4 colpi al secondo e nessun errore dura circa 5-6 minuti).
+- **Punti:** base crescente fino al 40° colpo, moltiplicata dalla combo (tetto ×5); la febbre (a 10 di fila, 8 s, poi pausa di 20 s) e il fuoco aggiungono +1 ciascuno.
+- **Bonus nel campo:** stella (+15 s, non fa avanzare la sequenza), scudo (para un errore), ghiaccio (rallenta il tempo), fuoco, bomba (spazza i numeri vicini).
+- **Ritmo:** conto alla rovescia 3-2-1, fasi ogni 25 secondi (più numeri, più veloci), battito e bordo rosso quando il tempo sta finendo, riconoscimenti a 5, 10, 20, 30 e 50 di fila, e a fine partita la distanza dal record.
+- Pausa (anche con il tasto P e quando si cambia scheda).
+
 ## Test
 
 I test usano Playwright e si trovano in `tests/`:
@@ -76,6 +87,7 @@ node launcher-raddoppio.js    # Raddoppio dentro il launcher
 node sentiero-logica.js       # percorso ottimo, generatore, codici sfida, record per periodo
 node sentiero-partita.js      # partita completa, una sola sfida al giorno, condivisione
 node launcher-sentiero.js     # Sentiero dentro il launcher
+node lampo.js                 # regole, punteggio, partita perfetta, bonus, launcher, schermi
 node launcher-nome.js         # nome obbligatorio, testi condivisi, statistiche anonime
 node launcher-record.js       # storico, periodi, backup e ripristino, avviso archiviazione
 ```

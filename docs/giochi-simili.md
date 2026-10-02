@@ -41,6 +41,12 @@ Raddoppio ha le stesse regole di base di 2048. Non è un caso fortuito: è la st
 - **Meccanica generale.** Il cammino su griglia con somma massima è un esercizio classico di programmazione dinamica (non è un'opera protetta). Non è stata trovata una versione giornaliera con operazioni per casella e punteggio in percentuale dell'ottimo; la ricerca non lo esclude. [Ipotesi]
 - **Rischio:** basso. Nome, grafica (carta millimetrata) e regole sono propri.
 
+## Lampo: il genere "tocca in ordine"
+
+- Il genere (tocca 1, 2, 3… in ordine, tavole di Schulte, app "Tap the numbers") è diffuso. Lampo non è nuovo come idea: aggiunge combo, bonus nel campo, regole diverse per sequenza e tempo che cala sempre più in fretta.
+- Partito da un prototipo ricevuto (chiamato "Numblast"), ma ricostruito con altro nome, altra struttura e altra grafica. Il nome originale è stato abbandonato perché generico.
+- **Rischio:** basso per il gioco, medio per il nome; da verificare su EUIPO, UIBM e negli store prima di una pubblicazione.
+
 ## Fonti
 
 - [Make7! Hexa Puzzle - App Store](https://apps.apple.com/us/app/make7-hexa-puzzle/id1095539172)

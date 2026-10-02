@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!--
-  Numeri in Tasca: Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio, Sentiero.
+  Numeri in Tasca: Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio, Sentiero, Lampo.
   © 2026 Silvio Chiaverini.
   Giochi ideati e realizzati da Silvio Chiaverini.
   Licenza: GNU GPL v3 (vedi LICENSE).
@@ -83,6 +83,10 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 .g-sen .lx-name{font-family:"Archivo",system-ui,sans-serif;font-weight:800;font-size:30px;color:#1f2a24}
 .g-sen .lx-name i{font-style:normal;color:#1f7a5a}
 .g-sen .lx-play{background:#1f7a5a;color:#ffffff}
+.g-lam{background:radial-gradient(ellipse at 70% 10%,#3a1450,#0a0a1a);color:#f4f5ff}
+.g-lam .lx-name{font-family:"Fredoka",system-ui,sans-serif;font-weight:700;font-size:30px;color:#ffffff}
+.g-lam .lx-name i{font-style:normal;color:#ff4757}
+.g-lam .lx-play{background:#ff4757;color:#2a0508}
 .lx-grid>:last-child:nth-child(odd){grid-column:1 / -1}   /* l'ultima carta dispari occupa tutta la riga */
 
 .lx-donate{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;background:var(--l-card);border:1px solid var(--l-line);border-radius:18px;padding:14px 16px}
@@ -175,7 +179,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 
 <div id="lx-launcher" class="lx-page">
   <header>
-    <p class="lx-eyebrow">Sette giochi di numeri</p>
+    <p class="lx-eyebrow">Otto giochi di numeri</p>
     <h1 class="lx-title">Numeri <span>in Tasca</span></h1>
     <p class="lx-sub">Partite da un minuto. Scegli un gioco e batti il tuo record.</p>
   </header>
@@ -248,6 +252,11 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
       <span class="lx-desc">Da in alto a sinistra a in basso a destra: trova il percorso che dà il valore più alto. Una sfida al giorno.</span>
       <span class="lx-best"><span>Record <b data-best="sent_best">0</b></span><span class="lx-play">Gioca</span></span>
     </button>
+    <button class="lx-card g-lam" type="button" data-game="lampo">
+      <span class="lx-name">Lam<i>po</i></span>
+      <span class="lx-desc">Tocca i numeri in ordine prima che finisca il tempo. Combo, febbre e bonus.</span>
+      <span class="lx-best"><span>Record <b data-best="lampo_best">0</b></span><span class="lx-play">Gioca</span></span>
+    </button>
   </main>
 
   <aside class="lx-donate" aria-label="Contributo volontario" hidden>
@@ -280,7 +289,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 
   <footer class="lx-foot">
     <p><strong>© 2026 Silvio Chiaverini.</strong></p>
-    <p>Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio e Sentiero sono giochi ideati e realizzati da Silvio Chiaverini. Codice rilasciato con licenza GNU GPL v3 (vedi LICENSE).</p>
+    <p>Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio, Sentiero e Lampo sono giochi ideati e realizzati da Silvio Chiaverini. Codice rilasciato con licenza GNU GPL v3 (vedi LICENSE).</p>
   </footer>
 </div>
 
@@ -1434,6 +1443,113 @@ td:first-child{font-family:var(--ui);font-weight:700}
     </div>
   </section>
 </div></template>
+<template id="tpl-lampo"><style>
+/* LAMPO. Layout: HUD (punti, prossimo, record), barra del tempo, indicatori dei bonus, campo di gioco a tutto schermo, barra comandi. Tema scuro con rosso corallo. */
+:root{
+  --bg:#0a0a1a; --bg2:#171845; --panel:#15162e; --line:#2c2f5c; --ink:#f4f5ff; --muted:#8d90b8;
+  --accent:#ff4757; --accent-ink:#2a0508; --gold:#fbbf24; --ok:#2ed573;
+  --ui:"Fredoka",system-ui,-apple-system,"Segoe UI",sans-serif; color-scheme:dark;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+.app{height:100%;display:flex;flex-direction:column;position:relative;background:radial-gradient(ellipse 120% 70% at 50% 35%,var(--bg2) 0%,var(--bg) 72%)}
+.hud{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:8px;padding:12px 16px 2px;width:100%;max-width:560px;margin-inline:auto;box-sizing:border-box}
+.stat{display:flex;flex-direction:column;min-width:0}
+.stat.r{align-items:flex-end}
+.lbl{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.stat b{font-size:26px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.next{text-align:center}
+.next b{display:block;font-size:40px;line-height:1;font-weight:700;color:var(--gold);text-shadow:0 0 14px rgba(251,191,36,.5);font-variant-numeric:tabular-nums}
+.tbar{height:8px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden;width:calc(100% - 32px);max-width:528px;margin:6px auto 2px}
+.tbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#2ed573,#a3e635);transition:background .3s}
+.tbar.mid i{background:linear-gradient(90deg,#fbbf24,#f59e0b)}
+.tbar.low i{background:linear-gradient(90deg,#ff4757,#ff6b81)}
+.chips{display:flex;gap:6px;justify-content:center;align-items:center;min-height:28px;flex-wrap:wrap;padding:0 12px}
+.chip{font-size:12px;font-weight:700;border-radius:99px;padding:3px 10px;border:1.5px solid currentColor;white-space:nowrap}
+.chip.combo{color:#c4b5fd}.chip.fever{color:#fde047}.chip.fire{color:#fb923c}.chip.ice{color:#7dd3fc}.chip.shield{color:var(--ok)}.chip.rule{color:var(--muted)}
+.stage{flex:1;min-height:0;position:relative;touch-action:none}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.bar{display:flex;gap:8px;justify-content:center;padding:6px 16px calc(12px + env(safe-area-inset-bottom,0px));width:100%;max-width:560px;margin-inline:auto;box-sizing:border-box}
+.btn{font:inherit;font-weight:600;font-size:15px;color:var(--ink);background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;cursor:pointer;flex:1;min-width:0;white-space:nowrap}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.btn.link{border:none;background:none;color:var(--muted);flex:none}
+#menu,#over{position:absolute;inset:0;display:grid;place-items:center;padding:16px;background:rgba(6,6,20,.82);z-index:8}
+#menu[hidden],#over[hidden]{display:none}
+.card{width:100%;max-width:340px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--panel);border:1.5px solid var(--line);border-radius:22px;padding:24px 22px 20px;display:flex;flex-direction:column;gap:14px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.card h1{margin:0;font-size:46px;font-weight:700;line-height:1;letter-spacing:.01em}
+.card h1 span{color:var(--accent)}
+.card h2{margin:0;font-size:30px;font-weight:700;color:var(--accent)}
+.eyebrow{margin:0;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.35;text-align:left}
+.rules li{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center}
+.rchip{font-weight:700;font-size:14px;text-align:center;color:var(--accent-ink);background:var(--accent);border-radius:9px;padding:5px 0}
+.rchip.g{background:var(--gold)}.rchip.c{background:#7dd3fc}
+.btns{display:flex;flex-direction:column;gap:10px}
+.btns .btn{flex:none;font-size:16px;padding:12px 14px}
+.small{margin:0;font-size:13px;color:var(--muted)}
+.small b{color:var(--ink)}
+.big{font-size:60px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.rec{align-self:center;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--gold);color:#2a1d00;border-radius:99px;padding:3px 12px}
+.rec[hidden]{display:none}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats div{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line);padding-top:8px}
+.stats b{font-size:24px;font-variant-numeric:tabular-nums}
+.stats span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+#shareBox{width:100%;box-sizing:border-box;font:13px/1.4 var(--ui);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;resize:none}
+@media (max-height:560px){.hud{padding-top:6px}.stat b{font-size:20px}.next b{font-size:30px}.bar{padding-bottom:8px}.card{padding:16px 18px;gap:10px}.card h1{font-size:34px}.rules{font-size:13px;gap:6px}.big{font-size:44px}}
+</style><div class="app" id="app">
+  <header class="hud">
+    <div class="stat"><span class="lbl">Punti</span><b id="score">0</b></div>
+    <div class="next"><span class="lbl">Prossimo</span><b id="next">1</b></div>
+    <div class="stat r"><span class="lbl" id="bestLbl">Record</span><b id="best">0</b></div>
+  </header>
+  <div class="tbar" id="tbar" role="progressbar" aria-label="Tempo"><i id="tfill"></i></div>
+  <div class="chips" id="chips"></div>
+  <div class="stage" id="stage"><canvas id="cv" aria-label="Campo di gioco: tocca i numeri in ordine"></canvas></div>
+  <footer class="bar">
+    <button class="btn" id="pause" type="button" disabled>Pausa</button>
+    <button class="btn" id="mute" type="button">Suono</button>
+  </footer>
+
+  <section id="menu">
+    <div class="card">
+      <p class="eyebrow">Gioco di riflessi · tocca in ordine</p>
+      <h1>Lam<span>po</span></h1>
+      <ul class="rules">
+        <li><span class="rchip">1→2</span><span>Tocca i numeri nell'ordine giusto prima che finisca il tempo. Uno sbagliato costa tempo e azzera la combo.</span></li>
+        <li><span class="rchip g">×5</span><span>La combo moltiplica i punti fino a ×5. A 10 di fila scatta la febbre, che aggiunge un altro +1.</span></li>
+        <li><span class="rchip c">★❄🔥</span><span>Bonus nel campo: stella (+tempo), ghiaccio (rallenta), fuoco (+1), scudo (para un errore), bomba (spazza i vicini).</span></li>
+      </ul>
+      <div class="btns">
+        <button class="btn primary" id="play" type="button">Classico · 1, 2, 3…</button>
+        <button class="btn" id="daily" type="button">Regola del giorno</button>
+      </div>
+      <p class="small">Record: <b id="menuBest">0</b> · Oggi: <b id="menuDaily">—</b></p>
+    </div>
+  </section>
+
+  <section id="over" hidden>
+    <div class="card">
+      <p class="eyebrow" id="overMode">Classico</p>
+      <h2>Tempo scaduto</h2>
+      <div class="big" id="overScore">0</div>
+      <span class="rec" id="newRecord" hidden>Nuovo record</span>
+      <p class="small" id="overNear"></p>
+      <div class="stats">
+        <div><b id="stHits">0</b><span>Colpi</span></div>
+        <div><b id="stCombo">0</b><span>Combo max</span></div>
+        <div><b id="stTime">0</b><span>Secondi</span></div>
+      </div>
+      <div class="btns">
+        <button class="btn primary" id="again" type="button">Rigioca</button>
+        <button class="btn" id="share" type="button">Copia risultato</button>
+        <textarea id="shareBox" rows="3" readonly hidden></textarea>
+      </div>
+    </div>
+  </section>
+</div></template>
 
 <script>
 /* © 2026 Silvio Chiaverini. */
@@ -1451,7 +1567,7 @@ td:first-child{font-family:var(--ui);font-weight:700}
   const playerName = () => { try { return cleanName(JSON.parse(localStorage.getItem('nit_name'))); } catch (e) { return ''; } };
   const withName = txt => { const n = playerName(); return n ? n + ' · ' + txt : txt; };
   // ---------- record salvati sul dispositivo: storico per gioco e per giorno (giorno di Roma) ----------
-  const REC_KEY = 'nit_hist', BEST_KEYS = ['bil_best', 'quad_best', 'primo_best', 'resto_best', 'girasette_best', 'rad_best', 'sent_best'];
+  const REC_KEY = 'nit_hist', BEST_KEYS = ['bil_best', 'quad_best', 'primo_best', 'resto_best', 'girasette_best', 'rad_best', 'sent_best', 'lampo_best'];
   const romeDate = d => { d = d || new Date(); try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d); } catch (e) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); } };
   const shiftDay = (ds, k) => { const d = new Date(ds + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + k); return d.toISOString().slice(0, 10); };
   const mondayOf = ds => shiftDay(ds, -((new Date(ds + 'T00:00:00Z').getUTCDay() + 6) % 7));
@@ -4725,6 +4841,422 @@ try {
 grids = gridsFor('sentiero-demo'); gi = 0; path = [[0, 0]]; sols = []; buildBoard(); render(); refreshMenu();
 })();
 },
+    lampo: function (window, requestAnimationFrame, setTimeout) {
+/* ============================================================================
+   LAMPO: gioco di riflessi. Numeri in movimento sul campo: si toccano nell'ordine della regola
+   (1, 2, 3... oppure multipli di 3, pari, alla rovescia da 30). Il tempo cala di continuo, ogni colpo giusto
+   ne ridà un po' (sempre meno col passare dei secondi), uno sbagliato ne toglie.
+   Punti: base crescente fino al 40° colpo, moltiplicata dalla combo (tetto x5) piu' bonus fissi di febbre e fuoco.
+   Bonus nel campo: stella (+tempo, non fa avanzare la sequenza), scudo (para un errore), ghiaccio (rallenta
+   il tempo), fuoco (+1 al moltiplicatore), bomba (spazza i numeri vicini). Febbre dopo 10 colpi di fila, con pausa di 20 s.
+   Struttura: 1) regole e logica pura  2) stato  3) campo (fisica)  4) disegno  5) audio  6) flusso e schermate
+   ============================================================================ */
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+/* ---------------------------------------------------------------- 1) REGOLE E LOGICA PURA */
+const RULES = [
+  { id: 'up', name: 'Classico', desc: '1, 2, 3…', first: 1, step: 1, dir: 1, len: 0 },
+  { id: 's3', name: 'Multipli di 3', desc: '3, 6, 9…', first: 3, step: 3, dir: 1, len: 0 },
+  { id: 'ev', name: 'Numeri pari', desc: '2, 4, 6…', first: 2, step: 2, dir: 1, len: 0 },
+  { id: 'dn', name: 'Alla rovescia', desc: '30, 29, 28…', first: 30, step: 1, dir: -1, len: 30 },
+];
+const DAILY_POOL = [1, 2, 3];                       // la regola del giorno non e' mai il Classico
+const seqVal = (rule, k) => rule.first + rule.dir * rule.step * (rule.len ? k % rule.len : k);
+const difficultyAt = t => 1 + t / 25;
+const recoverAt = d => Math.max(3, 14 - d * 0.6);   // tempo restituito da un colpo giusto: cala col tempo, cosi' la partita finisce
+const drainAt = d => 6.5 * (1 + d * 0.05);
+const comboMult = c => Math.min(5, 1 + c * 0.15);   // tetto x5: punteggi confrontabili
+const basePts = k => 50 + 5 * Math.min(k, 40);
+const maxAlive = d => 7 + Math.min(7, Math.floor(d));
+function mulberry(seed) { let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hashStr(s) { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const today = romeDate();
+const todayLabel = today.slice(8, 10) + '/' + today.slice(5, 7);
+const dailyRule = () => RULES[DAILY_POOL[hashStr('lampo-' + today) % DAILY_POOL.length]];
+const dailyKey = 'lampo_d_' + today;
+
+/* ---------------------------------------------------------------- 2) STATO */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+const cv = $('cv'), ctx = cv.getContext('2d'), stage = $('stage');
+let W = 0, H = 0, DPR = 1;
+let state = 'menu', mode = 'free', rule = RULES[0], rnd = Math.random, lastMode = 'free';
+let score = 0, idx = 0, combo = 0, maxCombo = 0, hits = 0, timer = 100;
+const TMAX = 100;
+let fever = 0, feverCD = 0, fire = 0, ice = 0, shield = 0;
+let numbers = [], particles = [], floats = [];
+let elapsed = 0, spawnCD = 0, shakeMag = 0, flash = 0, flashColor = 'rgba(255,255,255,.2)', pulse = 0;
+let paused = false, best = store.get('lampo_best', 0), prevBest = best, over = false;
+let TS = 1, gen = 0;
+let rings = [], ripples = [], callout = null, dispScore = 0, readyT = 0, phase = 1, freeze = 0, tickT = 0;
+const stars = Array.from({ length: 46 }, () => ({ x: Math.random(), y: Math.random(), s: 0.6 + Math.random() * 1.8, sp: 4 + Math.random() * 16, a: 0.15 + Math.random() * 0.4 }));
+const target = () => seqVal(rule, idx);
+
+/* ---------------------------------------------------------------- 5) AUDIO */
+let AC = null, muted = store.get('lampo_mute', false);
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC = null; } }
+  if (AC && AC.state === 'suspended') AC.resume().catch(() => {});
+  return AC;
+}
+function tone(f, d = 0.1, type = 'sine', v = 0.12, when = 0, slide = 0) {
+  if (muted || !AC) return;
+  const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime + when;
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + d);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  o.connect(g).connect(AC.destination); o.start(t); o.stop(t + d + 0.03);
+}
+const sfx = {
+  hit: c => { const b = 400 + Math.min(c, 20) * 35; tone(b, 0.1, 'sine', 0.14); tone(b * 1.5, 0.08, 'sine', 0.09, 0.05); },
+  wrong: () => tone(150, 0.2, 'sawtooth', 0.09, 0, 90),
+  bonus: () => { tone(880, 0.1, 'sine', 0.12); tone(1320, 0.12, 'sine', 0.08, 0.07); },
+  boom: () => { tone(110, 0.25, 'square', 0.08, 0, 50); },
+  fever: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.15, 'sine', 0.11, i * 0.08)),
+  milestone: n => [0, 4, 7, 12, 16].slice(0, 3 + Math.min(2, n)).forEach((st, i) => tone(523 * 2 ** (st / 12), 0.18, 'triangle', 0.1, i * 0.06)),
+  tick: () => tone(90, 0.1, 'sine', 0.13),
+  count: go => tone(go ? 880 : 520, go ? 0.25 : 0.12, 'triangle', 0.12),
+  over: () => [400, 350, 300, 200].forEach((f, i) => tone(f, 0.2, 'sawtooth', 0.07, i * 0.12)),
+};
+const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
+
+/* ---------------------------------------------------------------- 3) CAMPO */
+const R0 = () => clamp(Math.min(W, H) * 0.07, 24, 38);
+function spawn(force) {
+  const d = difficultyAt(elapsed), alive = numbers.filter(n => !n.dead);
+  const r = R0() + rnd() * 6;
+  let type = 'normal', val = null;
+  if (force === undefined) {
+    const roll = rnd();
+    if (roll < 0.04) type = 'star'; else if (roll < 0.07) type = 'bomb'; else if (roll < 0.10) type = 'ice';
+    else if (roll < 0.13) type = 'fire'; else if (roll < 0.15) type = 'shield';
+  }
+  if (type !== 'star' && type !== 'shield') val = force !== undefined ? force : seqVal(rule, idx + 1 + Math.floor(rnd() * Math.min(4, 1 + Math.floor(d))));
+  let x = W / 2, y = H / 2;
+  for (let a = 0; a < 20; a++) {
+    x = r + 6 + rnd() * Math.max(1, W - 2 * r - 12); y = r + 6 + rnd() * Math.max(1, H - 2 * r - 12);
+    if (alive.every(o => Math.hypot(o.x - x, o.y - y) > (o.r + r) * 1.3)) break;
+  }
+  const ang = rnd() * Math.PI * 2, sp = 35 + Math.min(d, 20) * 5 + rnd() * 25;
+  numbers.push({ x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, val, r, type, scale: 0, dead: false, deathT: 0 });
+}
+function stepField(dt, playing) {
+  const d = difficultyAt(elapsed), maxSp = Math.min(200, 70 + d * 8);
+  for (const n of numbers) {
+    if (n.dead) { n.deathT += dt; continue; }
+    n.scale += (1 - n.scale) * Math.min(1, dt * 9);
+    n.x += n.vx * dt; n.y += n.vy * dt;
+    const m = n.r + 4;
+    if (n.x < m) { n.x = m; n.vx = Math.abs(n.vx) * 0.9; } else if (n.x > W - m) { n.x = W - m; n.vx = -Math.abs(n.vx) * 0.9; }
+    if (n.y < m) { n.y = m; n.vy = Math.abs(n.vy) * 0.9; } else if (n.y > H - m) { n.y = H - m; n.vy = -Math.abs(n.vy) * 0.9; }
+    n.vx += (rnd() - 0.5) * 20 * dt; n.vy += (rnd() - 0.5) * 20 * dt;
+    const sp = Math.hypot(n.vx, n.vy);
+    if (sp > maxSp) { n.vx *= maxSp / sp; n.vy *= maxSp / sp; }
+  }
+  // i numeri non si sovrappongono: si respingono dolcemente
+  const al = numbers.filter(n => !n.dead);
+  for (let i = 0; i < al.length; i++) for (let j = i + 1; j < al.length; j++) {
+    const a = al[i], b = al[j], dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy), min = a.r + b.r + 4;
+    if (dist < min && dist > 0.01) { const push = (min - dist) / 2 / dist; a.x -= dx * push; a.y -= dy * push; b.x += dx * push; b.y += dy * push; }
+  }
+  numbers = numbers.filter(n => !n.dead || n.deathT < 0.3);
+  for (const p of particles) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += p.grav * dt; p.life -= p.decay * dt; }
+  particles = particles.filter(p => p.life > 0);
+  for (const f of floats) { f.y += f.vy * dt; f.vy *= 0.95; f.life -= f.decay * dt; f.scale += (1 - f.scale) * dt * 6; }
+  floats = floats.filter(f => f.life > 0);
+  if (shakeMag > 0.1) shakeMag *= 0.85; else shakeMag = 0;
+  if (flash > 0) flash -= dt;
+  comboPulse += (1 - comboPulse) * Math.min(1, dt * 10);
+}
+let comboPulse = 1;
+function burst(x, y, color, count = 18, speed = 200) {
+  if (reduceMotion) count = Math.min(count, 6);
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2, sp = speed * (0.3 + Math.random() * 0.7);
+    particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, decay: 1.5 + Math.random(), size: 3 + Math.random() * 5, color, grav: 100 + Math.random() * 100 });
+  }
+}
+function addFloat(text, x, y, color, size = 22) { floats.push({ text, x, y, vy: -80, life: 1, decay: 1.2, color, size, scale: 1.5 }); }
+const shake = m => { if (!reduceMotion) shakeMag = Math.max(shakeMag, m); };
+const hue = v => ((Math.abs(v) - 1) * 37 + 360) % 360;
+
+/* ---------------------------------------------------------------- 6) FLUSSO */
+function currentMult() { return comboMult(combo) + (fever > 0 ? 1 : 0) + (fire > 0 ? 1 : 0); }
+function hit(n) {
+  if (n.dead || state !== 'playing' || paused) return;
+  if (n.type === 'star') {
+    n.dead = true; n.deathT = 0; timer = Math.min(TMAX, timer + 15); score += 150;
+    burst(n.x, n.y, '#ffd700', 30, 280); addFloat('★ +tempo', n.x, n.y - 20, '#ffd700', 24); sfx.bonus(); shake(5); return;
+  }
+  if (n.type === 'shield') {
+    n.dead = true; n.deathT = 0; shield = 8;
+    burst(n.x, n.y, '#2ed573', 22, 200); addFloat('SCUDO', n.x, n.y - 20, '#2ed573', 24); sfx.bonus(); return;
+  }
+  if (n.val === target()) {
+    n.dead = true; n.deathT = 0;
+    combo++; maxCombo = Math.max(maxCombo, combo); hits++;
+    const pts = Math.floor(basePts(idx) * currentMult());
+    score += pts;
+    timer = Math.min(TMAX, timer + recoverAt(difficultyAt(elapsed)));
+    idx++;
+    if (rule.len && idx % rule.len === 0) { score += 300; addFloat('GIRO COMPLETO +300', W / 2, H * 0.4, '#fbbf24', 26); }
+    const col = 'hsl(' + hue(n.val) + ',90%,62%)';
+    burst(n.x, n.y, col, 16 + Math.min(combo, 12), 180 + Math.min(combo, 12) * 15);
+    addFloat('+' + pts, n.x, n.y - 20, col, 20 + Math.min(combo, 10));
+    if (combo > 1) addFloat(combo + 'x', n.x, n.y - 48, '#fff', 16);
+    rings.push({ x: n.x, y: n.y, r: n.r, life: 1, color: col });
+    const MS = { 5: ['OTTIMO!', '#7dd3fc'], 10: ['FANTASTICO!', '#fde047'], 20: ['INARRESTABILE!', '#fb923c'], 30: ['LEGGENDARIO!', '#f472b6'], 50: ['IMBATTIBILE!', '#ffffff'] };
+    if (MS[combo]) { callout = { text: MS[combo][0], color: MS[combo][1], life: 1.4 }; sfx.milestone(Object.keys(MS).indexOf(String(combo))); }
+    if (combo >= 5 && !reduceMotion) freeze = 0.035;
+    sfx.hit(combo); shake(2 + Math.min(combo, 6)); comboPulse = 1.5; flash = 0.2; flashColor = 'hsla(' + hue(n.val) + ',90%,60%,.18)'; buzz(8);
+    if (n.type === 'bomb') {
+      for (const o of numbers) if (!o.dead && o !== n && Math.hypot(o.x - n.x, o.y - n.y) < 150) { o.dead = true; o.deathT = 0; score += 20; burst(o.x, o.y, '#ff4444', 12, 150); }
+      shake(10); addFloat('BOOM', n.x, n.y - 70, '#ff4444', 30); sfx.boom();
+    } else if (n.type === 'ice') { ice = 5; addFloat('GHIACCIO', n.x, n.y - 70, '#7dd3fc', 24); sfx.bonus(); }
+    else if (n.type === 'fire') { fire = 6; addFloat('FUOCO +1', n.x, n.y - 70, '#fb923c', 24); sfx.bonus(); }
+    if (combo >= 10 && fever <= 0 && feverCD <= 0) {
+      fever = 8; sfx.fever(); addFloat('FEBBRE!', W / 2, H / 2, '#fde047', 40); shake(12);
+    }
+  } else {
+    if (shield > 0) { shield = 0; addFloat('PARATO', n.x, n.y - 20, '#2ed573', 22); shake(3); burst(n.x, n.y, '#2ed573', 10, 100); return; }
+    combo = 0; timer = Math.max(0, timer - 8);
+    shake(7); sfx.wrong(); buzz(60); burst(n.x, n.y, '#ff2244', 12, 100);
+    addFloat('SBAGLIATO', n.x, n.y - 20, '#ff2244', 18); flash = 0.2; flashColor = 'rgba(255,0,50,.2)'; comboPulse = 1.3;
+  }
+}
+function update(dt) {
+  pulse += dt;
+  dispScore += (score - dispScore) * Math.min(1, dt * 9);
+  if (callout) { callout.life -= dt; if (callout.life <= 0) callout = null; }
+  for (const r of rings) r.life -= dt * 2.2; rings = rings.filter(r => r.life > 0);
+  for (const r of ripples) r.life -= dt * 3; ripples = ripples.filter(r => r.life > 0);
+  if (state === 'ready' && !paused) {
+    const before = Math.ceil(readyT); readyT -= dt;
+    if (Math.ceil(readyT) !== before && readyT > 0) sfx.count(false);
+    if (readyT <= 0) { state = 'playing'; sfx.count(true); $('pause').disabled = false; }
+    stepField(dt, false); return;
+  }
+  if (state === 'playing' && freeze > 0) { freeze -= dt; return; }
+  if (state === 'playing' && !paused) {
+    elapsed += dt;
+    const d = difficultyAt(elapsed);
+    const ph = 1 + Math.floor(elapsed / 25);
+    if (ph !== phase) { phase = ph; callout = { text: 'FASE ' + phase, color: '#fbbf24', life: 1.3 }; sfx.bonus(); }
+    if (timer < TMAX * 0.25) { tickT -= dt; if (tickT <= 0) { tickT = 0.5; sfx.tick(); } }
+    timer -= drainAt(d) * (ice > 0 ? 0.3 : 1) * dt;
+    if (fever > 0) { fever -= dt; if (fever <= 0) { fever = 0; feverCD = 20; } } else if (feverCD > 0) feverCD -= dt;
+    if (fire > 0) fire -= dt; if (ice > 0) ice -= dt; if (shield > 0) shield -= dt;
+    spawnCD -= dt;
+    if (spawnCD <= 0) {
+      if (numbers.filter(n => !n.dead).length < maxAlive(d)) spawn();
+      spawnCD = Math.max(0.4, 1.8 - d * 0.12);
+      if (d > 3 && Math.random() < 0.3 && numbers.filter(n => !n.dead).length < maxAlive(d)) spawn();
+    }
+    const t = target();
+    if (!numbers.some(n => !n.dead && n.val === t)) spawn(t);       // il numero da toccare e' sempre nel campo
+    stepField(dt, true);
+    if (timer <= 0) { timer = 0; gameOver(); }
+  } else if (!paused) stepField(dt, false);
+}
+function startMenuDemo() {
+  numbers = []; elapsed = 0; rule = RULES[0]; idx = 0;
+  for (let i = 0; i < 7; i++) spawn();
+}
+function start(m) {
+  ac(); gen++; lastMode = m; mode = m;
+  rule = m === 'daily' ? dailyRule() : RULES[0];
+  rnd = m === 'daily' ? mulberry(hashStr('lampo-' + today)) : Math.random;
+  state = 'ready'; readyT = 3; over = false; paused = false; phase = 1; dispScore = 0; rings = []; ripples = []; callout = null; freeze = 0;
+  score = 0; idx = 0; combo = 0; maxCombo = 0; hits = 0; timer = TMAX; elapsed = 0;
+  fever = 0; feverCD = 0; fire = 0; ice = 0; shield = 0; spawnCD = 0; shakeMag = 0; comboPulse = 1;
+  numbers = []; particles = []; floats = [];
+  best = store.get(m === 'daily' ? dailyKey : 'lampo_best', 0); prevBest = best;
+  for (let i = 0; i < 5; i++) spawn();
+  $('menu').hidden = true; $('over').hidden = true; $('pause').disabled = true; $('pause').textContent = 'Pausa';
+  hudCache = {};
+  sfx.count(false);
+}
+function gameOver() {
+  if (over) return;
+  over = true; state = 'over'; sfx.over(); buzz(80); shake(12);
+  const key = mode === 'daily' ? dailyKey : 'lampo_best';
+  const isRecord = score > prevBest && score > 0;
+  if (score > store.get(key, 0)) store.set(key, score);
+  if (mode === 'daily' && score > store.get('lampo_best', 0) && false) store.set('lampo_best', score);
+  for (let i = 0; i < 60; i++) particles.push({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - 0.5) * 300, vy: (Math.random() - 0.5) * 300, life: 1, decay: 0.6 + Math.random() * 0.5, size: 3 + Math.random() * 7, color: 'hsl(' + Math.random() * 60 + ',100%,60%)', grav: 80 });
+  $('overMode').textContent = mode === 'daily' ? 'Regola del giorno · ' + rule.name + ' · ' + todayLabel : rule.name;
+  $('overScore').textContent = Math.floor(score).toLocaleString('it-IT');
+  $('newRecord').hidden = !isRecord;
+  const gap = Math.floor(prevBest - score);
+  $('overNear').textContent = isRecord ? 'Hai battuto il tuo record di ' + Math.floor(prevBest).toLocaleString('it-IT') + '.' : prevBest > 0 ? (gap < prevBest * 0.25 ? 'Ci sei quasi: ti mancano ' + gap.toLocaleString('it-IT') + ' punti al record.' : 'Record da battere: ' + Math.floor(prevBest).toLocaleString('it-IT') + '.') : 'Prima partita: ora hai un record da battere.';
+  $('stHits').textContent = hits; $('stCombo').textContent = maxCombo; $('stTime').textContent = Math.round(elapsed);
+  $('share').textContent = 'Copia risultato'; $('shareBox').hidden = true; $('pause').disabled = true;
+  const g = gen;
+  setTimeout(() => { if (g === gen) { $('over').hidden = false; $('again').focus({ preventScroll: true }); } }, Math.round(500 * TS));
+}
+function refreshMenu() {
+  $('menuBest').textContent = store.get('lampo_best', 0).toLocaleString('it-IT');
+  const d = store.get(dailyKey, null);
+  $('menuDaily').textContent = d === null ? '—' : d.toLocaleString('it-IT');
+  const dr = dailyRule();
+  $('daily').textContent = 'Del giorno · ' + dr.name;
+}
+function togglePause(on) {
+  if (state !== 'playing') return;
+  paused = on === undefined ? !paused : on;
+  $('pause').textContent = paused ? 'Riprendi' : 'Pausa';
+}
+
+/* ---------------------------------------------------------------- 4) DISEGNO */
+function fit() {
+  const r = stage.getBoundingClientRect();
+  if (Math.abs(r.width - W) < 0.5 && Math.abs(r.height - H) < 0.5) return;
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  const ow = W, oh = H; W = r.width; H = r.height;
+  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+  if (ow && oh) for (const n of numbers) { n.x = clamp(n.x * W / ow, n.r, W - n.r); n.y = clamp(n.y * H / oh, n.r, H - n.r); }
+}
+const ICON = { star: '★', shield: '🛡', bomb: '💣', ice: '❄', fire: '🔥' };
+const EDGE = { star: '#ffd700', bomb: '#ff2244', ice: '#7dd3fc', fire: '#fb923c', shield: '#2ed573' };
+function draw() {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  ctx.save();
+  if (shakeMag) ctx.translate((Math.random() - 0.5) * shakeMag * 2, (Math.random() - 0.5) * shakeMag * 2);
+  const bgH = (phase * 40 + 230) % 360;
+  const bg = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.7);
+  bg.addColorStop(0, 'hsla(' + bgH + ',70%,35%,' + (0.18 + Math.sin(pulse * 1.5) * 0.04) + ')'); bg.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  for (const st of stars) { st.y -= st.sp / Math.max(H, 1) * 0.016 * (fever > 0 ? 3 : 1); if (st.y < 0) st.y = 1; ctx.globalAlpha = st.a; ctx.fillStyle = 'hsl(' + ((bgH + st.x * 60) % 360) + ',80%,80%)'; ctx.beginPath(); ctx.arc(st.x * W, st.y * H, st.s, 0, Math.PI * 2); ctx.fill(); }
+  ctx.globalAlpha = 1;
+  if (fever > 0) { ctx.fillStyle = 'hsla(' + (pulse * 120 % 360) + ',80%,50%,0.10)'; ctx.fillRect(-20, -20, W + 40, H + 40); }
+  if (ice > 0) { ctx.fillStyle = 'rgba(100,200,255,' + (0.05 + Math.sin(pulse * 4) * 0.03) + ')'; ctx.fillRect(-20, -20, W + 40, H + 40); }
+  const t = state === 'playing' || state === 'ready' ? target() : null;
+  for (const n of numbers) {
+    if (n.dead) {
+      const k = clamp(n.deathT / 0.3, 0, 1);
+      ctx.globalAlpha = 1 - k; ctx.fillStyle = n.val ? 'hsla(' + hue(n.val) + ',90%,60%,.5)' : 'rgba(255,255,255,.4)';
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.r * (1 + k * 1.6), 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; continue;
+    }
+    const isT = n.val !== null && n.val === t;
+    const r = n.r * n.scale * (isT && !reduceMotion ? 1 + Math.sin(pulse * 5) * 0.07 : 1);
+    ctx.save(); ctx.translate(n.x, n.y);
+    if (isT) { ctx.shadowColor = 'hsla(' + hue(n.val) + ',100%,60%,.8)'; ctx.shadowBlur = 20; }
+    if (isT && !reduceMotion) { ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 2; ctx.setLineDash([6, 8]); ctx.lineDashOffset = -pulse * 40; ctx.beginPath(); ctx.arc(0, 0, r + 12 + Math.sin(pulse * 4) * 2, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); }
+    if (n.type !== 'normal') { ctx.strokeStyle = EDGE[n.type]; ctx.lineWidth = 3; ctx.setLineDash([4, 4]); ctx.lineDashOffset = -pulse * 30; ctx.beginPath(); ctx.arc(0, 0, r + 6, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); }
+    const g = ctx.createRadialGradient(-r * 0.3, -r * 0.3, 0, 0, 0, r);
+    if (n.type === 'star') { g.addColorStop(0, '#fff8dc'); g.addColorStop(1, '#ffd700'); }
+    else if (n.type === 'shield') { g.addColorStop(0, '#88ffcc'); g.addColorStop(1, '#008844'); }
+    else if (n.type === 'bomb') { g.addColorStop(0, '#ff6666'); g.addColorStop(1, '#880000'); }
+    else if (n.type === 'ice') { g.addColorStop(0, '#ccf0ff'); g.addColorStop(1, '#2288cc'); }
+    else if (n.type === 'fire') { g.addColorStop(0, '#ffcc00'); g.addColorStop(1, '#ff4400'); }
+    else { g.addColorStop(0, 'hsl(' + hue(n.val) + ',100%,75%)'); g.addColorStop(1, 'hsl(' + hue(n.val) + ',90%,58%)'); }
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.2)'; ctx.beginPath(); ctx.arc(-r * 0.2, -r * 0.25, r * 0.45, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    if (n.val === null) { ctx.font = Math.round(r * 1.1) + 'px sans-serif'; ctx.fillStyle = '#222'; ctx.fillText(ICON[n.type], 0, 2); }
+    else {
+      const digits = String(n.val).length;
+      ctx.font = 'bold ' + Math.round(r * (digits > 2 ? 0.7 : 0.9)) + 'px "Fredoka","Segoe UI",system-ui,sans-serif';
+      ctx.fillStyle = n.type === 'bomb' ? '#fff' : 'rgba(0,0,0,.72)'; ctx.fillText(n.val, 0, 2);
+      if (n.type !== 'normal') { ctx.font = Math.round(r * 0.6) + 'px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(ICON[n.type], 0, -r - 12); }
+    }
+    ctx.restore();
+  }
+  for (const r of rings) { ctx.globalAlpha = Math.max(0, r.life); ctx.strokeStyle = r.color; ctx.lineWidth = 4 * r.life; ctx.beginPath(); ctx.arc(r.x, r.y, r.r * (1 + (1 - r.life) * 2.6), 0, Math.PI * 2); ctx.stroke(); }
+  for (const r of ripples) { ctx.globalAlpha = Math.max(0, r.life) * 0.6; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(r.x, r.y, 8 + (1 - r.life) * 26, 0, Math.PI * 2); ctx.stroke(); }
+  ctx.globalAlpha = 1;
+  for (const p of particles) { ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2); ctx.fill(); }
+  ctx.globalAlpha = 1;
+  for (const f of floats) {
+    ctx.globalAlpha = Math.max(0, f.life); ctx.fillStyle = f.color; ctx.font = 'bold ' + Math.round(f.size * f.scale) + 'px "Fredoka","Segoe UI",sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = f.color; ctx.shadowBlur = 8; ctx.fillText(f.text, clamp(f.x, 50, W - 50), f.y); ctx.shadowBlur = 0;
+  }
+  ctx.globalAlpha = 1;
+  if (flash > 0) { ctx.fillStyle = flashColor; ctx.fillRect(0, 0, W, H); }
+  if (state === 'playing' && timer < TMAX * 0.25) { const a = 0.12 + Math.abs(Math.sin(pulse * 6)) * 0.14; const v = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.75); v.addColorStop(0, 'rgba(255,0,40,0)'); v.addColorStop(1, 'rgba(255,0,40,' + a + ')'); ctx.fillStyle = v; ctx.fillRect(0, 0, W, H); }
+  if (callout) { const k = Math.min(1, (1.4 - callout.life) * 6), sc = 0.6 + 0.4 * Math.min(1, k) + (callout.life > 1.2 ? (callout.life - 1.2) * 1.2 : 0); ctx.save(); ctx.translate(W / 2, H * 0.26); ctx.scale(sc, sc); ctx.globalAlpha = clamp(callout.life * 1.6, 0, 1); ctx.font = 'bold 40px "Fredoka",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = callout.color; ctx.shadowColor = callout.color; ctx.shadowBlur = 24; ctx.fillText(callout.text, 0, 0); ctx.restore(); ctx.globalAlpha = 1; }
+  if (state === 'ready') { const n = Math.ceil(readyT), k = readyT - Math.floor(readyT); ctx.save(); ctx.translate(W / 2, H / 2); ctx.scale(0.8 + k * 0.5, 0.8 + k * 0.5); ctx.globalAlpha = 0.5 + k * 0.5; ctx.font = 'bold 120px "Fredoka",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff'; ctx.shadowColor = '#ff4757'; ctx.shadowBlur = 30; ctx.fillText(n > 0 ? n : 'VIA', 0, 0); ctx.restore(); ctx.globalAlpha = 1; }
+  if (paused) {
+    ctx.fillStyle = 'rgba(6,6,20,.7)'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 34px "Fredoka",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('IN PAUSA', W / 2, H / 2);
+  }
+  ctx.restore();
+}
+let hudCache = {};
+const setText = (id, v) => { if (hudCache[id] !== v) { hudCache[id] = v; $(id).textContent = v; } };
+function hud() {
+  setText('score', Math.round(dispScore).toLocaleString('it-IT'));
+  setText('best', Math.max(best, Math.floor(score)).toLocaleString('it-IT'));
+  setText('bestLbl', mode === 'daily' ? 'Oggi' : 'Record');
+  setText('next', state === 'playing' || state === 'ready' ? String(target()) : '—');
+  const pct = clamp(timer / TMAX * 100, 0, 100);
+  $('tfill').style.width = pct + '%';
+  const tb = $('tbar'); tb.classList.toggle('low', pct < 25); tb.classList.toggle('mid', pct >= 25 && pct < 50);
+  tb.setAttribute('aria-valuenow', Math.round(pct));
+  const chips = [];
+  if (state === 'playing' || state === 'ready') {
+    chips.push(['rule', rule.name + ' · fase ' + phase]);
+    if (combo > 1) chips.push(['combo', combo + '× · ×' + currentMult().toFixed(1)]);
+    if (fever > 0) chips.push(['fever', 'FEBBRE ' + fever.toFixed(0) + 's']);
+    else if (combo < 10 && combo > 0) chips.push(['rule', 'febbre a 10']);
+    if (fire > 0) chips.push(['fire', 'FUOCO ' + fire.toFixed(0) + 's']);
+    if (ice > 0) chips.push(['ice', 'GHIACCIO ' + ice.toFixed(0) + 's']);
+    if (shield > 0) chips.push(['shield', 'SCUDO']);
+  }
+  const key = chips.map(c => c.join(':')).join('|');
+  if (hudCache.chips !== key) { hudCache.chips = key; const box = $('chips'); box.textContent = ''; chips.forEach(([c, t]) => { const s = document.createElement('span'); s.className = 'chip ' + c; s.textContent = t; box.appendChild(s); }); }
+}
+let last = performance.now();
+function frame(now) {
+  const dt = clamp((now - last) / 1000, 0, 0.05); last = now;
+  if (!$('tfill')) return;                         // il gioco e' stato chiuso mentre il fotogramma era in coda
+  fit(); update(dt * TS); draw(); hud();
+  requestAnimationFrame(frame);
+}
+
+/* ---------------------------------------------------------------- INPUT E SCHERMATE */
+cv.addEventListener('pointerdown', e => {
+  e.preventDefault(); ac();
+  if (state !== 'playing' || paused) { if (paused) togglePause(false); return; }
+  const rc = cv.getBoundingClientRect(), px = e.clientX - rc.left, py = e.clientY - rc.top;
+  ripples.push({ x: px, y: py, life: 1 });
+  let best = null, bd = Infinity;
+  for (const n of numbers) { if (n.dead) continue; const d = Math.hypot(n.x - px, n.y - py); if (d < n.r * 1.4 && d < bd) { best = n; bd = d; } }
+  if (best) hit(best);
+});
+$('play').addEventListener('click', () => start('free'));
+$('daily').addEventListener('click', () => start('daily'));
+$('again').addEventListener('click', () => start(lastMode));
+$('pause').addEventListener('click', () => togglePause());
+$('share').addEventListener('click', () => {
+  const txt = 'Lampo · ' + (mode === 'daily' ? 'regola del giorno ' + todayLabel + ' (' + rule.name + ')' : rule.name) + '\n' + Math.floor(score).toLocaleString('it-IT') + ' punti · ' + hits + ' colpi · combo max ' + maxCombo + ' · ' + Math.round(elapsed) + ' s';
+  const fallback = () => { const b = $('shareBox'); b.value = txt; b.hidden = false; b.focus(); b.select(); $('share').textContent = 'Seleziona e copia il testo'; };
+  try { navigator.clipboard.writeText(withName(txt)).then(() => { $('share').textContent = 'Copiato'; }, () => { $('shareBox').value = withName(txt); fallback(); $('shareBox').value = withName(txt); }); } catch (e) { fallback(); $('shareBox').value = withName(txt); }
+});
+const muteBtn = $('mute');
+const syncMute = () => { muteBtn.textContent = muted ? 'Muto' : 'Suono'; };
+muteBtn.addEventListener('click', () => { muted = !muted; store.set('lampo_mute', muted); ac(); syncMute(); });
+syncMute();
+window.addEventListener('keydown', e => { if ((e.key === 'p' || e.key === 'P') && state === 'playing') togglePause(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && state === 'playing') togglePause(true); });
+window.__L = {
+  RULES, seqVal, comboMult, basePts, recoverAt, drainAt, difficultyAt, dailyRule, hit, start, update, target, spawn, mulberry,
+  get S() { return { state, score, idx, combo, maxCombo, hits, timer, fever, feverCD, fire, ice, shield, elapsed, numbers, paused, mode, rule }; },
+  set timer(v) { timer = v; }, setTimescale(x) { TS = x; },
+};
+
+fit(); startMenuDemo(); refreshMenu(); hud();
+requestAnimationFrame(frame);
+})();
+},
   };
 
   const launcher = document.getElementById('lx-launcher');
@@ -4749,7 +5281,7 @@ grids = gridsFor('sentiero-demo'); gi = 0; path = [[0, 0]]; sols = []; buildBoar
   }
 
   // ---------- conteggio per il test: quale gioco viene rigiocato di più ----------
-  const NAMES = { bilancia: 'Bilancia', quadrante: 'Quadrante', primo: 'Primo', resto: 'Resto', girasette: 'Girasette', raddoppio: 'Raddoppio', sentiero: 'Sentiero' };
+  const NAMES = { bilancia: 'Bilancia', quadrante: 'Quadrante', primo: 'Primo', resto: 'Resto', girasette: 'Girasette', raddoppio: 'Raddoppio', sentiero: 'Sentiero', lampo: 'Lampo' };
   const KEYS = Object.keys(NAMES);
   const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   const ls = {
