@@ -116,3 +116,12 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 - **Codice del giorno:** 4 cifre, 8 tentativi, nessun tempo; uscendo e rientrando la partita riprende (tentativo e codice uguali); una volta finita non si rigioca: il risultato si rivede senza contare una seconda partita.
 - **Corretto durante i test:** l'ultimo fotogramma dopo l'uscita dal gioco dava un errore su un elemento già rimosso (stessa causa già vista in Lampo).
 - **Limite:** non provato con persone vere; la difficoltà delle serie lunghe (5 e 6 cifre, tempo che cala) è calibrata sul solutore, non sui giocatori.
+
+## Calamita (serie, obiettivo, gancio di fine partita)
+
+- **Serie di giorni:** ieri e l'altro ieri giocati → "2 giorni di fila" con l'avviso per tenerla; un giorno vuoto la azzera; nuovo giocatore: "Inizia la tua serie". Home senza scorrimento orizzontale a 360 px.
+- **Obiettivo:** pallini 0/3 e 1/3 corretti; la carta del gioco giocato oggi mostra "✓ oggi"; il gioco consigliato non è mai il più giocato.
+- **Fine partita (partita vera di Cassaforte):** con un record di oggi già alto compare "Ti mancano N punti per il record di oggi", la 2ª partita di oggi, la serie e l'obiettivo; con un record precedente basso "Nuovo record di sempre" con coriandoli; "Prossimo" apre il gioco suggerito; Invio rigioca.
+- **Corretto durante i test:** i giochi aggiornano il proprio record *prima* di mostrare la schermata finale, quindi il record di sempre risultava già "pari": ora si usa il record che c'era prima della partita. Un fotogramma di Cassaforte dopo il passaggio a un altro gioco dava un errore perché l'id `app` era già di un altro gioco.
+- **Girasette e Bilancia (partita libera):** nessun "Copia risultato" proprio → lo aggiunge il launcher, con il nome.
+- **Limite:** sono ingredienti noti, ma non è provato che trattengano i giocatori. Il segnale si vedrà nelle statistiche anonime: partite a testa, quanti arrivano a 3 partite e quanti tornano in giorni diversi.

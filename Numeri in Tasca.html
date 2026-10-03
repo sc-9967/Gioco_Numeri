@@ -185,7 +185,32 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 .lx-copy{margin:0;font-size:12px;opacity:.7;text-align:center}
 .lx-give{margin:0;font-size:13px;text-align:center;opacity:.85}
 .lx-give a{color:inherit;font-weight:700}
-@media (prefers-reduced-motion:reduce){.lx-card{transition:none}}
+/* calamita: serie di giorni, obiettivo del giorno, gancio di fine partita, coriandoli */
+.lx-card{position:relative}
+.lx-done{position:absolute;top:10px;right:10px;font-size:11px;font-weight:800;letter-spacing:.04em;background:rgba(255,255,255,.94);color:#111;border-radius:99px;padding:3px 9px;box-shadow:0 2px 8px rgba(0,0,0,.25);pointer-events:none}
+.lx-done[hidden]{display:none}
+.lx-today{background:var(--l-card);border:1px solid var(--l-line);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.lx-trow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.lx-flame{font-weight:800;font-size:18px}
+.lx-flame small{font-weight:600;font-size:12px;color:var(--l-muted);margin-left:6px}
+.lx-dots{display:flex;gap:6px;align-items:center;font-size:13px;font-weight:700;color:var(--l-muted)}
+.lx-dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--l-ink);box-sizing:border-box;opacity:.35}
+.lx-dots i.on{background:var(--l-ink);opacity:1}
+.lx-thint{margin:0;font-size:13px;color:var(--l-muted);line-height:1.4}
+.lx-tplay{align-self:flex-start;font:inherit;font-weight:800;font-size:15px;color:var(--l-bg);background:var(--l-ink);border:none;border-radius:12px;padding:10px 16px;cursor:pointer}
+.lx-tplay:focus-visible{outline:3px solid var(--l-ink);outline-offset:2px}
+.lx-holder .lx-hook{display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;border-top:1px solid rgba(128,128,128,.35);padding-top:10px;color:inherit}
+.lx-holder .lx-hook[hidden]{display:none}
+.lx-holder .lx-hl{margin:0;font-weight:800;font-size:15px;line-height:1.3}
+.lx-holder .lx-hl.win{font-size:17px}
+.lx-holder .lx-hs{margin:0;font-size:12.5px;opacity:.85;line-height:1.4}
+.lx-holder .lx-next,.lx-holder .lx-sharebtn{font:inherit;font-weight:700;font-size:14px;color:inherit;background:none;border:1.5px solid currentColor;border-radius:12px;padding:8px 14px;cursor:pointer;opacity:.92}
+.lx-holder .lx-next:focus-visible,.lx-holder .lx-sharebtn:focus-visible{outline:3px solid currentColor;outline-offset:2px}
+.lx-holder .lx-sharebox{width:100%;box-sizing:border-box;font:13px/1.4 inherit;color:inherit;background:rgba(128,128,128,.15);border:1px solid rgba(128,128,128,.4);border-radius:10px;padding:8px;resize:none}
+.lx-confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9999}
+.lx-confetti i{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;animation:lxfall 2.2s cubic-bezier(.3,.6,.5,1) forwards}
+@keyframes lxfall{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--dx),105vh) rotate(var(--rot))}}
+@media (prefers-reduced-motion:reduce){.lx-card{transition:none}.lx-confetti{display:none}}
 </style>
 
 <div id="lx-launcher" class="lx-page">
@@ -207,6 +232,11 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
     </form>
     <p class="lx-hello" id="lx-hello" hidden>Ciao, <b id="lx-helloname"></b> <button type="button" id="lx-namechange">Cambia</button></p>
     <p class="lx-storewarn" id="lx-storewarn" role="alert" hidden>Questo browser non permette di salvare i dati: record e nome andranno persi alla chiusura. Esci dalla navigazione privata o consenti i dati del sito.</p>
+  </section>
+  <section class="lx-today" id="lx-today" aria-label="La tua serie e l'obiettivo di oggi">
+    <div class="lx-trow"><span class="lx-flame" id="lx-flame"></span><span class="lx-dots" id="lx-dots" aria-label="Giochi diversi giocati oggi"></span></div>
+    <p class="lx-thint" id="lx-thint"></p>
+    <button class="lx-tplay" id="lx-tplay" type="button"></button>
   </section>
   <button class="lx-recbtn" id="lx-recbtn" type="button">I miei record</button>
 
@@ -1802,7 +1832,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
   }
   // Migliore e numero di partite per periodo (oggi, settimana da lunedi', anno, sempre).
   const BEST_OF = { bilancia: 'bil_best', quadrante: 'quad_best', primo: 'primo_best', resto: 'resto_best', girasette: 'girasette_best', raddoppio: 'rad_best', sentiero: 'sent_best', lampo: 'lampo_best', cassaforte: 'cass_best' };
-  function recAgg(h, game, today) {
+  function recAgg(h, game, today, floorOverride) {
     const g = h[game] || {}, ws = mondayOf(today), we = shiftDay(ws, 6), out = { day: null, week: null, month: null, year: null, all: null };
     const take = (k, r) => { const o = out[k] || (out[k] = { best: 0, plays: 0 }); o.best = Math.max(o.best, r.b); o.plays += r.n; };
     Object.keys(g).filter(isDay).forEach(d => {
@@ -1815,6 +1845,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
     });
     // il record di sempre non puo' essere piu' basso di quello gia' salvato dal gioco (partite precedenti allo storico)
     let fl = 0; try { fl = JSON.parse(localStorage.getItem(BEST_OF[game])) || 0; } catch (e) {}
+    if (floorOverride !== undefined) fl = floorOverride;
     if (sane(fl) && fl > 0) { const o = out.all || (out.all = { best: 0, plays: 0 }); o.best = Math.max(o.best, fl); }
     return out;
   }
@@ -5884,8 +5915,9 @@ window.addEventListener('resize', render);
 
 /* ciclo: tempo, punteggio animato, ultimi secondi */
 let last = 0;
+const APP = $('app');
 function frame(t) {
-  if (!$('app')) return;                      // il launcher ha tolto il gioco: ultimo fotogramma già in coda
+  if (!APP.isConnected) return;               // il launcher ha tolto il gioco: ultimo fotogramma già in coda (l'id 'app' può essere già di un altro gioco)
   requestAnimationFrame(frame);
   const dt = clamp((t - last) / 1000, 0, 0.1); last = t || last;
   if (state === 'play' && !document.hidden && !locked) {
@@ -5927,6 +5959,7 @@ requestAnimationFrame(frame);
       try { v = JSON.parse(localStorage.getItem(b.dataset.best)) || 0; } catch (e) {}
       b.textContent = Number(v).toLocaleString('it-IT');
     });
+    renderToday();
   }
 
   // un solo contesto audio condiviso tra i giochi
@@ -5958,6 +5991,104 @@ requestAnimationFrame(frame);
   stats.order = order;
   const grid = document.querySelector('.lx-grid');
   order.forEach(k => grid.appendChild(grid.querySelector('[data-game="' + k + '"]')));
+
+  // ---------- calamita: serie di giorni, obiettivo del giorno, suggerimento, gancio di fine partita ----------
+  // Tutto si ricava dallo storico dei record (nit_hist): niente chiavi nuove, quindi il backup lo porta con sé.
+  const GOAL = 3;
+  const MILES = { 3: 'tre di fila', 7: 'settimana piena', 14: 'due settimane', 30: 'un mese intero', 100: 'cento giorni' };
+  const playedDays = h => {
+    const set = new Set();
+    Object.keys(h).forEach(g => { if (!BEST_OF[g] || !h[g]) return; Object.keys(h[g]).filter(isDay).forEach(d => { const r = h[g][d]; if (r && sane(r.n) && r.n > 0) set.add(d); }); });
+    return set;
+  };
+  function streakInfo(h, today) {
+    const days = playedDays(h), playedToday = days.has(today);
+    let cur = 0, d = playedToday ? today : shiftDay(today, -1);
+    while (days.has(d)) { cur++; d = shiftDay(d, -1); }
+    let best = 0, run = 0, prev = null;
+    [...days].sort().forEach(x => { run = prev && shiftDay(prev, 1) === x ? run + 1 : 1; best = Math.max(best, run); prev = x; });
+    return { cur, best: Math.max(best, cur), playedToday };
+  }
+  const todayGames = (h, today) => KEYS.filter(g => h[g] && h[g][today] && sane(h[g][today].n) && h[g][today].n > 0);
+  const totalPlays = (h, g) => Object.keys(h[g] || {}).filter(isDay).reduce((n, d) => n + (h[g][d] && sane(h[g][d].n) ? h[g][d].n : 0), 0);
+  // gioco consigliato: uno non ancora giocato oggi, tra quelli che l'utente conosce meno (a parita', nell'ordine delle carte del tester)
+  function suggestGame(h, today, exclude) {
+    const done = new Set(todayGames(h, today));
+    let pool = KEYS.filter(k => k !== exclude && !done.has(k));
+    if (!pool.length) pool = KEYS.filter(k => k !== exclude);
+    return pool.sort((a, b) => totalPlays(h, a) - totalPlays(h, b) || order.indexOf(a) - order.indexOf(b))[0];
+  }
+  const dayWord = n => n + (n === 1 ? ' giorno' : ' giorni');
+  function renderToday() {
+    const el = document.getElementById('lx-today'); if (!el) return;
+    const h = recLoad(), today = romeDate(), st = streakInfo(h, today), tg = todayGames(h, today), left = Math.max(0, GOAL - tg.length);
+    document.getElementById('lx-flame').innerHTML = st.cur > 0
+      ? '🔥 ' + dayWord(st.cur) + ' di fila' + (MILES[st.cur] ? '<small>' + MILES[st.cur] + '</small>' : (st.best > st.cur ? '<small>record ' + st.best + '</small>' : ''))
+      : 'Inizia la tua serie';
+    document.getElementById('lx-dots').innerHTML = Array.from({ length: GOAL }, (_, i) => '<i class="' + (i < tg.length ? 'on' : '') + '"></i>').join('') + '<span>' + Math.min(tg.length, GOAL) + '/' + GOAL + ' oggi</span>';
+    let hint;
+    if (tg.length >= GOAL) hint = 'Obiettivo di oggi completato.' + (st.cur > 0 ? ' Domani torna per il giorno ' + (st.cur + 1) + ' della serie.' : '');
+    else if (!st.playedToday && st.cur > 0) hint = 'Gioca oggi per tenere la serie di ' + dayWord(st.cur) + '. Obiettivo: ' + GOAL + ' giochi diversi.';
+    else if (!st.playedToday) hint = 'Gioca una partita oggi per iniziare la serie. Obiettivo: ' + GOAL + ' giochi diversi.';
+    else hint = 'Ancora ' + (left === 1 ? '1 gioco diverso' : left + ' giochi diversi') + ' per completare l\'obiettivo di oggi.';
+    document.getElementById('lx-thint').textContent = hint;
+    const next = suggestGame(h, today, null), b = document.getElementById('lx-tplay');
+    b.textContent = (tg.length >= GOAL ? 'Un\'altra partita: ' : 'Gioca ora: ') + NAMES[next]; b.dataset.game = next;
+    document.querySelectorAll('.lx-card[data-game]').forEach(c => { let t = c.querySelector('.lx-done'); if (!t) { t = document.createElement('span'); t.className = 'lx-done'; t.textContent = '✓ oggi'; c.appendChild(t); } t.hidden = !tg.includes(c.dataset.game); });
+  }
+  // Gancio di fine partita: cosa batti, cosa ti manca, serie di giorni, obiettivo, prossimo gioco.
+  function hookMessage(score, before) {
+    const lbl = { day: 'di oggi', week: 'della settimana', all: 'di sempre' };
+    if (!before.all) return { tier: 'first', line: 'Primo punteggio: ora hai un record da battere.' };
+    if (score > before.all.best) return { tier: 'all', line: '★ Nuovo record di sempre!' };
+    if (before.week && score > before.week.best) return { tier: 'week', line: '★ Record della settimana!' };
+    if (before.day && score > before.day.best) return { tier: 'day', line: '★ Record di oggi!' };
+    const goals = ['day', 'week', 'all'].filter(k => before[k] && before[k].best > score).map(k => [k, before[k].best]);
+    if (!goals.length) return { tier: 'none', line: 'Pari al tuo record ' + lbl.all + '. Un punto in più e lo superi.' };
+    const [k, best] = goals[0], gap = best - score;
+    return { tier: 'none', line: (gap <= best * 0.1 ? 'Quasi! ' : '') + 'Ti mancano ' + gap.toLocaleString('it-IT') + ' punti per il record ' + lbl[k] + '.' };
+  }
+  function confetti(holder, n) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const box = document.createElement('div'); box.className = 'lx-confetti';
+    const cols = ['#ff4757', '#ffa502', '#2ed573', '#1e90ff', '#a55eea', '#ffdf68', '#00d2d3'];
+    for (let i = 0; i < n; i++) {
+      const c = document.createElement('i');
+      c.style.left = (Math.random() * 100) + '%'; c.style.background = cols[i % cols.length];
+      c.style.setProperty('--dx', (Math.random() * 160 - 80) + 'px'); c.style.setProperty('--rot', (Math.random() * 900 - 450) + 'deg');
+      c.style.animationDelay = (Math.random() * 0.5) + 's'; c.style.animationDuration = (1.6 + Math.random() * 1.2) + 's';
+      box.appendChild(c);
+    }
+    holder.appendChild(box); setTimeout(() => box.remove(), 3600);
+  }
+  function fillHook(holder, key, score, before, stBefore) {
+    const hook = holder.querySelector('.lx-hook'); if (!hook) return;
+    const h = recLoad(), today = romeDate(), st = streakInfo(h, today), tg = todayGames(h, today), msg = hookMessage(score, before);
+    const nth = (before.day ? before.day.plays : 0) + 1;
+    const parts = [nth + 'ª partita di oggi'];
+    if (st.cur > 0) parts.push('🔥 ' + (st.cur > stBefore.cur ? 'serie di ' + dayWord(st.cur) : dayWord(st.cur) + ' di fila') + (MILES[st.cur] && st.cur > stBefore.cur ? ' · ' + MILES[st.cur] : ''));
+    parts.push(tg.length >= GOAL ? 'obiettivo di oggi fatto ✓' : 'obiettivo ' + tg.length + '/' + GOAL);
+    const next = suggestGame(h, today, key), win = ['all', 'week', 'day'].includes(msg.tier);
+    hook.innerHTML = '';
+    const a = document.createElement('p'); a.className = 'lx-hl' + (win ? ' win' : ''); a.textContent = msg.line; hook.appendChild(a);
+    const b = document.createElement('p'); b.className = 'lx-hs'; b.textContent = parts.join(' · '); hook.appendChild(b);
+    const n = document.createElement('button'); n.type = 'button'; n.className = 'lx-next';
+    n.textContent = (tg.length >= GOAL ? 'Prova anche: ' : 'Prossimo: ') + NAMES[next] + ' →';
+    n.addEventListener('click', () => { unmount(); go(next); }); hook.appendChild(n);
+    const own = holder.querySelector('#share');
+    if (!own || own.hidden) {                                    // i giochi che condividono solo la sfida del giorno (o niente) ricevono "Copia risultato" dal launcher
+      const sh = document.createElement('button'); sh.type = 'button'; sh.className = 'lx-sharebtn'; sh.textContent = 'Copia risultato';
+      const box = document.createElement('textarea'); box.className = 'lx-sharebox'; box.rows = 3; box.readOnly = true; box.hidden = true;
+      const txt = withName(NAMES[key] + ' · ' + score.toLocaleString('it-IT') + ' punti' + (win ? ' (' + msg.line.replace(/^★ |!$/g, '') + ')' : ''));
+      const fb = () => { box.value = txt; box.hidden = false; box.focus(); box.select(); sh.textContent = 'Seleziona e copia il testo'; };
+      sh.addEventListener('click', () => { try { navigator.clipboard.writeText(txt).then(() => { sh.textContent = 'Copiato'; }, fb); } catch (e) { fb(); } });
+      hook.appendChild(sh); hook.appendChild(box);
+    }
+    hook.hidden = false;
+    if (msg.tier === 'all' || msg.tier === 'week') { confetti(holder, msg.tier === 'all' ? 70 : 40); try { navigator.vibrate && navigator.vibrate([60, 40, 60]); } catch (e) {} }
+    else if (msg.tier === 'day') confetti(holder, 22);
+  }
+  document.getElementById('lx-tplay').addEventListener('click', e => go(e.currentTarget.dataset.game));
 
   let dbRef = null, writing = false, dirty = false, saveTimer = 0;
   async function flush() {
@@ -6079,6 +6210,7 @@ requestAnimationFrame(frame);
     const overPanel = holder.querySelector('#over').firstElementChild;
     menuPanel.querySelector('.btns').appendChild(back());
     overPanel.querySelector('.btns').appendChild(back());
+    const hook = document.createElement('div'); hook.className = 'lx-hook'; hook.hidden = true; overPanel.querySelector('.btns').after(hook);
     const copy = document.createElement('p');
     copy.className = 'lx-copy'; copy.textContent = '© 2026 ' + AUTHOR;
     menuPanel.appendChild(copy);
@@ -6133,16 +6265,30 @@ requestAnimationFrame(frame);
     });
     const raf = f => ctx.alive ? requestAnimationFrame(f) : 0;
     const later = (f, ms) => setTimeout(() => { if (ctx.alive) f(); }, ms);
+    const readBest = () => { try { return JSON.parse(localStorage.getItem(BEST_OF[key])) || 0; } catch (e) { return 0; } };
+    let floor = readBest();   // il gioco aggiorna il proprio record prima della schermata finale: serve quello di prima per sapere se e' nuovo
     current = { key, holder, ctx };
+    // Invio nella schermata finale = "Rigioca" (una partita in più senza cercare il tasto)
+    const onEnter = e => {
+      if (e.key !== 'Enter' || e.ctrlKey || e.metaKey || e.altKey) return;
+      const ov = holder.querySelector('#over'), t = e.target;
+      if (!ov || ov.hidden || (t && /^(BUTTON|A|TEXTAREA|INPUT|SELECT)$/.test(t.tagName))) return;
+      const a = holder.querySelector('#again'); if (a) { e.preventDefault(); a.click(); }
+    };
+    window.addEventListener('keydown', onEnter); ctx.listeners.push(['keydown', onEnter, undefined]);
     try { GAMES[key](win, raf, later); } catch (e) { console.error(e); }
     track.open(key);
     ['play', 'daily', 'again'].forEach(id => { const b = holder.querySelector('#' + id); if (b) b.addEventListener('click', () => track.start(key)); });
     const over = holder.querySelector('#over'), overScore = holder.querySelector('#overScore');
     if (over && overScore) new MutationObserver(() => {
       if (over.hidden || over.dataset.replay) return;           // i riepiloghi di una partita gia' registrata non contano due volte
+      const sc = parseInt(String(overScore.textContent).replace(/\D/g, ''), 10) || 0;
+      const h0 = recLoad(), today0 = romeDate(), before = recAgg(h0, key, today0, floor), stBefore = streakInfo(h0, today0);
       track.finish(key, overScore.textContent);
-      recAdd(key, parseInt(String(overScore.textContent).replace(/\D/g, ''), 10) || 0);
+      recAdd(key, sc);
       refreshRecLines(holder, key);
+      floor = Math.max(floor, readBest());
+      if (sc > 0) fillHook(holder, key, sc, before, stBefore);
     })
       .observe(over, { attributes: true, attributeFilter: ['hidden'] });
     window.scrollTo(0, 0);

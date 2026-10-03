@@ -82,6 +82,18 @@ Gioco di deduzione (la famiglia di "Bulls and Cows" e Mastermind). Il codice ha 
 - **Ritmo:** le tessere si girano una a una con il suono del meccanismo, i pallini si accendono, la cassaforte si apre con monete e un messaggio a ogni serie di 3, 6, 10 e 15; vibrazione sul telefono; rispetta "riduci animazioni".
 - Origine: il prototipo ricevuto ("La cassaforte a indizi") colorava di verde la cifra sbagliata. È stato riscritto da zero: stesso tema, regole e struttura proprie.
 
+## Calamita: serie, obiettivo e gancio di fine partita
+
+Uno strato del launcher che vale per tutti i giochi, senza toccare le loro regole. Tutto si ricava dallo storico dei record, quindi non servono nuovi dati e il backup lo porta con sé.
+
+- **Serie di giorni** (giorno di Roma): quanti giorni di fila hai giocato almeno una partita, con il record personale e un riconoscimento a 3, 7, 14, 30 e 100 giorni. Un giorno vuoto la azzera. Una partita finita a 0 punti non conta.
+- **Obiettivo del giorno:** 3 giochi diversi, con tre pallini sulla home e il segno "✓ oggi" sulle carte già giocate. Serve anche a far provare giochi che un tester non aveva aperto.
+- **Gioca ora:** un pulsante che propone un gioco non ancora giocato oggi, scegliendo tra quelli che conosci meno.
+- **Gancio di fine partita** (sotto "Rigioca", così il pulsante non si sposta): se hai battuto il record di oggi, della settimana o di sempre (con coriandoli e vibrazione per gli ultimi due); altrimenti quanti punti ti mancano per il primo record da superare, con "Quasi!" se sei entro il 10%. Poi quante partite hai fatto oggi, la serie, l'obiettivo e il pulsante "Prossimo: …".
+- **Copia risultato** in tutti i giochi: dove il gioco lo offre solo per la sfida del giorno (o non lo offre, come Girasette) lo aggiunge il launcher.
+- **Invio** nella schermata finale = "Rigioca".
+- Nessun avviso, nessuna notifica, nessun conto alla rovescia finto: la serie si perde solo davvero.
+
 ## Test
 
 I test usano Playwright e si trovano in `tests/`:
@@ -104,6 +116,7 @@ node launcher-sentiero.js     # Sentiero dentro il launcher
 node lampo.js                 # regole, punteggio, partita perfetta, bonus, launcher, schermi
 node cassaforte.js            # regole, punteggio, partite complete del bot
 node launcher-cassaforte.js   # tastierino, note, indizio, vite, tempo, codice del giorno, record, schermi
+node launcher-calamita.js    # serie, obiettivo, gancio di fine partita, coriandoli, condivisione
 node launcher-nome.js         # nome obbligatorio, testi condivisi, statistiche anonime
 node launcher-uscita.js       # uscita dalla partita in ogni gioco, record oggi/settimana/mese/anno/sempre
 node launcher-record.js       # storico, periodi, backup e ripristino, avviso archiviazione
