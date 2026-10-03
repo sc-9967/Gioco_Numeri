@@ -129,6 +129,7 @@ node cassaforte.js            # regole, punteggio, partite complete del bot
 node launcher-cassaforte.js   # tastierino, note, indizio, vite, tempo, codice del giorno, record, schermi
 node launcher-calamita.js    # serie, obiettivo, gancio di fine partita, coriandoli, condivisione
 node istruzioni.js            # istruzioni per bambini: prima apertura, riapertura, lettura, lunghezza delle frasi
+node donazione.js             # pulsante Dona visibile, link sicuro
 node launcher-nome.js         # nome obbligatorio, testi condivisi, statistiche anonime
 node launcher-uscita.js       # uscita dalla partita in ogni gioco, record oggi/settimana/mese/anno/sempre
 node launcher-record.js       # storico, periodi, backup e ripristino, avviso archiviazione
@@ -141,4 +142,4 @@ Risultati e misure del 30/09/2026 in `docs/risultati-test.md`. L'analisi dei gio
 - Il gioco "Cassaforte", descritto nelle prime sessioni di lavoro, non è stato recuperato: non esiste in nessuna delle copie disponibili.
 - Il riquadro del contributo PayPal è nascosto. Per riattivarlo, in `index.html` imposta `SHOW_DONATE = true`.
 
-Copyright © 2026 Silvio Chiaverini. Licenza GNU GPL v3: vedi il file `LICENSE`.
+Copyright © 2026 Silvio Chiaverini. Licenza GNU GPL v3: vedi il file `LICENSE`. Scelte su licenza, donazioni, pubblicità e bambini: `docs/decisioni.md`.

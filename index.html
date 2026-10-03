@@ -331,7 +331,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
     <span class="lx-coin" aria-hidden="true">€</span>
     <div>
       <p class="lx-dt">Ti piacciono questi giochi?</p>
-      <p class="lx-dd">Lascia un contributo libero all'autore, a partire da 1 €. I giochi restano gratuiti per tutti.</p>
+      <p class="lx-dd">Un adulto può lasciare un contributo libero all'autore, a partire da 1 €. È un regalo: non toglie né aggiunge nulla ai giochi, che restano gratuiti per tutti.</p>
     </div>
     <a class="lx-pay" id="lx-pay" href="#" target="_blank" rel="noopener">Offri un contributo</a>
   </aside>
@@ -1846,7 +1846,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
   const PAY_URL = 'https://www.paypal.com/donate/?hosted_button_id=' + encodeURIComponent(PAYPAL_DONATE_ID);
   const payReady = /^[A-Z0-9]{6,20}$/i.test(PAYPAL_DONATE_ID);
   // Contributo nascosto per ora: metti true per riattivare il riquadro e il link a fine partita.
-  const SHOW_DONATE = false;
+  const SHOW_DONATE = true;
   const AUTHOR = 'Silvio Chiaverini';
   // Nome del giocatore: salvato solo sul dispositivo, compare nei testi che si condividono (mai nelle statistiche anonime).
   const cleanName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
@@ -6399,9 +6399,9 @@ requestAnimationFrame(frame);
     menuPanel.appendChild(copy);
     const give = document.createElement('p'); give.className = 'lx-give';
     if (payReady && SHOW_DONATE) {
-      give.append('Ti è piaciuto? ');
+      give.append('Un adulto può ');
       const a = document.createElement('a'); a.href = PAY_URL; a.target = '_blank'; a.rel = 'noopener';
-      a.textContent = 'lascia un contributo all\'autore'; give.appendChild(a);
+      a.textContent = 'lasciare un contributo all\'autore'; give.appendChild(a);
       give.append(' (da 1 €)');
     } else give.textContent = '© 2026 ' + AUTHOR;
     overPanel.appendChild(give);
