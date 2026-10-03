@@ -1,6 +1,6 @@
 # Numeri in Tasca
 
-Otto giochi di numeri da partite brevi, pensati per il telefono. Sono tutti dentro un unico file HTML, `index.html`, senza dipendenze: si apre nel browser.
+Nove giochi di numeri da partite brevi, pensati per il telefono. Sono tutti dentro un unico file HTML, `index.html`, senza dipendenze: si apre nel browser.
 
 | Gioco | In breve |
 |---|---|
@@ -11,9 +11,10 @@ Otto giochi di numeri da partite brevi, pensati per il telefono. Sono tutti dent
 | **Girasette** | Fondi tre o più tessere uguali su una griglia esagonale fino al 7. Finiti i tre pezzi, gli anelli della plancia girano. |
 | **Sentiero** | Da in alto a sinistra a in basso a destra di una griglia 5×5: ogni casella somma, moltiplica o sottrae. Trova il percorso che dà il valore più alto. Una serie di 5 griglie al giorno, uguale per tutti. |
 | **Lampo** | Gioco di riflessi: tocca i numeri in movimento nell'ordine giusto prima che finisca il tempo. Combo, febbre, bonus e regole diverse. |
+| **Cassaforte** | Scassina un codice di cifre tutte diverse: dopo ogni tentativo sai quante cifre sono giuste al posto giusto (●) e quante giuste ma altrove (○). Serie di 20 casseforti con tre vite e codice del giorno uguale per tutti. |
 | **Raddoppio** | Scorri la griglia 4×4 e fondi le tessere uguali. Le catene di fusioni moltiplicano i punti, il martello rompe una tessera. |
 
-`index.html` è il launcher con tutti e otto i giochi (la copia `Numeri in Tasca.html` è identica). I file singoli dei giochi sono stati eliminati: ogni gioco si apre direttamente con `index.html#bilancia`, `#quadrante`, `#primo`, `#resto`, `#girasette`, `#raddoppio`, `#sentiero`, `#lampo`.
+`index.html` è il launcher con tutti e nove i giochi (la copia `Numeri in Tasca.html` è identica). I file singoli dei giochi sono stati eliminati: ogni gioco si apre direttamente con `index.html#bilancia`, `#quadrante`, `#primo`, `#resto`, `#girasette`, `#raddoppio`, `#sentiero`, `#lampo`, `#cassaforte`.
 
 ## Come provarli
 
@@ -70,6 +71,17 @@ Gioco di riflessi su campo in movimento. Si toccano i numeri nell'ordine della r
 - **Ritmo:** conto alla rovescia 3-2-1, fasi ogni 25 secondi (più numeri, più veloci), battito e bordo rosso quando il tempo sta finendo, riconoscimenti a 5, 10, 20, 30 e 50 di fila, e a fine partita la distanza dal record.
 - Pausa (anche con il tasto P e quando si cambia scheda).
 
+## Cassaforte
+
+Gioco di deduzione (la famiglia di "Bulls and Cows" e Mastermind). Il codice ha cifre tutte diverse; dopo ogni tentativo il gioco dice solo *quante* cifre sono giuste al posto giusto (●) e *quante* giuste ma fuori posto (○), non quali.
+
+- **Serie:** fino a 20 casseforti, con codici di 3, 4, 5 e poi 6 cifre, tre vite e un tempo per ogni cassaforte (che dopo l'ottava cala). Tentativi finiti o tempo scaduto costano una vita. La serie finisce sempre: per le vite, per il tempo o dopo la ventesima cassaforte.
+- **Punti:** (100 × cifre + 40 × tentativi rimasti + fino a 100 di tempo − 50 se si usa l'indizio) × moltiplicatore. Il moltiplicatore sale di 0,25 per ogni cassaforte aperta di fila, con tetto ×5.
+- **Codice del giorno:** 4 cifre, 8 tentativi, senza limite di tempo, uguale per tutti (seme dalla data di Roma). Una sola partita al giorno; se si esce a metà la partita riprende dal punto in cui era. A fine partita si copia un risultato senza spoiler (quadratini verdi e gialli).
+- **Aiuti:** tastierino a schermo (anche tastiera fisica), modo "Note" per segnare le cifre escluse, un indizio per cassaforte che svela una cifra assente.
+- **Ritmo:** le tessere si girano una a una con il suono del meccanismo, i pallini si accendono, la cassaforte si apre con monete e un messaggio a ogni serie di 3, 6, 10 e 15; vibrazione sul telefono; rispetta "riduci animazioni".
+- Origine: il prototipo ricevuto ("La cassaforte a indizi") colorava di verde la cifra sbagliata. È stato riscritto da zero: stesso tema, regole e struttura proprie.
+
 ## Test
 
 I test usano Playwright e si trovano in `tests/`:
@@ -90,6 +102,8 @@ node sentiero-logica.js       # percorso ottimo, generatore, codici sfida, recor
 node sentiero-partita.js      # partita completa, una sola sfida al giorno, condivisione
 node launcher-sentiero.js     # Sentiero dentro il launcher
 node lampo.js                 # regole, punteggio, partita perfetta, bonus, launcher, schermi
+node cassaforte.js            # regole, punteggio, partite complete del bot
+node launcher-cassaforte.js   # tastierino, note, indizio, vite, tempo, codice del giorno, record, schermi
 node launcher-nome.js         # nome obbligatorio, testi condivisi, statistiche anonime
 node launcher-uscita.js       # uscita dalla partita in ogni gioco, record oggi/settimana/mese/anno/sempre
 node launcher-record.js       # storico, periodi, backup e ripristino, avviso archiviazione

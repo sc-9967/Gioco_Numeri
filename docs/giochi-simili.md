@@ -47,6 +47,13 @@ Raddoppio ha le stesse regole di base di 2048. Non è un caso fortuito: è la st
 - Partito da un prototipo ricevuto (chiamato "Numblast"), ma ricostruito con altro nome, altra struttura e altra grafica. Il nome originale è stato abbandonato perché generico.
 - **Rischio:** basso per il gioco, medio per il nome; da verificare su EUIPO, UIBM e negli store prima di una pubblicazione.
 
+## Cassaforte: Bulls and Cows / Mastermind
+
+- **Genere molto diffuso.** "Bulls and Cows" è un gioco da carta e penna molto antico; Mastermind (1970) lo ha reso commerciale con i pioli colorati. Le regole di deduzione non sono proteggibili, ma «Mastermind» è un marchio e il suo aspetto (tabellone a pioli) è del produttore. Esistono molte versioni a cifre, e giochi in stile Wordle con i numeri (Numble, Nerdle). La ricerca non è esaustiva. [Probabile]
+- **Cosa lo distingue.** Serie con vite, tempo, moltiplicatore con tetto e codici sempre più lunghi; codice del giorno uguale per tutti con una sola partita; note e indizio. Tema (cassaforte), nome, grafica e testi sono propri. Si evita il nome Mastermind e i pioli colorati: i feedback sono pallini pieni (●) e vuoti (○).
+- **Origine.** Rielaborato da un prototipo ricevuto ("La cassaforte a indizi", dentro un file "Tre nuove sfide"). Del prototipo non resta codice: aveva il colore verde sulla cifra sbagliata, l'indizio sulla somma e una sola partita senza tetto né fine definita.
+- **Rischio:** basso per il gioco, basso-medio per il nome «Cassaforte» (parola comune: da verificare su EUIPO, UIBM e negli store prima di una pubblicazione).
+
 ## Fonti
 
 - [Make7! Hexa Puzzle - App Store](https://apps.apple.com/us/app/make7-hexa-puzzle/id1095539172)

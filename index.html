@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!--
-  Numeri in Tasca: Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio, Sentiero, Lampo.
+  Numeri in Tasca: Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio, Sentiero, Lampo, Cassaforte.
   © 2026 Silvio Chiaverini.
   Giochi ideati e realizzati da Silvio Chiaverini.
   Licenza: GNU GPL v3 (vedi LICENSE).
@@ -87,6 +87,10 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 .g-lam .lx-name{font-family:"Fredoka",system-ui,sans-serif;font-weight:700;font-size:30px;color:#ffffff}
 .g-lam .lx-name i{font-style:normal;color:#ff4757}
 .g-lam .lx-play{background:#ff4757;color:#2a0508}
+.g-cas{background:radial-gradient(ellipse at 70% 10%,#26407a,#070d1c);color:#f3f6ff}
+.g-cas .lx-name{font-family:"Fredoka",system-ui,sans-serif;font-weight:700;font-size:30px;color:#ffffff}
+.g-cas .lx-name i{font-style:normal;color:#f5c451}
+.g-cas .lx-play{background:#f5c451;color:#241800}
 .lx-grid>:last-child:nth-child(odd){grid-column:1 / -1}   /* l'ultima carta dispari occupa tutta la riga */
 
 .lx-donate{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;background:var(--l-card);border:1px solid var(--l-line);border-radius:18px;padding:14px 16px}
@@ -186,7 +190,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 
 <div id="lx-launcher" class="lx-page">
   <header>
-    <p class="lx-eyebrow">Otto giochi di numeri</p>
+    <p class="lx-eyebrow">Nove giochi di numeri</p>
     <h1 class="lx-title">Numeri <span>in Tasca</span></h1>
     <p class="lx-sub">Partite da un minuto. Scegli un gioco e batti il tuo record.</p>
   </header>
@@ -264,6 +268,11 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
       <span class="lx-desc">Tocca i numeri in ordine prima che finisca il tempo. Combo, febbre e bonus.</span>
       <span class="lx-best"><span>Record <b data-best="lampo_best">0</b></span><span class="lx-play">Gioca</span></span>
     </button>
+    <button class="lx-card g-cas" type="button" data-game="cassaforte">
+      <span class="lx-name">Cassa<i>forte</i></span>
+      <span class="lx-desc">Scassina il codice di cifre tutte diverse: ● giusta e al suo posto, ○ giusta ma altrove. Serie di 20 casseforti e codice del giorno.</span>
+      <span class="lx-best"><span>Record <b data-best="cass_best">0</b></span><span class="lx-play">Gioca</span></span>
+    </button>
   </main>
 
   <aside class="lx-donate" aria-label="Contributo volontario" hidden>
@@ -296,7 +305,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 
   <footer class="lx-foot">
     <p><strong>© 2026 Silvio Chiaverini.</strong></p>
-    <p>Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio, Sentiero e Lampo sono giochi ideati e realizzati da Silvio Chiaverini. Codice rilasciato con licenza GNU GPL v3 (vedi LICENSE).</p>
+    <p>Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio, Sentiero, Lampo e Cassaforte sono giochi ideati e realizzati da Silvio Chiaverini. Codice rilasciato con licenza GNU GPL v3 (vedi LICENSE).</p>
   </footer>
 </div>
 
@@ -1558,6 +1567,209 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
   </section>
 </div></template>
 
+<template id="tpl-cassaforte"><style>
+/* CASSAFORTE. Layout: HUD (vite o tentativi, emblema della cassaforte, punti), riga con giro/tempo, barra del tempo, chip, tabellone dei tentativi, tastierino, barra comandi. Tema blu acciaio con ottone. */
+:root{
+  --bg:#070d1c; --bg2:#182647; --panel:#111a30; --line:#2a3860; --ink:#f3f6ff; --muted:#8d9bc4;
+  --gold:#f5c451; --gold2:#ffe29a; --gold-ink:#241800; --ok:#2ed573; --warn:#ffb020; --bad:#ff5468;
+  --ui:"Fredoka",system-ui,-apple-system,"Segoe UI",sans-serif; color-scheme:dark;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+.app{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;background:radial-gradient(ellipse 120% 60% at 50% 18%,var(--bg2) 0%,var(--bg) 74%)}
+.hud{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:8px 16px 0;width:100%;max-width:560px;margin-inline:auto;box-sizing:border-box}
+.stat{display:flex;flex-direction:column;min-width:0}
+.stat.r{align-items:flex-end}
+.lbl{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.stat b{font-size:26px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+#lives{color:var(--bad);letter-spacing:.06em}
+#lives .dead{color:rgba(255,255,255,.16)}
+.emblem{width:66px;height:66px;position:relative;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5))}
+.emblem svg{width:100%;height:100%;display:block;overflow:visible}
+.emblem .frame{fill:#1b2748;stroke:#46567f;stroke-width:3}
+.emblem .face{fill:url(#cfSteel);stroke:#8ea0cc;stroke-width:1.5}
+.emblem .door{transform-origin:8px 40px;transition:transform .8s cubic-bezier(.5,0,.2,1),opacity .8s}
+.emblem.open .door{transform:scaleX(.12);opacity:.35}
+.emblem .bars rect{fill:url(#cfGold);stroke:#a97a12;stroke-width:.8}
+.emblem .dialwrap{transition:transform .7s cubic-bezier(.3,1.4,.4,1);transform-origin:40px 40px}
+.emblem .ring{fill:none;stroke:#c5d0f0;stroke-width:1.2;opacity:.6}
+.emblem .tick{stroke:#c5d0f0;stroke-width:1.4;opacity:.7}
+.emblem .hub{fill:#2a3860;stroke:var(--gold);stroke-width:2}
+.emblem .spoke{stroke:var(--gold);stroke-width:3.5;stroke-linecap:round}
+.emblem .lamp{fill:#5a6690;transition:fill .25s}
+.emblem.ok .lamp{fill:var(--ok);filter:drop-shadow(0 0 4px var(--ok))}
+.emblem.bad .lamp{fill:var(--bad);filter:drop-shadow(0 0 4px var(--bad))}
+.emblem.bad{animation:shake .45s}
+.sub{display:flex;justify-content:space-between;gap:8px;padding:4px 18px 0;width:100%;max-width:560px;margin-inline:auto;box-sizing:border-box;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.03em}
+.sub b{color:var(--ink);font-variant-numeric:tabular-nums}
+.tbar{height:7px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden;width:calc(100% - 32px);max-width:528px;margin:5px auto 2px}
+.tbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#2ed573,#a3e635);transition:background .3s}
+.tbar.mid i{background:linear-gradient(90deg,#fbbf24,#f59e0b)}
+.tbar.low i{background:linear-gradient(90deg,#ff5468,#ff7d8c)}
+.tbar.low{animation:pulse .6s infinite}
+.tbar.off{opacity:.25}
+.chips{display:flex;gap:6px;justify-content:center;align-items:center;min-height:26px;flex-wrap:wrap;padding:0 12px}
+.chip{font-size:12px;font-weight:700;border-radius:99px;padding:2px 10px;border:1.5px solid currentColor;white-space:nowrap}
+.chip.combo{color:#fb923c}.chip.hint{color:#7dd3fc}.chip.day{color:var(--gold)}.chip.note{color:#c4b5fd}
+.board{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding:4px 12px;width:100%;max-width:560px;margin-inline:auto;box-sizing:border-box;scrollbar-width:none}
+.board::-webkit-scrollbar{display:none}
+.row{flex:0 0 auto;display:flex;align-items:center;gap:8px;height:var(--rh,40px);padding:0 10px;border-radius:12px;background:rgba(255,255,255,.035);border:1.5px solid transparent;box-sizing:border-box}
+.row.act{border-color:var(--gold);background:rgba(245,196,81,.08);box-shadow:0 0 16px rgba(245,196,81,.16)}
+.row.shake{animation:shake .4s}
+.row .no{width:16px;font-size:11px;font-weight:600;color:var(--muted);text-align:center;flex:none}
+.tiles{flex:1;display:flex;justify-content:center;gap:6px;perspective:300px}
+.t{width:var(--ts,36px);height:calc(var(--rh,40px)*.8);border-radius:9px;display:grid;place-items:center;font-size:calc(var(--rh,40px)*.52);font-weight:700;font-variant-numeric:tabular-nums;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--ink);box-sizing:border-box}
+.row.act .t.on{background:linear-gradient(160deg,#36456f,#222c4d);border-color:var(--gold2);animation:put .12s}
+.row.done .t{background:linear-gradient(160deg,#2c3a64,#1c2543);border-color:#4a5a8c}
+.t.flip{animation:flip .4s both;animation-delay:var(--d,0ms)}
+.pegs{flex:none;display:grid;grid-template-columns:repeat(var(--pc,2),11px);gap:4px;width:calc(var(--pc,2)*11px + (var(--pc,2) - 1)*4px)}
+.p{width:11px;height:11px;border-radius:50%;box-sizing:border-box;border:1.5px solid rgba(255,255,255,.14)}
+.p.e{background:var(--ok);border-color:var(--ok);box-shadow:0 0 6px rgba(46,213,115,.6)}
+.p.h{background:transparent;border:2.5px solid var(--warn);box-shadow:0 0 6px rgba(255,176,32,.45)}
+.p.pop{animation:peg .3s both;animation-delay:var(--d,0ms)}
+.msg{min-height:22px;text-align:center;font-size:13px;font-weight:600;color:var(--gold2);padding:2px 14px 0;line-height:1.25}
+.msg.bad{color:#ff8b99}
+.pad{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;padding:4px 14px 2px;width:100%;max-width:420px;margin-inline:auto;box-sizing:border-box}
+.key{font:inherit;font-weight:700;font-size:21px;height:44px;color:var(--ink);background:linear-gradient(180deg,#26335a,#1a2447);border:1.5px solid #3c4d80;border-radius:12px;cursor:pointer;touch-action:manipulation;box-shadow:0 3px 0 #0c1228;position:relative}
+.key:active{transform:translateY(2px);box-shadow:0 1px 0 #0c1228}
+.key.used{opacity:.4}
+.key.x{opacity:.32;text-decoration:line-through;text-decoration-thickness:2px}
+.key.flash{animation:keyflash .9s}
+.key.act{font-size:15px}
+.key.act.on{background:linear-gradient(180deg,#5a4aa8,#3d3278);border-color:#c4b5fd}
+.key.go{background:linear-gradient(180deg,var(--gold2),var(--gold));color:var(--gold-ink);border-color:var(--gold);box-shadow:0 3px 0 #8a6414;grid-column:span 3;font-size:22px}
+.key.go.ready{animation:pulse .9s infinite}
+.key:focus-visible,.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.bar{display:flex;gap:8px;justify-content:center;padding:6px 16px calc(10px + env(safe-area-inset-bottom,0px));width:100%;max-width:560px;margin-inline:auto;box-sizing:border-box}
+.btn{font:inherit;font-weight:600;font-size:15px;color:var(--ink);background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:9px 12px;cursor:pointer;flex:1;min-width:0;white-space:nowrap}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:var(--gold-ink);font-weight:700}
+.btn.link{border:none;background:none;color:var(--muted);flex:none}
+.fx{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:6}
+.coin{position:absolute;width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff2b8,var(--gold) 55%,#a97a12);animation:fly 1.1s cubic-bezier(.2,.7,.4,1) forwards}
+.float{position:absolute;transform:translate(-50%,0);font-weight:700;font-size:26px;color:var(--gold2);text-shadow:0 2px 10px rgba(0,0,0,.6),0 0 14px rgba(245,196,81,.6);white-space:nowrap;animation:rise 1.4s ease-out forwards}
+.float.bad{color:#ff8b99;text-shadow:0 2px 10px rgba(0,0,0,.6),0 0 14px rgba(255,84,104,.6)}
+.float small{display:block;font-size:14px;text-align:center;color:#fb923c}
+.banner{position:absolute;left:0;right:0;top:30%;text-align:center;font-size:30px;font-weight:700;color:var(--ink);text-shadow:0 3px 16px rgba(0,0,0,.7);animation:banner 1.5s ease both}
+.banner small{display:block;font-size:14px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+#menu,#over{position:absolute;inset:0;display:grid;place-items:center;padding:16px;background:rgba(5,9,22,.84);z-index:8}
+#menu[hidden],#over[hidden]{display:none}
+.card{width:100%;max-width:340px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--panel);border:1.5px solid var(--line);border-radius:22px;padding:22px 22px 18px;display:flex;flex-direction:column;gap:13px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.55)}
+.card h1{margin:0;font-size:40px;font-weight:700;line-height:1;letter-spacing:.01em}
+.card h1 span{color:var(--gold)}
+.card h2{margin:0;font-size:30px;font-weight:700;color:var(--gold)}
+.eyebrow{margin:0;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:14.5px;line-height:1.35;text-align:left}
+.rules li{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:center}
+.rchip{font-weight:700;font-size:14px;text-align:center;color:var(--gold-ink);background:var(--gold);border-radius:9px;padding:5px 0}
+.rchip.g{background:var(--ok)}.rchip.c{background:#7dd3fc}
+.btns{display:flex;flex-direction:column;gap:10px}
+.btns .btn{flex:none;font-size:16px;padding:12px 14px}
+.small{margin:0;font-size:13px;color:var(--muted)}
+.small b{color:var(--ink)}
+.big{font-size:58px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.rec{align-self:center;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--gold);color:var(--gold-ink);border-radius:99px;padding:3px 12px}
+.rec[hidden]{display:none}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats div{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line);padding-top:8px}
+.stats b{font-size:24px;font-variant-numeric:tabular-nums}
+.stats span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.code{display:flex;justify-content:center;gap:6px}
+.code i{font-style:normal;width:34px;height:40px;display:grid;place-items:center;border-radius:9px;font-weight:700;font-size:22px;background:#1c2543;border:1.5px solid var(--gold)}
+.code[hidden]{display:none}
+#shareBox{width:100%;box-sizing:border-box;font:13px/1.4 var(--ui);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;resize:none}
+@keyframes flip{0%{transform:rotateX(90deg);opacity:.2}65%{transform:rotateX(-14deg);opacity:1}100%{transform:rotateX(0)}}
+@keyframes peg{0%{transform:scale(0)}70%{transform:scale(1.35)}100%{transform:scale(1)}}
+@keyframes put{0%{transform:scale(.7)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+@keyframes keyflash{0%,100%{box-shadow:0 3px 0 #0c1228}25%,75%{box-shadow:0 0 0 3px #7dd3fc,0 3px 0 #0c1228}}
+@keyframes rise{0%{opacity:0;transform:translate(-50%,10px) scale(.7)}15%{opacity:1;transform:translate(-50%,0) scale(1.1)}100%{opacity:0;transform:translate(-50%,-70px) scale(1)}}
+@keyframes fly{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.4)}}
+@keyframes banner{0%{opacity:0;transform:scale(.8)}18%{opacity:1;transform:scale(1.05)}30%{transform:scale(1)}80%{opacity:1}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-delay:0ms!important;transition-duration:.01ms!important}}
+@media (max-height:600px){.emblem{width:48px;height:48px}.stat b{font-size:20px}.key{height:38px;font-size:18px}.card{padding:16px 18px;gap:9px}.card h1{font-size:32px}.rules{font-size:13px;gap:6px}.big{font-size:44px}.chips{min-height:20px}}
+</style><div class="app" id="app">
+  <header class="hud">
+    <div class="stat"><span class="lbl" id="lblL">Vite</span><b id="lives">♥♥♥</b></div>
+    <div class="emblem" id="emblem" aria-hidden="true">
+      <svg viewBox="0 0 80 80">
+        <defs>
+          <radialGradient id="cfSteel" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#5b6c9c"/><stop offset="1" stop-color="#232f52"/></radialGradient>
+          <linearGradient id="cfGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9a8"/><stop offset="1" stop-color="#d9a21c"/></linearGradient>
+        </defs>
+        <circle class="frame" cx="40" cy="40" r="38"/>
+        <g class="bars"><rect x="24" y="38" width="34" height="10" rx="2"/><rect x="20" y="49" width="20" height="10" rx="2"/><rect x="42" y="49" width="20" height="10" rx="2"/><rect x="31" y="27" width="20" height="10" rx="2"/></g>
+        <g class="door">
+          <circle class="face" cx="40" cy="40" r="32"/>
+          <g class="dialwrap" id="dial">
+            <circle class="ring" cx="40" cy="40" r="23"/>
+            <g class="ticks"><line class="tick" x1="40" y1="14" x2="40" y2="19"/><line class="tick" x1="66" y1="40" x2="61" y2="40"/><line class="tick" x1="40" y1="66" x2="40" y2="61"/><line class="tick" x1="14" y1="40" x2="19" y2="40"/><line class="tick" x1="58.4" y1="21.6" x2="55" y2="25"/><line class="tick" x1="58.4" y1="58.4" x2="55" y2="55"/><line class="tick" x1="21.6" y1="58.4" x2="25" y2="55"/><line class="tick" x1="21.6" y1="21.6" x2="25" y2="25"/></g>
+            <line class="spoke" x1="40" y1="40" x2="40" y2="23"/><line class="spoke" x1="40" y1="40" x2="55" y2="49"/><line class="spoke" x1="40" y1="40" x2="25" y2="49"/>
+            <circle class="hub" cx="40" cy="40" r="6"/>
+          </g>
+          <circle class="lamp" cx="40" cy="12" r="3.2"/>
+        </g>
+      </svg>
+    </div>
+    <div class="stat r"><span class="lbl">Punti</span><b id="score">0</b></div>
+  </header>
+  <div class="sub"><span id="roundLbl">Cassaforte 1</span><span id="timeLbl"><b>1:00</b></span></div>
+  <div class="tbar" id="tbar" role="progressbar" aria-label="Tempo"><i id="tfill"></i></div>
+  <div class="chips" id="chips"></div>
+  <div class="board" id="board" aria-label="Tentativi"></div>
+  <div class="msg" id="msg" aria-live="polite"></div>
+  <div class="pad" id="pad">
+    <button class="key" type="button" data-d="1">1</button><button class="key" type="button" data-d="2">2</button><button class="key" type="button" data-d="3">3</button><button class="key" type="button" data-d="4">4</button><button class="key" type="button" data-d="5">5</button>
+    <button class="key" type="button" data-d="6">6</button><button class="key" type="button" data-d="7">7</button><button class="key" type="button" data-d="8">8</button><button class="key" type="button" data-d="9">9</button><button class="key" type="button" data-d="0">0</button>
+    <button class="key act" id="note" type="button" aria-pressed="false">✎ Note</button><button class="key act" id="del" type="button" aria-label="Cancella">⌫</button><button class="key go" id="go" type="button">Prova</button>
+  </div>
+  <footer class="bar">
+    <button class="btn" id="hint" type="button" disabled>Indizio</button>
+    <button class="btn" id="mute" type="button">Suono</button>
+  </footer>
+  <div class="fx" id="fx"></div>
+
+  <section id="menu">
+    <div class="card">
+      <p class="eyebrow">Gioco di deduzione · scassina il codice</p>
+      <h1>Cassa<span>forte</span></h1>
+      <ul class="rules">
+        <li><span class="rchip g">●○</span><span>Scrivi un codice di cifre <b>tutte diverse</b>. ● = cifra giusta al posto giusto. ○ = cifra giusta, ma al posto sbagliato. Non ti dico quali.</span></li>
+        <li><span class="rchip">×5</span><span>Ogni cassaforte aperta di fila alza il moltiplicatore fino a ×5. Meno tentativi e meno tempo usi, più punti fai.</span></li>
+        <li><span class="rchip c">♥♥♥</span><span>Una cassaforte non aperta costa una vita. Arrivano codici sempre più lunghi, fino a 20 casseforti.</span></li>
+      </ul>
+      <div class="btns">
+        <button class="btn primary" id="play" type="button">Serie · 20 casseforti</button>
+        <button class="btn" id="daily" type="button">Codice del giorno</button>
+      </div>
+      <p class="small">Record: <b id="menuBest">0</b> · Oggi: <b id="menuDaily">—</b></p>
+    </div>
+  </section>
+
+  <section id="over" hidden>
+    <div class="card">
+      <p class="eyebrow" id="overMode">Serie</p>
+      <h2 id="overTitle">Fine della serie</h2>
+      <div class="big" id="overScore">0</div>
+      <span class="rec" id="newRecord" hidden>Nuovo record</span>
+      <div class="code" id="overCode" hidden></div>
+      <p class="small" id="overNear"></p>
+      <div class="stats">
+        <div><b id="stA">0</b><span id="stAl">Casseforti</span></div>
+        <div><b id="stB">0</b><span id="stBl">Serie max</span></div>
+        <div><b id="stC">0</b><span id="stCl">Tentativi</span></div>
+      </div>
+      <div class="btns">
+        <button class="btn primary" id="again" type="button">Rigioca</button>
+        <button class="btn" id="share" type="button">Copia risultato</button>
+        <textarea id="shareBox" rows="4" readonly hidden></textarea>
+      </div>
+    </div>
+  </section>
+</div></template>
+
 <script>
 /* © 2026 Silvio Chiaverini. */
 (() => {
@@ -1574,7 +1786,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
   const playerName = () => { try { return cleanName(JSON.parse(localStorage.getItem('nit_name'))); } catch (e) { return ''; } };
   const withName = txt => { const n = playerName(); return n ? n + ' · ' + txt : txt; };
   // ---------- record salvati sul dispositivo: storico per gioco e per giorno (giorno di Roma) ----------
-  const REC_KEY = 'nit_hist', BEST_KEYS = ['bil_best', 'quad_best', 'primo_best', 'resto_best', 'girasette_best', 'rad_best', 'sent_best', 'lampo_best'];
+  const REC_KEY = 'nit_hist', BEST_KEYS = ['bil_best', 'quad_best', 'primo_best', 'resto_best', 'girasette_best', 'rad_best', 'sent_best', 'lampo_best', 'cass_best'];
   const romeDate = d => { d = d || new Date(); try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d); } catch (e) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); } };
   const shiftDay = (ds, k) => { const d = new Date(ds + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + k); return d.toISOString().slice(0, 10); };
   const mondayOf = ds => shiftDay(ds, -((new Date(ds + 'T00:00:00Z').getUTCDay() + 6) % 7));
@@ -1589,7 +1801,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
     recSave(h);
   }
   // Migliore e numero di partite per periodo (oggi, settimana da lunedi', anno, sempre).
-  const BEST_OF = { bilancia: 'bil_best', quadrante: 'quad_best', primo: 'primo_best', resto: 'resto_best', girasette: 'girasette_best', raddoppio: 'rad_best', sentiero: 'sent_best', lampo: 'lampo_best' };
+  const BEST_OF = { bilancia: 'bil_best', quadrante: 'quad_best', primo: 'primo_best', resto: 'resto_best', girasette: 'girasette_best', raddoppio: 'rad_best', sentiero: 'sent_best', lampo: 'lampo_best', cassaforte: 'cass_best' };
   function recAgg(h, game, today) {
     const g = h[game] || {}, ws = mondayOf(today), we = shiftDay(ws, 6), out = { day: null, week: null, month: null, year: null, all: null };
     const take = (k, r) => { const o = out[k] || (out[k] = { best: 0, plays: 0 }); o.best = Math.max(o.best, r.b); o.plays += r.n; };
@@ -5274,6 +5486,433 @@ fit(); startMenuDemo(); refreshMenu(); hud();
 requestAnimationFrame(frame);
 })();
 },
+    cassaforte: function (window, requestAnimationFrame, setTimeout) {
+/* ============================================================================
+   CASSAFORTE: gioco di deduzione. Si scassina un codice di cifre tutte diverse. Dopo ogni tentativo si sa solo
+   QUANTE cifre sono giuste al posto giusto (●) e QUANTE sono giuste ma fuori posto (○), non quali.
+   Due modi: "Serie" (fino a 20 casseforti, codici sempre piu' lunghi, 3 vite, tempo per ogni cassaforte)
+   e "Codice del giorno" (4 cifre, 8 tentativi, uguale per tutti, una sola partita al giorno, si puo' riprendere).
+   Punti serie: (100 x cifre + 40 x tentativi rimasti + fino a 100 di tempo - 50 se usi l'indizio) x moltiplicatore (tetto x5).
+   Struttura: 1) regole e logica pura  2) stato  3) disegno del tabellone  4) audio ed effetti  5) flusso e schermate
+   ============================================================================ */
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const fmt = n => Math.floor(n).toLocaleString('it-IT');
+const fmtMult = m => '×' + String(Math.round(m * 100) / 100).replace('.', ',');
+const clock = s => { s = Math.max(0, Math.ceil(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+
+/* ---------------------------------------------------------------- 1) REGOLE E LOGICA PURA */
+const LIVES = 3, MAX_CODES = 20, DAILY_LEN = 4;
+const LEN_AT = n => n < 2 ? 3 : n < 6 ? 4 : n < 12 ? 5 : 6;                 // lunghezza del codice alla n-esima cassaforte
+const TRIES_OF = { 3: 8, 4: 8, 5: 9, 6: 10 };
+const TIME_OF = { 3: 60, 4: 90, 5: 120, 6: 150 };
+const timeLimit = (len, n) => Math.max(40, TIME_OF[len] - Math.max(0, n - 8) * 5);   // dopo l'ottava cassaforte il tempo cala
+const mult = streak => Math.min(5, 1 + 0.25 * streak);                      // tetto x5: punteggi confrontabili
+const codePoints = (len, triesLeft, timeLeft, limit, hints) =>
+  Math.max(50, 100 * len + 40 * triesLeft + Math.round(100 * clamp(timeLeft / limit, 0, 1)) - 50 * hints);
+const dailyPoints = (triesLeft, secs, hints) =>
+  Math.max(100, 500 + 100 * triesLeft + Math.round(200 * clamp((280 - secs) / 240, 0, 1)) - 100 * hints);
+function mulberry(seed) { let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hashStr(s) { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+function makeCode(len, rnd) {
+  const d = '0123456789'.split('');
+  for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; }
+  return d.slice(0, len).join('');
+}
+function feedback(code, guess) {
+  let exact = 0, present = 0;
+  for (let i = 0; i < guess.length; i++) { if (guess[i] === code[i]) exact++; else if (code.includes(guess[i])) present++; }
+  return { exact, present };
+}
+const validGuess = (g, len) => typeof g === 'string' && g.length === len && /^\d+$/.test(g) && new Set(g).size === len;
+function allCodes(len) {
+  const out = [];
+  (function rec(p, used) { if (p.length === len) { out.push(p.join('')); return; } for (let d = 0; d <= 9; d++) { if (!used[d]) { used[d] = 1; p.push(d); rec(p, used); p.pop(); used[d] = 0; } } })([], []);
+  return out;
+}
+const sameFb = (a, b) => a.exact === b.exact && a.present === b.present;
+
+/* ---------------------------------------------------------------- 2) STATO */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} },
+};
+const today = romeDate();
+const todayLabel = today.slice(8, 10) + '/' + today.slice(5, 7);
+const dailyKey = 'cass_d_' + today, progKey = 'cass_dp_' + today;
+const board = $('board'), msgEl = $('msg'), emblem = $('emblem'), fxEl = $('fx');
+let state = 'menu', mode = 'serie', gen = 0, locked = false, noteMode = false;
+let code = '', len = 3, maxTries = 7, guesses = [], cur = [], excl = new Set(), hintUsed = 0;
+let n = 0, solved = 0, lives = LIVES, streak = 0, maxStreak = 0, score = 0, dispScore = 0, totalTries = 0;
+let tLeft = 0, tLimit = 0, elapsed = 0, codeSecs = 0, animRow = -1, angle = 0, msgTok = 0, hintRnd = Math.random;
+let best = store.get('cass_best', 0), prevBest = best, over = false, muted = store.get('cass_mute', false);
+let lastKind = '', dailyGrid = [], hintDigit = '', tickSec = -1, TS = 1;   // TS: scala dei ritardi (solo per i test)
+
+/* ---------------------------------------------------------------- 4) AUDIO ED EFFETTI */
+let AC = null;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC = null; } }
+  if (AC && AC.state === 'suspended') AC.resume().catch(() => {});
+  return AC;
+}
+function tone(f, d = 0.1, type = 'sine', v = 0.12, when = 0, slide = 0) {
+  if (muted || !AC) return;
+  const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime + when;
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + d);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  o.connect(g).connect(AC.destination); o.start(t); o.stop(t + d + 0.03);
+}
+const sfx = {
+  key: d => tone(480 + (+d) * 24, 0.045, 'square', 0.05),
+  del: () => tone(280, 0.05, 'square', 0.05),
+  note: () => tone(700, 0.05, 'triangle', 0.07),
+  err: () => tone(150, 0.18, 'sawtooth', 0.08, 0, 90),
+  tumbler: (k, w) => tone(820 + k * 70, 0.035, 'triangle', 0.09, w),
+  peg: (e, w) => tone(e ? 880 : 520, 0.09, e ? 'sine' : 'triangle', 0.1, w),
+  hint: () => { tone(900, 0.08, 'sine', 0.1); tone(1200, 0.1, 'sine', 0.08, 0.07); },
+  solve: () => { [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.16, 'sine', 0.12, i * 0.07)); tone(110, 0.3, 'triangle', 0.16, 0.05, 70); },
+  fail: () => { tone(220, 0.25, 'sawtooth', 0.1, 0, 110); tone(160, 0.35, 'sawtooth', 0.09, 0.15, 70); },
+  tick: () => tone(1000, 0.03, 'square', 0.04),
+  start: () => { tone(392, 0.08, 'triangle', 0.09); tone(587, 0.12, 'triangle', 0.09, 0.08); },
+  over: () => [400, 300, 200, 150].forEach((f, i) => tone(f, 0.2, 'sawtooth', 0.08, i * 0.1)),
+  win: () => [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => tone(f, 0.2, 'sine', 0.12, i * 0.09)),
+};
+const buzz = ms => { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {} };
+
+function rect(el) { const a = $('app').getBoundingClientRect(), r = el.getBoundingClientRect(); return { x: r.left - a.left + r.width / 2, y: r.top - a.top + r.height / 2 }; }
+function coins(x, y, count) {
+  if (reduceMotion) return;
+  for (let i = 0; i < count; i++) {
+    const c = document.createElement('i'), a = Math.random() * Math.PI * 2, sp = 60 + Math.random() * 130;
+    c.className = 'coin'; c.style.left = x + 'px'; c.style.top = y + 'px';
+    c.style.setProperty('--dx', Math.cos(a) * sp + 'px'); c.style.setProperty('--dy', (Math.sin(a) * sp + 40) + 'px'); c.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+    fxEl.appendChild(c); setTimeout(() => c.remove(), 1200);
+  }
+}
+function floatText(html, x, y, bad) {
+  const f = document.createElement('div');
+  f.className = 'float' + (bad ? ' bad' : ''); f.innerHTML = html; f.style.left = x + 'px'; f.style.top = y + 'px';
+  fxEl.appendChild(f); setTimeout(() => f.remove(), 1500);
+}
+function banner(title, sub) {
+  const b = document.createElement('div'); b.className = 'banner';
+  b.innerHTML = (sub ? '<small>' + sub + '</small>' : '') + title;
+  fxEl.appendChild(b); setTimeout(() => b.remove(), 1600);
+}
+function msg(t, bad) {
+  msgEl.textContent = t; msgEl.className = 'msg' + (bad ? ' bad' : '');
+  const k = ++msgTok;
+  if (t) setTimeout(() => { if (k === msgTok) msgEl.textContent = ''; }, 2600);
+}
+function shakeRow() { const a = board.querySelector('.act'); if (!a) return; a.classList.remove('shake'); void a.offsetWidth; a.classList.add('shake'); }
+function emblemReset() { emblem.classList.remove('ok', 'bad', 'open'); }
+
+/* ---------------------------------------------------------------- 3) DISEGNO DEL TABELLONE */
+function fit() {
+  const bw = board.clientWidth, bh = board.clientHeight;
+  if (!bw || !bh) return;
+  const rh = clamp(Math.floor((bh - (maxTries - 1) * 5 - 8) / maxTries), 24, 46);
+  const ts = Math.max(22, Math.min(Math.floor(rh * 0.92), Math.floor((bw - 110) / len) - 6));
+  board.style.setProperty('--rh', rh + 'px'); board.style.setProperty('--ts', ts + 'px');
+}
+function render() {
+  fit();
+  const pc = Math.ceil(len / 2), rows = [];
+  for (let i = 0; i < maxTries; i++) {
+    const gu = guesses[i], active = i === guesses.length && state === 'play';
+    let tiles = '', pegs = '';
+    for (let k = 0; k < len; k++) {
+      const ch = gu ? gu.g[k] : active && cur[k] !== undefined ? cur[k] : '';
+      tiles += '<span class="t' + (ch !== '' ? ' on' : '') + (gu && i === animRow ? ' flip' : '') + '" style="--d:' + k * 110 + 'ms">' + ch + '</span>';
+    }
+    for (let k = 0; k < len; k++) {
+      const cls = gu ? (k < gu.exact ? 'e' : k < gu.exact + gu.present ? 'h' : '') : '';
+      pegs += '<span class="p ' + cls + (gu && i === animRow && cls ? ' pop' : '') + '" style="--d:' + (len * 110 + k * 70) + 'ms"></span>';
+    }
+    const label = gu ? 'Tentativo ' + (i + 1) + ': ' + gu.g.split('').join(' ') + ', ' + gu.exact + ' al posto giusto, ' + gu.present + ' fuori posto' : 'Tentativo ' + (i + 1);
+    rows.push('<div class="row' + (gu ? ' done' : '') + (active ? ' act' : '') + '" aria-label="' + label + '"><span class="no">' + (i + 1) + '</span><div class="tiles">' + tiles + '</div><div class="pegs" style="--pc:' + pc + '">' + pegs + '</div></div>');
+  }
+  board.innerHTML = rows.join('');
+  const a = board.querySelector('.act') || board.querySelector('.row.done:last-of-type');
+  if (a) board.scrollTop = Math.max(0, a.offsetTop - board.offsetTop - board.clientHeight / 2 + a.offsetHeight / 2);
+}
+function updatePad() {
+  document.querySelectorAll('#pad .key[data-d]').forEach(k => {
+    k.classList.toggle('used', cur.includes(k.dataset.d));
+    k.classList.toggle('x', excl.has(k.dataset.d));
+  });
+  $('go').classList.toggle('ready', state === 'play' && cur.length === len);
+  $('note').classList.toggle('on', noteMode); $('note').setAttribute('aria-pressed', noteMode ? 'true' : 'false');
+  const canHint = state === 'play' && !locked && hintUsed === 0 && [...'0123456789'].some(d => !code.includes(d) && !excl.has(d));
+  $('hint').disabled = !canHint;
+  $('hint').textContent = hintUsed ? 'Indizio usato' : 'Indizio −' + (mode === 'daily' ? 100 : 50);
+}
+let hc = {};
+function hud() {
+  const set = (id, v, html) => { if (hc[id] !== v) { hc[id] = v; $(id)[html ? 'innerHTML' : 'textContent'] = v; } };
+  set('score', fmt(dispScore));
+  if (mode === 'daily') { set('lblL', 'Tentativi'); set('lives', guesses.length + '/' + maxTries); $('lives').style.color = 'var(--gold)'; }
+  else { set('lblL', 'Vite'); set('lives', '♥'.repeat(lives) + '<span class="dead">' + '♥'.repeat(LIVES - lives) + '</span>', true); $('lives').style.color = ''; }
+  if (mode === 'daily') { set('roundLbl', 'Codice del giorno ' + todayLabel + ' · ' + len + ' cifre'); set('timeLbl', '<b>' + clock(elapsed) + '</b>', true); }
+  else { set('roundLbl', 'Cassaforte ' + Math.min(n + 1, MAX_CODES) + ' di ' + MAX_CODES + ' · ' + len + ' cifre'); set('timeLbl', '<b>' + clock(tLeft) + '</b>', true); }
+  const tb = $('tbar'), pct = tLimit > 0 ? clamp(tLeft / tLimit, 0, 1) : 1;
+  $('tfill').style.width = (pct * 100).toFixed(1) + '%';
+  tb.classList.toggle('mid', tLimit > 0 && pct <= 0.5 && pct > 0.2); tb.classList.toggle('low', tLimit > 0 && pct <= 0.2 && state === 'play'); tb.classList.toggle('off', tLimit === 0);
+  const chips = [];
+  if (mode === 'daily') chips.push('<span class="chip day">Uguale per tutti</span>');
+  else if (streak > 0) chips.push('<span class="chip combo">🔥 ' + streak + ' di fila · ' + fmtMult(mult(streak)) + '</span>');
+  if (hintUsed) chips.push('<span class="chip hint">💡 indizio</span>');
+  if (noteMode) chips.push('<span class="chip note">✎ note: tocca le cifre da escludere</span>');
+  set('chips', chips.join(''), true);
+}
+
+/* ---------------------------------------------------------------- 5) FLUSSO E SCHERMATE */
+function dailyCode() { return makeCode(DAILY_LEN, mulberry(hashStr('cassaforte-' + today))); }
+function saveProgress() {
+  if (mode !== 'daily') return;
+  store.set(progKey, { g: guesses.map(x => x.g), h: hintDigit ? [hintDigit] : [], s: Math.round(elapsed), u: hintUsed });
+}
+function newCode() {
+  len = mode === 'daily' ? DAILY_LEN : LEN_AT(n);
+  maxTries = TRIES_OF[len];
+  code = mode === 'daily' ? dailyCode() : makeCode(len, Math.random);
+  guesses = []; cur = []; excl = new Set(); hintUsed = 0; hintDigit = ''; tickSec = -1; codeSecs = 0; animRow = -1; locked = false; noteMode = false;
+  tLimit = mode === 'daily' ? 0 : timeLimit(len, n); tLeft = tLimit;
+  hintRnd = mode === 'daily' ? mulberry(hashStr('indizio-' + today)) : Math.random;
+  if (mode === 'daily') {
+    const p = store.get(progKey, null);
+    if (p && Array.isArray(p.g)) {
+      p.g.forEach(g => { if (validGuess(g, len) && guesses.length < maxTries) guesses.push(Object.assign({ g }, feedback(code, g))); });
+      (p.h || []).forEach(d => { if (/^\d$/.test(d) && !code.includes(d)) { excl.add(d); hintDigit = d; } });
+      hintUsed = p.u ? 1 : 0; elapsed = +p.s || 0;
+    }
+  }
+  emblemReset(); state = 'play';
+  render(); updatePad(); hc = {}; hud();
+  const first = !store.get('cass_seen', false);
+  if (first) { store.set('cass_seen', true); msg('Scrivi ' + len + ' cifre diverse e premi Prova. ● giusta e al suo posto, ○ giusta ma altrove.'); }
+  else if (mode === 'serie') banner('Cassaforte ' + (n + 1), len + ' cifre · ' + maxTries + ' tentativi');
+  sfx.start();
+}
+function start(m) {
+  ac(); gen++; mode = m; over = false; delete $('over').dataset.replay;
+  n = 0; solved = 0; lives = LIVES; streak = 0; maxStreak = 0; score = 0; dispScore = 0; totalTries = 0; elapsed = 0; dailyGrid = [];
+  best = store.get('cass_best', 0); prevBest = best;
+  $('menu').hidden = true; $('over').hidden = true;
+  fxEl.innerHTML = '';
+  newCode();
+}
+function pressDigit(d) {
+  if (state !== 'play' || locked) return;
+  ac();
+  if (noteMode) { if (excl.has(d)) excl.delete(d); else excl.add(d); sfx.note(); updatePad(); hud(); saveProgress(); return; }
+  if (cur.length >= len) { sfx.err(); shakeRow(); msg('Hai già ' + len + ' cifre: premi Prova o cancella.', true); return; }
+  if (cur.includes(d)) { sfx.err(); shakeRow(); msg('Cifre tutte diverse: il ' + d + ' è già nel tentativo.', true); return; }
+  cur.push(d); sfx.key(d); render(); updatePad();
+}
+function backspace() { if (state !== 'play' || locked || !cur.length) return; cur.pop(); sfx.del(); render(); updatePad(); }
+function submit() {
+  if (state !== 'play' || locked) return;
+  ac();
+  if (cur.length !== len) { sfx.err(); shakeRow(); msg('Servono ' + len + ' cifre.', true); return; }
+  const g = cur.join(''), fb = feedback(code, g);
+  guesses.push(Object.assign({ g }, fb)); cur = []; locked = true; animRow = guesses.length - 1;
+  angle += 50 + fb.exact * 45; $('dial').style.transform = 'rotate(' + angle + 'deg)';
+  render(); updatePad(); hud(); saveProgress();
+  for (let k = 0; k < len; k++) sfx.tumbler(k, k * 0.11);
+  for (let k = 0; k < fb.exact + fb.present; k++) sfx.peg(k < fb.exact, len * 0.11 + k * 0.07);
+  const ms = Math.round((len * 110 + (fb.exact + fb.present) * 70 + 260) * (reduceMotion ? 0.2 : 1) * TS), g0 = gen;
+  setTimeout(() => {
+    if (g0 !== gen) return;
+    locked = false; animRow = -1;
+    if (fb.exact === len) onSolved();
+    else if (guesses.length >= maxTries) onFailed('tries');
+    else { render(); updatePad(); }
+  }, ms);
+}
+function useHint() {
+  if (state !== 'play' || locked || hintUsed) return;
+  const pool = [...'0123456789'].filter(d => !code.includes(d) && !excl.has(d));
+  if (!pool.length) return;
+  ac();
+  const d = pool[Math.floor(hintRnd() * pool.length)];
+  excl.add(d); hintDigit = d; hintUsed = 1; sfx.hint(); buzz(15);
+  msg('Indizio: il ' + d + ' non c\'è nel codice.');
+  updatePad(); hud(); saveProgress();
+  const k = document.querySelector('#pad .key[data-d="' + d + '"]'); if (k) { k.classList.add('flash'); setTimeout(() => k.classList.remove('flash'), 1000); }
+}
+function onSolved() {
+  state = 'between';
+  const triesLeft = maxTries - guesses.length, p = rect(emblem), g0 = gen;
+  let pts, m = 1;
+  if (mode === 'daily') pts = dailyPoints(triesLeft, elapsed, hintUsed);
+  else { m = mult(streak); pts = Math.round(codePoints(len, triesLeft, tLeft, tLimit, hintUsed) * m); streak++; maxStreak = Math.max(maxStreak, streak); }
+  score += pts; solved++; totalTries += guesses.length;
+  emblem.classList.add('ok', 'open'); sfx.solve(); buzz(40); coins(p.x, p.y, 26);
+  floatText('+' + fmt(pts) + (m > 1 ? '<small>' + fmtMult(m) + '</small>' : ''), p.x, p.y + 44);
+  if (mode === 'serie' && [3, 6, 10, 15].includes(streak)) setTimeout(() => { if (g0 === gen) banner(streak >= 10 ? 'Maestro scassinatore!' : streak >= 6 ? 'Mani d\'oro!' : 'Serie di ' + streak + '!', fmtMult(mult(streak)) + ' sui prossimi'); }, 500);
+  msg('Aperta in ' + guesses.length + (guesses.length === 1 ? ' tentativo' : ' tentativi') + '!');
+  setTimeout(() => {
+    if (g0 !== gen) return;
+    if (mode === 'daily') { finish(true); return; }
+    n++;
+    if (n >= MAX_CODES) finish('clear'); else newCode();
+  }, (reduceMotion ? 500 : 1500) * TS);
+}
+function onFailed(why) {
+  if (state !== 'play') return;
+  state = 'between';
+  const p = rect(emblem), g0 = gen;
+  emblem.classList.add('bad'); sfx.fail(); buzz(120);
+  msg((why === 'time' ? 'Tempo scaduto. ' : 'Tentativi finiti. ') + 'Il codice era ' + code + '.', true);
+  if (mode === 'serie') { lives--; streak = 0; floatText('−1 vita', p.x, p.y + 44, true); n++; }
+  hc = {}; hud();
+  setTimeout(() => {
+    if (g0 !== gen) return;
+    if (mode === 'daily') finish(false);
+    else if (lives <= 0) finish('lives');
+    else if (n >= MAX_CODES) finish('clear');
+    else newCode();
+  }, (reduceMotion ? 700 : 2200) * TS);
+}
+function dailyGridText(gs) {
+  return gs.map(x => '🟩'.repeat(x.exact) + '🟨'.repeat(x.present) + '⬛'.repeat(len - x.exact - x.present)).join('\n');
+}
+function fillOver(r) {
+  // r: { kind, score, ... } vedi chiamanti
+  $('overMode').textContent = r.mode;
+  $('overTitle').textContent = r.title;
+  $('overScore').textContent = fmt(r.score);
+  $('newRecord').hidden = !r.record;
+  $('overNear').textContent = r.near || '';
+  $('stA').textContent = r.a[0]; $('stAl').textContent = r.a[1];
+  $('stB').textContent = r.b[0]; $('stBl').textContent = r.b[1];
+  $('stC').textContent = r.c[0]; $('stCl').textContent = r.c[1];
+  const oc = $('overCode'); oc.hidden = !r.code; oc.innerHTML = r.code ? r.code.split('').map(d => '<i>' + d + '</i>').join('') : '';
+  $('again').textContent = r.again;
+  $('share').textContent = 'Copia risultato'; $('shareBox').hidden = true;
+}
+let shareText = '';
+function finish(kind) {
+  if (over) return;
+  over = true; state = 'over'; lastKind = kind; hc = {};
+  const g0 = gen;
+  if (mode === 'daily') {
+    const win = kind === true, res = { s: win ? score : 0, ok: win, t: guesses.length, sec: Math.round(elapsed), h: hintUsed, len, max: maxTries, grid: dailyGridText(guesses), code: win ? '' : code };
+    store.set(dailyKey, res); store.del(progKey);
+    win ? sfx.win() : sfx.over();
+    showDaily(res, false);
+    return;
+  }
+  const isRecord = score > prevBest && score > 0;
+  if (score > store.get('cass_best', 0)) store.set('cass_best', score);
+  kind === 'clear' ? sfx.win() : sfx.over(); buzz(80);
+  const gap = Math.floor(prevBest - score);
+  const avg = solved ? (totalTries / solved).toFixed(1).replace('.', ',') : '—';
+  const title = kind === 'clear' ? 'Banca svuotata!' : 'Fine della serie';
+  const near = isRecord ? (prevBest > 0 ? 'Hai battuto il tuo record di ' + fmt(prevBest) + '.' : 'Primo record: ora hai un punteggio da battere.')
+    : prevBest > 0 ? (gap < prevBest * 0.25 ? 'Ci sei quasi: ti mancano ' + fmt(gap) + ' punti al record.' : 'Record da battere: ' + fmt(prevBest) + '.') : 'Prima serie: ora hai un record da battere.';
+  fillOver({ mode: 'Serie · ' + (kind === 'clear' ? 'tutte le 20 casseforti' : solved + (solved === 1 ? ' cassaforte aperta' : ' casseforti aperte')), title, score, record: isRecord, near, a: [solved, 'Aperte'], b: [maxStreak, 'Serie max'], c: [avg, 'Tentativi'], again: 'Rigioca' });
+  shareText = 'Cassaforte · Serie\n' + fmt(score) + ' punti · ' + solved + (solved === 1 ? ' cassaforte aperta' : ' casseforti aperte') + (kind === 'clear' ? ' (tutte!)' : '') + ' · serie di ' + maxStreak + ' (' + fmtMult(mult(maxStreak)) + ')';
+  setTimeout(() => { if (g0 === gen) { $('over').hidden = false; $('again').focus({ preventScroll: true }); } }, 500 * TS);
+}
+function showDaily(res, replay) {
+  const g0 = gen;
+  fillOver({
+    mode: 'Codice del giorno · ' + todayLabel + ' · ' + res.len + ' cifre', title: res.ok ? 'Cassaforte aperta!' : 'Cassaforte chiusa', score: res.s, record: false,
+    near: res.ok ? 'Aperta in ' + res.t + ' tentativi su ' + res.max + '. Domani un nuovo codice.' : 'Il codice di oggi era questo. Domani un nuovo codice.',
+    a: [res.t + '/' + res.max, 'Tentativi'], b: [clock(res.sec), 'Tempo'], c: [res.h ? 'sì' : 'no', 'Indizio'], code: res.ok ? '' : res.code, again: 'Gioca la serie',
+  });
+  shareText = 'Cassaforte · codice del giorno ' + todayLabel + '\n' + (res.ok ? res.t + '/' + res.max + ' tentativi · ' + fmt(res.s) + ' punti' : 'non aperta (' + res.t + '/' + res.max + ')') + '\n' + res.grid;
+  if (replay) { $('over').dataset.replay = '1'; $('menu').hidden = true; $('over').hidden = false; $('again').focus({ preventScroll: true }); return; }
+  delete $('over').dataset.replay;
+  setTimeout(() => { if (g0 === gen) { $('over').hidden = false; $('again').focus({ preventScroll: true }); } }, 500 * TS);
+}
+function refreshMenu() {
+  $('menuBest').textContent = fmt(store.get('cass_best', 0));
+  const d = store.get(dailyKey, null), p = store.get(progKey, null);
+  $('menuDaily').textContent = d ? fmt(d.s) : '—';
+  $('daily').textContent = d ? 'Codice del giorno · fatto ✓' : p && p.g && p.g.length ? 'Codice del giorno · riprendi (' + p.g.length + ')' : 'Codice del giorno';
+}
+function demo() {
+  // tabellone di esempio dietro al menu
+  mode = 'serie'; state = 'menu'; len = 4; maxTries = 8; code = '4719'; cur = []; guesses = [];
+  ['1234', '5671', '4817', '4719'].slice(0, 3).forEach(g => guesses.push(Object.assign({ g }, feedback(code, g))));
+  render(); updatePad(); hud();
+}
+
+/* eventi */
+$('pad').addEventListener('click', e => {
+  const b = e.target.closest('.key'); if (!b) return;
+  if (b.dataset.d !== undefined) pressDigit(b.dataset.d);
+  else if (b.id === 'del') backspace();
+  else if (b.id === 'go') submit();
+  else if (b.id === 'note') { if (state === 'play') { noteMode = !noteMode; ac(); sfx.note(); updatePad(); hud(); } }
+});
+$('hint').addEventListener('click', useHint);
+$('play').addEventListener('click', () => start('serie'));
+$('daily').addEventListener('click', () => {
+  const d = store.get(dailyKey, null);
+  if (d) { gen++; mode = 'daily'; over = true; state = 'over'; showDaily(d, true); return; }
+  start('daily');
+});
+$('again').addEventListener('click', () => start('serie'));
+$('share').addEventListener('click', () => {
+  const txt = withName(shareText);
+  const fallback = () => { const b = $('shareBox'); b.value = txt; b.hidden = false; b.focus(); b.select(); $('share').textContent = 'Seleziona e copia il testo'; };
+  try { navigator.clipboard.writeText(txt).then(() => { $('share').textContent = 'Copiato'; }, fallback); } catch (e) { fallback(); }
+});
+const syncMute = () => { $('mute').textContent = muted ? 'Muto' : 'Suono'; };
+$('mute').addEventListener('click', () => { muted = !muted; store.set('cass_mute', muted); ac(); syncMute(); });
+syncMute();
+window.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey || state !== 'play') return;
+  const tag = e.target && e.target.tagName;
+  if (tag === 'TEXTAREA' || tag === 'INPUT') return;
+  if (/^\d$/.test(e.key)) { pressDigit(e.key); e.preventDefault(); }
+  else if (e.key === 'Backspace') { backspace(); e.preventDefault(); }
+  else if (e.key === 'Enter') { if (document.activeElement && document.activeElement.tagName === 'BUTTON' && document.activeElement.id !== 'go') return; submit(); e.preventDefault(); }
+  else if (e.key === 'n' || e.key === 'N') { noteMode = !noteMode; updatePad(); hud(); }
+  else if (e.key === 'h' || e.key === 'H') useHint();
+});
+window.addEventListener('resize', render);
+
+/* ciclo: tempo, punteggio animato, ultimi secondi */
+let last = 0;
+function frame(t) {
+  if (!$('app')) return;                      // il launcher ha tolto il gioco: ultimo fotogramma già in coda
+  requestAnimationFrame(frame);
+  const dt = clamp((t - last) / 1000, 0, 0.1); last = t || last;
+  if (state === 'play' && !document.hidden && !locked) {
+    codeSecs += dt; elapsed += dt;
+    if (tLimit > 0) {
+      tLeft = Math.max(0, tLeft - dt);
+      if (tLeft <= 0) onFailed('time');
+      else if (tLeft <= 10 && Math.ceil(tLeft) !== tickSec) { tickSec = Math.ceil(tLeft); sfx.tick(); }
+    }
+  }
+  dispScore += (score - dispScore) * Math.min(1, dt * 9); if (Math.abs(score - dispScore) < 1) dispScore = score;
+  hud();
+}
+
+/* Interfaccia di prova (usata dai test automatici; innocua per il gioco). */
+window.__C = {
+  LEN_AT, TRIES_OF, TIME_OF, timeLimit, mult, codePoints, dailyPoints, makeCode, feedback, validGuess, allCodes, sameFb, mulberry, hashStr, dailyCode, MAX_CODES, LIVES,
+  start, pressDigit, backspace, submit, useHint, type(s) { [...s].forEach(pressDigit); },
+  setCode(c) { code = c; len = c.length; maxTries = TRIES_OF[len] || maxTries; guesses = []; cur = []; render(); updatePad(); },
+  setTime(v) { tLeft = v; }, setTimescale(x) { TS = x; },
+  get S() { return { state, mode, code, len, maxTries, guesses, cur, n, solved, lives, streak, maxStreak, score, tLeft, tLimit, elapsed, locked, hintUsed, excl: [...excl], over }; },
+};
+
+fit(); demo(); refreshMenu();
+requestAnimationFrame(frame);
+})();
+},
   };
 
   const launcher = document.getElementById('lx-launcher');
@@ -5298,7 +5937,7 @@ requestAnimationFrame(frame);
   }
 
   // ---------- conteggio per il test: quale gioco viene rigiocato di più ----------
-  const NAMES = { bilancia: 'Bilancia', quadrante: 'Quadrante', primo: 'Primo', resto: 'Resto', girasette: 'Girasette', raddoppio: 'Raddoppio', sentiero: 'Sentiero', lampo: 'Lampo' };
+  const NAMES = { bilancia: 'Bilancia', quadrante: 'Quadrante', primo: 'Primo', resto: 'Resto', girasette: 'Girasette', raddoppio: 'Raddoppio', sentiero: 'Sentiero', lampo: 'Lampo', cassaforte: 'Cassaforte' };
   const KEYS = Object.keys(NAMES);
   const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   const ls = {

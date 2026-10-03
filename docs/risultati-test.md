@@ -105,3 +105,14 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 - **Dentro ogni gioco:** riga "Record · oggi · settimana · mese · sempre" nel menu e a fine partita, aggiornata dopo ogni partita.
 - **Corretto:** il listener di Lampo su `document` non veniva rimosso all'uscita e poteva dare un errore dopo il ritorno al launcher.
 - **Limite:** i record restano sul dispositivo (backup manuale), i punteggi non sono verificabili, e le partite abbandonate non contano nemmeno come record.
+
+## Cassaforte
+
+- **Prototipo ricevuto (simulazione):** il verde era mostrato sulla cifra con indice uguale al *numero* di cifre giuste, non su quelle giuste: 12-18% delle cifre colorate in modo falso. Un solutore casuale coerente apriva il codice in 4,2-4,8 tentativi su 6-9 disponibili e non perdeva mai: troppo facile. Gli altri due giochi del file (ponte e equazione in caduta) non sono stati integrati: nel ponte la prima scelta è alla cieca (10-20% di successo con la scelta migliore al primo tentativo), nell'equazione il primo numero va scelto senza vedere gli operatori.
+- **Nuovo feedback (solo conteggi):** un solutore casuale che usa solo le informazioni del gioco apre il codice in media in 5,3 tentativi (3 cifre), 5,5 (4), 5,9 (5), 6,4 (6). Con 7 tentativi per 3 cifre perdeva il 3,8% delle volte; i tentativi sono stati portati a 8 (3 cifre), 8 (4), 9 (5), 10 (6).
+- **Logica:** feedback, lunghezza per cassaforte, moltiplicatore con tetto ×5 (×1, ×1,25, ×2, ×5, ×5), tentativi validi (cifre diverse), codici sempre a cifre diverse, codice del giorno stabile, punti entro i limiti.
+- **La serie finisce sempre:** 6 serie del bot a velocità massima finite tutte (20 casseforti a testa), oltre ai limiti di vite e tempo.
+- **Tocchi reali a 360×700 e 320×560:** cifra ripetuta rifiutata, cancellazione, tentativo incompleto non inviato, tastierino bloccato durante la rivelazione, note, un solo indizio per cassaforte, vita persa per tentativi finiti e per tempo scaduto, record registrato per periodo e in `cass_best`, nessuno scorrimento orizzontale, pulsante di uscita dentro lo schermo.
+- **Codice del giorno:** 4 cifre, 8 tentativi, nessun tempo; uscendo e rientrando la partita riprende (tentativo e codice uguali); una volta finita non si rigioca: il risultato si rivede senza contare una seconda partita.
+- **Corretto durante i test:** l'ultimo fotogramma dopo l'uscita dal gioco dava un errore su un elemento già rimosso (stessa causa già vista in Lampo).
+- **Limite:** non provato con persone vere; la difficoltà delle serie lunghe (5 e 6 cifre, tempo che cala) è calibrata sul solutore, non sui giocatori.
