@@ -170,3 +170,9 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 
 - Quando la serie finisce per vite perse (tentativi finiti o tempo scaduto), la schermata finale mostra «Il codice che non hai aperto era:» con le cifre esatte. Verificato a 360×700 e 320×560: il codice mostrato coincide con quello dell'ultima cassaforte persa. Nel codice del giorno la combinazione si vedeva già.
 - Le casseforti mancate prima dell'ultima mostrano il codice per qualche secondo (come prima). Se vuoi vedere sempre tutti i codici mancati a fine serie, è una riga in più.
+
+## Cassaforte: il codice non aperto, più evidente (seconda correzione)
+
+- **Segnalazione:** «a fine gioco la combinazione non si vede». Nei miei test si vedeva già (provato anche con una partita a velocità normale, tre vite perse con tocchi veri sul tastierino: compare «Il codice che non hai aperto era: 7425»). La causa più probabile è che il file usato fosse una versione precedente. [Ipotesi, non l'ho potuto verificare]
+- **Cosa ho comunque migliorato:** a ogni cassaforte mancata il codice compare grande al centro del tabellone per circa 3 secondi (prima: una riga piccola per 2 secondi); a fine serie si vedono l'ultimo codice e gli altri mancati prima («Prima: 123 · 2483»).
+- **Numero di versione** in fondo alla home (`BUILD`, ora 2026-10-03.4): se qualcosa non corrisponde a quello che leggi qui, controlla prima quel numero.

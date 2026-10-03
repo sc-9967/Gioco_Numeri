@@ -58,10 +58,13 @@ let fails = 0; const ok = (c, m) => { if (!c) fails++; console.log((c ? 'OK  ' :
     ok(S2.guesses.length === 0 && S2.len === 3, 'nuova cassaforte (3 cifre)');
     // fallimento per tentativi finiti
     await page.evaluate(() => { window.__C.setTimescale(0.05); window.__C.setCode('123'); });
-    for (let i = 0; i < 8; i++) { await page.evaluate(i => { const C = window.__C; C.type(['045', '046', '047', '048', '049', '456', '457', '458'][i]); C.submit(); }, i); await sleep(120); }
-    await sleep(200);
+    for (let i = 0; i < 7; i++) { await page.evaluate(i => { const C = window.__C; C.type(['045', '046', '047', '048', '049', '456', '457', '458'][i]); C.submit(); }, i); await sleep(120); }
+    await page.evaluate(() => { window.__C.setTimescale(1); const C = window.__C; C.type('458'); C.submit(); });   // ultimo tentativo a velocità normale: si legge il codice
+    await sleep(1800);
+    const rv = await page.evaluate(() => ({ vis: !!document.querySelector('.reveal'), code: [...document.querySelectorAll('.reveal .code i')].map(i => i.textContent).join(''), txt: document.querySelector('.reveal p') && document.querySelector('.reveal p').textContent }));
+    ok(rv.vis && rv.code === '123' && /codice era/i.test(rv.txt), 'cassaforte mancata: il codice esatto compare grande in partita (' + rv.code + ')');
     await page.screenshot({ path: `shots/cas-${tag}-fail.png` });
-    await sleep(600);
+    await page.evaluate(() => window.__C.setTimescale(0.05)); await sleep(3600);
     const S3 = await page.evaluate(() => window.__C.S);
     ok(S3.lives === 2 && S3.streak === 0, 'tentativi finiti: vita persa (' + S3.lives + '), serie azzerata');
     // fallimento per tempo
@@ -72,6 +75,8 @@ let fails = 0; const ok = (c, m) => { if (!c) fails++; console.log((c ? 'OK  ' :
     const over = await page.isVisible('#over'); const S4 = await page.evaluate(() => window.__C.S);
     ok(over && S4.state === 'over', 'tre vite perse: fine della serie');
     const shownCode = await page.evaluate(() => ({ vis: !document.getElementById('overCode').hidden, code: [...document.querySelectorAll('#overCode i')].map(i => i.textContent).join(''), lbl: document.getElementById('overCodeLbl').textContent, lblVis: !document.getElementById('overCodeLbl').hidden }));
+    const earlier = await page.evaluate(() => ({ vis: !document.getElementById('overMissed').hidden, txt: document.getElementById('overMissed').textContent }));
+    ok(earlier.vis && /^Prima: 123/.test(earlier.txt), 'a fine serie compaiono anche i codici mancati prima: ' + earlier.txt);
     ok(shownCode.vis && shownCode.lblVis && shownCode.code === lastCode && /non hai aperto/.test(shownCode.lbl), 'fine serie sbagliata: si vede la combinazione esatta ' + shownCode.code + ' (era ' + lastCode + ') · ' + shownCode.lbl);
     await page.screenshot({ path: `shots/cas-${tag}-over.png` });
     const hist = await page.evaluate(() => JSON.parse(localStorage.getItem('nit_hist') || '{}').cassaforte);

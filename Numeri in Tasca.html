@@ -357,6 +357,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 
   <footer class="lx-foot">
     <p><strong>© 2026 Silvio Chiaverini.</strong></p>
+    <p class="lx-ver" id="lx-ver" style="font-size:12px;opacity:.7"></p>
     <p>Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio, Sentiero, Lampo e Cassaforte sono giochi ideati e realizzati da Silvio Chiaverini. Codice rilasciato con licenza GNU GPL v3 (vedi LICENSE).</p>
   </footer>
 </div>
@@ -1750,6 +1751,11 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
 .code{display:flex;justify-content:center;gap:6px}
 .code i{font-style:normal;width:34px;height:40px;display:grid;place-items:center;border-radius:9px;font-weight:700;font-size:22px;background:#1c2543;border:1.5px solid var(--gold)}
 .code[hidden]{display:none}
+.reveal{position:absolute;left:0;right:0;top:30%;display:flex;flex-direction:column;align-items:center;gap:10px;z-index:7;pointer-events:none;animation:revin .35s ease-out both}
+.reveal p{margin:0;font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#ff8b99;text-shadow:0 2px 10px rgba(0,0,0,.8)}
+.reveal .code{background:rgba(7,13,28,.92);padding:12px 14px;border-radius:18px;border:1.5px solid var(--bad);box-shadow:0 10px 40px rgba(0,0,0,.6)}
+.reveal .code i{width:46px;height:56px;font-size:30px}
+@keyframes revin{from{opacity:0;transform:translateY(14px) scale(.9)}to{opacity:1;transform:none}}
 #shareBox{width:100%;box-sizing:border-box;font:13px/1.4 var(--ui);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;resize:none}
 @keyframes flip{0%{transform:rotateX(90deg);opacity:.2}65%{transform:rotateX(-14deg);opacity:1}100%{transform:rotateX(0)}}
 @keyframes peg{0%{transform:scale(0)}70%{transform:scale(1.35)}100%{transform:scale(1)}}
@@ -1828,6 +1834,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
       <span class="rec" id="newRecord" hidden>Nuovo record</span>
       <p class="small" id="overCodeLbl" hidden></p>
       <div class="code" id="overCode" hidden></div>
+      <p class="small" id="overMissed" hidden></p>
       <p class="small" id="overNear"></p>
       <div class="stats">
         <div><b id="stA">0</b><span id="stAl">Casseforti</span></div>
@@ -1854,6 +1861,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
   // Contributo nascosto per ora: metti true per riattivare il riquadro e il link a fine partita.
   const SHOW_DONATE = true;
   const AUTHOR = 'Silvio Chiaverini';
+  const BUILD = '2026-10-03.4';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
   // Nome del giocatore: salvato solo sul dispositivo, compare nei testi che si condividono (mai nelle statistiche anonime).
   const cleanName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
   const playerName = () => { try { return cleanName(JSON.parse(localStorage.getItem('nit_name'))); } catch (e) { return ''; } };
@@ -5725,7 +5733,7 @@ let code = '', len = 3, maxTries = 7, guesses = [], cur = [], excl = new Set(), 
 let n = 0, solved = 0, lives = LIVES, streak = 0, maxStreak = 0, score = 0, dispScore = 0, totalTries = 0;
 let tLeft = 0, tLimit = 0, elapsed = 0, codeSecs = 0, animRow = -1, angle = 0, msgTok = 0, hintRnd = Math.random;
 let best = store.get('cass_best', 0), prevBest = best, over = false, muted = store.get('cass_mute', false);
-let lastKind = '', dailyGrid = [], hintDigit = '', tickSec = -1, lastMiss = '', TS = 1;   // TS: scala dei ritardi (solo per i test)
+let lastKind = '', dailyGrid = [], hintDigit = '', tickSec = -1, lastMiss = '', missed = [], TS = 1;   // TS: scala dei ritardi (solo per i test)
 
 /* ---------------------------------------------------------------- 4) AUDIO ED EFFETTI */
 let AC = null;
@@ -5868,6 +5876,7 @@ function newCode() {
     }
   }
   emblemReset(); state = 'play';
+  { const rv = fxEl.querySelector('.reveal'); if (rv) rv.remove(); }
   render(); updatePad(); hc = {}; hud();
   const first = !store.get('cass_seen', false);
   if (first) { store.set('cass_seen', true); msg('Scrivi ' + len + ' cifre diverse e premi Prova. ● giusta e al suo posto, ○ giusta ma altrove.'); }
@@ -5876,7 +5885,7 @@ function newCode() {
 }
 function start(m) {
   ac(); gen++; mode = m; over = false; delete $('over').dataset.replay;
-  lastMiss = ''; n = 0; solved = 0; lives = LIVES; streak = 0; maxStreak = 0; score = 0; dispScore = 0; totalTries = 0; elapsed = 0; dailyGrid = [];
+  lastMiss = ''; missed = []; n = 0; solved = 0; lives = LIVES; streak = 0; maxStreak = 0; score = 0; dispScore = 0; totalTries = 0; elapsed = 0; dailyGrid = [];
   best = store.get('cass_best', 0); prevBest = best;
   $('menu').hidden = true; $('over').hidden = true;
   fxEl.innerHTML = '';
@@ -5945,7 +5954,8 @@ function onFailed(why) {
   const p = rect(emblem), g0 = gen;
   emblem.classList.add('bad'); sfx.fail(); buzz(120);
   msg((why === 'time' ? 'Tempo scaduto. ' : 'Tentativi finiti. ') + 'Il codice era ' + code + '.', true);
-  if (mode === 'serie') { lives--; streak = 0; lastMiss = code; floatText('−1 vita', p.x, p.y + 44, true); n++; }
+  if (mode === 'serie') { lives--; streak = 0; lastMiss = code; missed.push(code); floatText('−1 vita', p.x, p.y + 44, true); n++; }
+  revealCode();
   hc = {}; hud();
   setTimeout(() => {
     if (g0 !== gen) return;
@@ -5953,7 +5963,14 @@ function onFailed(why) {
     else if (lives <= 0) finish('lives');
     else if (n >= MAX_CODES) finish('clear');
     else newCode();
-  }, (reduceMotion ? 700 : 2200) * TS);
+  }, (reduceMotion ? 700 : 3200) * TS);
+}
+/** Una cassaforte non aperta: il codice esatto compare grande al centro (resta finché non parte la prossima o finisce la serie). */
+function revealCode() {
+  const old = fxEl.querySelector('.reveal'); if (old) old.remove();
+  const el = document.createElement('div'); el.className = 'reveal';
+  el.innerHTML = '<p>Il codice era</p><div class="code">' + code.split('').map(d => '<i>' + d + '</i>').join('') + '</div>';
+  fxEl.appendChild(el);
 }
 function dailyGridText(gs) {
   return gs.map(x => '🟩'.repeat(x.exact) + '🟨'.repeat(x.present) + '⬛'.repeat(len - x.exact - x.present)).join('\n');
@@ -5970,6 +5987,7 @@ function fillOver(r) {
   $('stC').textContent = r.c[0]; $('stCl').textContent = r.c[1];
   const oc = $('overCode'); oc.hidden = !r.code; oc.innerHTML = r.code ? r.code.split('').map(d => '<i>' + d + '</i>').join('') : '';
   const ol = $('overCodeLbl'); ol.hidden = !r.code; ol.textContent = r.codeLbl || 'Il codice era:';
+  const om = $('overMissed'); om.hidden = !(r.earlier && r.earlier.length); om.textContent = r.earlier && r.earlier.length ? 'Prima: ' + r.earlier.join(' · ') : '';
   $('again').textContent = r.again;
   $('share').textContent = 'Copia risultato'; $('shareBox').hidden = true;
 }
@@ -5993,7 +6011,7 @@ function finish(kind) {
   const title = kind === 'clear' ? 'Banca svuotata!' : 'Fine della serie';
   const near = isRecord ? (prevBest > 0 ? 'Hai battuto il tuo record di ' + fmt(prevBest) + '.' : 'Primo record: ora hai un punteggio da battere.')
     : prevBest > 0 ? (gap < prevBest * 0.25 ? 'Ci sei quasi: ti mancano ' + fmt(gap) + ' punti al record.' : 'Record da battere: ' + fmt(prevBest) + '.') : 'Prima serie: ora hai un record da battere.';
-  fillOver({ mode: 'Serie · ' + (kind === 'clear' ? 'tutte le 20 casseforti' : solved + (solved === 1 ? ' cassaforte aperta' : ' casseforti aperte')), title, score, record: isRecord, near, a: [solved, 'Aperte'], b: [maxStreak, 'Serie max'], c: [avg, 'Tentativi'], again: 'Rigioca', code: lastMiss, codeLbl: 'Il codice che non hai aperto era:' });
+  fillOver({ mode: 'Serie · ' + (kind === 'clear' ? 'tutte le 20 casseforti' : solved + (solved === 1 ? ' cassaforte aperta' : ' casseforti aperte')), title, score, record: isRecord, near, a: [solved, 'Aperte'], b: [maxStreak, 'Serie max'], c: [avg, 'Tentativi'], again: 'Rigioca', code: lastMiss, codeLbl: 'Il codice che non hai aperto era:', earlier: missed.slice(0, -1) });
   shareText = 'Cassaforte · Serie\n' + fmt(score) + ' punti · ' + solved + (solved === 1 ? ' cassaforte aperta' : ' casseforti aperte') + (kind === 'clear' ? ' (tutte!)' : '') + ' · serie di ' + maxStreak + ' (' + fmtMult(mult(maxStreak)) + ')';
   setTimeout(() => { if (g0 === gen) { $('over').hidden = false; $('again').focus({ preventScroll: true }); } }, 500 * TS);
 }
@@ -6134,6 +6152,7 @@ requestAnimationFrame(frame);
     ls.set('nit_order', order);
   }
   stats.order = order;
+  document.getElementById('lx-ver').textContent = 'Versione ' + BUILD;
   const grid = document.querySelector('.lx-grid');
   order.forEach(k => grid.appendChild(grid.querySelector('[data-game="' + k + '"]')));
 
