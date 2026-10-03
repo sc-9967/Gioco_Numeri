@@ -67,9 +67,12 @@ let fails = 0; const ok = (c, m) => { if (!c) fails++; console.log((c ? 'OK  ' :
     // fallimento per tempo
     await page.evaluate(() => window.__C.setTime(0.2)); await sleep(700);
     ok((await page.evaluate(() => window.__C.S.lives)) === 1, 'tempo scaduto: vita persa');
+    const lastCode = await page.evaluate(() => window.__C.S.code);
     await page.evaluate(() => window.__C.setTime(0.1)); await sleep(1500);
     const over = await page.isVisible('#over'); const S4 = await page.evaluate(() => window.__C.S);
     ok(over && S4.state === 'over', 'tre vite perse: fine della serie');
+    const shownCode = await page.evaluate(() => ({ vis: !document.getElementById('overCode').hidden, code: [...document.querySelectorAll('#overCode i')].map(i => i.textContent).join(''), lbl: document.getElementById('overCodeLbl').textContent, lblVis: !document.getElementById('overCodeLbl').hidden }));
+    ok(shownCode.vis && shownCode.lblVis && shownCode.code === lastCode && /non hai aperto/.test(shownCode.lbl), 'fine serie sbagliata: si vede la combinazione esatta ' + shownCode.code + ' (era ' + lastCode + ') · ' + shownCode.lbl);
     await page.screenshot({ path: `shots/cas-${tag}-over.png` });
     const hist = await page.evaluate(() => JSON.parse(localStorage.getItem('nit_hist') || '{}').cassaforte);
     const day = hist && Object.values(hist)[0];

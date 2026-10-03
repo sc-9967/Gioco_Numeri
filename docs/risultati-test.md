@@ -165,3 +165,8 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 - **Limite 1:** i punteggi ora sono di un altro ordine (mediana circa 13.000 per il bot, contro 430.000 senza fine). **Un record vecchio molto alto non si batte più**: decidi se azzerare il record di Girasette sui dispositivi dei tester.
 - **Limite 2:** nella partita del giorno le posizioni dei sassi non sono identiche per tutti: se la cella scelta dal seme è occupata si passa alla successiva, quindi dipende dalle mosse.
 - **Limite 3:** la taratura è su bot, non su persone. I tre numeri (`ROCK_START`, `ROCK_A`, `ROCK_B`) si cambiano in una riga.
+
+## Cassaforte: combinazione visibile a fine serie sbagliata
+
+- Quando la serie finisce per vite perse (tentativi finiti o tempo scaduto), la schermata finale mostra «Il codice che non hai aperto era:» con le cifre esatte. Verificato a 360×700 e 320×560: il codice mostrato coincide con quello dell'ultima cassaforte persa. Nel codice del giorno la combinazione si vedeva già.
+- Le casseforti mancate prima dell'ultima mostrano il codice per qualche secondo (come prima). Se vuoi vedere sempre tutti i codici mancati a fine serie, è una riga in più.

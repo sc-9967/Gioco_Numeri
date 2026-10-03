@@ -1826,6 +1826,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
       <h2 id="overTitle">Fine della serie</h2>
       <div class="big" id="overScore">0</div>
       <span class="rec" id="newRecord" hidden>Nuovo record</span>
+      <p class="small" id="overCodeLbl" hidden></p>
       <div class="code" id="overCode" hidden></div>
       <p class="small" id="overNear"></p>
       <div class="stats">
@@ -5724,7 +5725,7 @@ let code = '', len = 3, maxTries = 7, guesses = [], cur = [], excl = new Set(), 
 let n = 0, solved = 0, lives = LIVES, streak = 0, maxStreak = 0, score = 0, dispScore = 0, totalTries = 0;
 let tLeft = 0, tLimit = 0, elapsed = 0, codeSecs = 0, animRow = -1, angle = 0, msgTok = 0, hintRnd = Math.random;
 let best = store.get('cass_best', 0), prevBest = best, over = false, muted = store.get('cass_mute', false);
-let lastKind = '', dailyGrid = [], hintDigit = '', tickSec = -1, TS = 1;   // TS: scala dei ritardi (solo per i test)
+let lastKind = '', dailyGrid = [], hintDigit = '', tickSec = -1, lastMiss = '', TS = 1;   // TS: scala dei ritardi (solo per i test)
 
 /* ---------------------------------------------------------------- 4) AUDIO ED EFFETTI */
 let AC = null;
@@ -5875,7 +5876,7 @@ function newCode() {
 }
 function start(m) {
   ac(); gen++; mode = m; over = false; delete $('over').dataset.replay;
-  n = 0; solved = 0; lives = LIVES; streak = 0; maxStreak = 0; score = 0; dispScore = 0; totalTries = 0; elapsed = 0; dailyGrid = [];
+  lastMiss = ''; n = 0; solved = 0; lives = LIVES; streak = 0; maxStreak = 0; score = 0; dispScore = 0; totalTries = 0; elapsed = 0; dailyGrid = [];
   best = store.get('cass_best', 0); prevBest = best;
   $('menu').hidden = true; $('over').hidden = true;
   fxEl.innerHTML = '';
@@ -5926,7 +5927,7 @@ function onSolved() {
   let pts, m = 1;
   if (mode === 'daily') pts = dailyPoints(triesLeft, elapsed, hintUsed);
   else { m = mult(streak); pts = Math.round(codePoints(len, triesLeft, tLeft, tLimit, hintUsed) * m); streak++; maxStreak = Math.max(maxStreak, streak); }
-  score += pts; solved++; totalTries += guesses.length;
+  lastMiss = ''; score += pts; solved++; totalTries += guesses.length;
   emblem.classList.add('ok', 'open'); sfx.solve(); buzz(40); coins(p.x, p.y, 26);
   floatText('+' + fmt(pts) + (m > 1 ? '<small>' + fmtMult(m) + '</small>' : ''), p.x, p.y + 44);
   if (mode === 'serie' && [3, 6, 10, 15].includes(streak)) setTimeout(() => { if (g0 === gen) banner(streak >= 10 ? 'Maestro scassinatore!' : streak >= 6 ? 'Mani d\'oro!' : 'Serie di ' + streak + '!', fmtMult(mult(streak)) + ' sui prossimi'); }, 500);
@@ -5944,7 +5945,7 @@ function onFailed(why) {
   const p = rect(emblem), g0 = gen;
   emblem.classList.add('bad'); sfx.fail(); buzz(120);
   msg((why === 'time' ? 'Tempo scaduto. ' : 'Tentativi finiti. ') + 'Il codice era ' + code + '.', true);
-  if (mode === 'serie') { lives--; streak = 0; floatText('−1 vita', p.x, p.y + 44, true); n++; }
+  if (mode === 'serie') { lives--; streak = 0; lastMiss = code; floatText('−1 vita', p.x, p.y + 44, true); n++; }
   hc = {}; hud();
   setTimeout(() => {
     if (g0 !== gen) return;
@@ -5968,6 +5969,7 @@ function fillOver(r) {
   $('stB').textContent = r.b[0]; $('stBl').textContent = r.b[1];
   $('stC').textContent = r.c[0]; $('stCl').textContent = r.c[1];
   const oc = $('overCode'); oc.hidden = !r.code; oc.innerHTML = r.code ? r.code.split('').map(d => '<i>' + d + '</i>').join('') : '';
+  const ol = $('overCodeLbl'); ol.hidden = !r.code; ol.textContent = r.codeLbl || 'Il codice era:';
   $('again').textContent = r.again;
   $('share').textContent = 'Copia risultato'; $('shareBox').hidden = true;
 }
@@ -5991,7 +5993,7 @@ function finish(kind) {
   const title = kind === 'clear' ? 'Banca svuotata!' : 'Fine della serie';
   const near = isRecord ? (prevBest > 0 ? 'Hai battuto il tuo record di ' + fmt(prevBest) + '.' : 'Primo record: ora hai un punteggio da battere.')
     : prevBest > 0 ? (gap < prevBest * 0.25 ? 'Ci sei quasi: ti mancano ' + fmt(gap) + ' punti al record.' : 'Record da battere: ' + fmt(prevBest) + '.') : 'Prima serie: ora hai un record da battere.';
-  fillOver({ mode: 'Serie · ' + (kind === 'clear' ? 'tutte le 20 casseforti' : solved + (solved === 1 ? ' cassaforte aperta' : ' casseforti aperte')), title, score, record: isRecord, near, a: [solved, 'Aperte'], b: [maxStreak, 'Serie max'], c: [avg, 'Tentativi'], again: 'Rigioca' });
+  fillOver({ mode: 'Serie · ' + (kind === 'clear' ? 'tutte le 20 casseforti' : solved + (solved === 1 ? ' cassaforte aperta' : ' casseforti aperte')), title, score, record: isRecord, near, a: [solved, 'Aperte'], b: [maxStreak, 'Serie max'], c: [avg, 'Tentativi'], again: 'Rigioca', code: lastMiss, codeLbl: 'Il codice che non hai aperto era:' });
   shareText = 'Cassaforte · Serie\n' + fmt(score) + ' punti · ' + solved + (solved === 1 ? ' cassaforte aperta' : ' casseforti aperte') + (kind === 'clear' ? ' (tutte!)' : '') + ' · serie di ' + maxStreak + ' (' + fmtMult(mult(maxStreak)) + ')';
   setTimeout(() => { if (g0 === gen) { $('over').hidden = false; $('again').focus({ preventScroll: true }); } }, 500 * TS);
 }

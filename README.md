@@ -81,6 +81,7 @@ Gioco di deduzione (la famiglia di "Bulls and Cows" e Mastermind). Il codice ha 
 
 - **Serie:** fino a 20 casseforti, con codici di 3, 4, 5 e poi 6 cifre, tre vite e un tempo per ogni cassaforte (che dopo l'ottava cala). Tentativi finiti o tempo scaduto costano una vita. La serie finisce sempre: per le vite, per il tempo o dopo la ventesima cassaforte.
 - **Punti:** (100 × cifre + 40 × tentativi rimasti + fino a 100 di tempo − 50 se si usa l'indizio) × moltiplicatore. Il moltiplicatore sale di 0,25 per ogni cassaforte aperta di fila, con tetto ×5.
+- **Fine serie sbagliata:** la schermata finale mostra la combinazione esatta dell'ultima cassaforte che non hai aperto (dopo l'ultima vita persa, per tentativi finiti o per tempo). Durante la partita, ogni cassaforte mancata mostra il codice per qualche secondo.
 - **Codice del giorno:** 4 cifre, 8 tentativi, senza limite di tempo, uguale per tutti (seme dalla data di Roma). Una sola partita al giorno; se si esce a metà la partita riprende dal punto in cui era. A fine partita si copia un risultato senza spoiler (quadratini verdi e gialli).
 - **Aiuti:** tastierino a schermo (anche tastiera fisica), modo "Note" per segnare le cifre escluse, un indizio per cassaforte che svela una cifra assente.
 - **Ritmo:** le tessere si girano una a una con il suono del meccanismo, i pallini si accendono, la cassaforte si apre con monete e un messaggio a ogni serie di 3, 6, 10 e 15; vibrazione sul telefono; rispetta "riduci animazioni".
