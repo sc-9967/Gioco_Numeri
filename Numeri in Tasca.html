@@ -1097,6 +1097,11 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .card .sub{margin:0;color:var(--muted);font-size:15px}
 .card .rec{align-self:center;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--accent);color:var(--accent-ink);border-radius:99px;padding:3px 12px}
 .card .rec[hidden]{display:none}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats div{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line);padding-top:8px}
+.stats b{font-size:24px;font-variant-numeric:tabular-nums}
+.stats span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+#shareBox{width:100%;box-sizing:border-box;font:13px/1.4 var(--ui);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;resize:none}
 @media (max-height:560px){.hud{padding-top:6px}.stat b{font-size:22px}h1{font-size:24px}.bar{padding-bottom:8px}}
 </style><div class="app" id="app">
   <header class="hud">
@@ -1124,19 +1129,29 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
       </ul>
       <div class="btns">
         <button class="btn primary" id="play" type="button">Gioca</button>
+        <button class="btn" id="daily" type="button">Partita del giorno</button>
       </div>
-      <p class="small">Record: <b id="menuBest">0</b></p>
+      <p class="small">Record: <b id="menuBest">0</b> · Oggi: <b id="menuDaily">—</b></p>
     </div>
   </section>
 
   <section id="over" hidden>
     <div class="card">
+      <p class="eyebrow" id="overMode">Partita libera</p>
       <h2>Nessuna mossa</h2>
       <div class="big" id="overScore">0</div>
       <span class="rec" id="newRecord" hidden>Nuovo record</span>
-      <p class="sub">Record: <b id="finalBest">0</b></p>
+      <p class="sub"><span id="finalLbl">Record</span>: <b id="finalBest">0</b></p>
+      <div class="stats">
+        <div><b id="stTile">0</b><span>Tessera max</span></div>
+        <div><b id="stSpins">0</b><span>Giri</span></div>
+        <div><b id="stChain">0</b><span>Catena max</span></div>
+      </div>
       <div class="btns">
         <button class="btn primary" id="again" type="button">Rigioca</button>
+        <button class="btn" id="share" type="button">Copia risultato</button>
+        <textarea id="shareBox" rows="4" readonly hidden></textarea>
+        <button class="btn" id="other" type="button">Partita del giorno</button>
       </div>
     </div>
   </section>
@@ -3652,32 +3667,38 @@ function rotationMap(b) {
 /* ------------------------------------------------------ 2) STATO E GENERATORE */
 const BASE_W = [26, 24, 20, 15, 10, 5];   // pesi per i valori 1..6: i bassi sono più frequenti
 let placedCount = 0;                 // pezzi posizionati in questa partita: fa salire la difficoltà
+let rng = Math.random;               // nella partita del giorno e' un generatore con seme: stessi pezzi per tutti
+let mode = 'free', trayNo = 0;       // 'free' | 'daily'; trayNo: quante riserve sono state generate
+const stat = { tile: 0, spins: 0, chain: 0, sevens: 0 };
+function mulberry(seed) { let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hashStr(s) { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const today = romeDate(), todayLabel = today.slice(8, 10) + '/' + today.slice(5, 7), dailyKey = 'girasette_d_' + today;
 /** Livello di difficoltà 0..8: ogni 25 pezzi i valori alti diventano più frequenti e l'aiuto cala. */
 const difficulty = () => Math.min(8, Math.floor(placedCount / 25));
 function randVal(board) {
   const lv = difficulty();
   // Spesso si pesca tra i valori già presenti in plancia (1..5): aiuta a costruire gruppi. L'aiuto cala col livello.
-  if (board && Math.random() < 0.4 - 0.03 * lv) {
+  if (board && rng() < 0.4 - 0.03 * lv) {
     const present = [...new Set(board.values())].filter(v => v >= 1 && v <= 5);
-    if (present.length) return present[Math.floor(Math.random() * present.length)];
+    if (present.length) return present[Math.floor(rng() * present.length)];
   }
   const w = BASE_W.map((x, i) => Math.max(2, x + lv * (i - 2.5) * 1.5));
-  let t = Math.random() * w.reduce((a, b) => a + b, 0);
+  let t = rng() * w.reduce((a, b) => a + b, 0);
   for (let i = 0; i < 6; i++) { t -= w[i]; if (t < 0) return i + 1; }
   return 1;
 }
 function makePiece(board, double) {
   const a = randVal(board);
   if (!double) return { vals: [a], o: 0, rot: 0, pop: 1 };
-  const b = Math.random() < 0.4 ? a : randVal(board);
-  return { vals: [a, b], o: Math.floor(Math.random() * 6), rot: 0, pop: 1 };
+  const b = rng() < 0.4 ? a : randVal(board);
+  return { vals: [a, b], o: Math.floor(rng() * 6), rot: 0, pop: 1 };
 }
 /** Tre pezzi per volta, con almeno una tessera singola per non togliere ogni via d'uscita. */
 function makeTray(board) {
   const tray = [];
   let hasSingle = false;
   for (let i = 0; i < 3; i++) {
-    let dbl = Math.random() < 0.45;
+    let dbl = rng() < 0.45;
     if (i === 2 && !hasSingle) dbl = false;
     if (!dbl) hasSingle = true;
     tray.push(makePiece(board, dbl));
@@ -3685,6 +3706,13 @@ function makeTray(board) {
   return tray;
 }
 
+/** Riserva successiva. Nella partita del giorno ogni riserva ha il proprio seme (data + numero) e non guarda la plancia:
+ *  i pezzi sono gli stessi per tutti, qualunque mosse si facciano. Si perde l'aiuto che in partita libera pesca i valori già presenti. */
+function nextTray() {
+  if (mode === 'daily') { rng = mulberry(hashStr('girasette-' + today + '-' + trayNo)); trayNo++; return makeTray(null); }
+  rng = Math.random; trayNo++;
+  return makeTray(board);
+}
 let board = new Map();               // "q,r" -> valore
 let tray = [null, null, null];
 let selected = null;                 // indice del pezzo selezionato nella riserva
@@ -3693,7 +3721,9 @@ let busy = false, over = false;
 let gen = 0;                         // invalida le animazioni in corso quando si riavvia
 let TIMESCALE = 1;                   // 1 = normale (i test lo riducono per andare veloci)
 
-try { best = parseInt(localStorage.getItem('girasette_best') || '0', 10) || 0; } catch (e) { best = 0; }
+const readFree = () => { try { return parseInt(localStorage.getItem('girasette_best') || '0', 10) || 0; } catch (e) { return 0; } };
+const readDay = () => { try { return parseInt(localStorage.getItem(dailyKey) || '0', 10) || 0; } catch (e) { return 0; } };
+best = readFree();
 
 const hasAnyMove = () => tray.some(p => p && canPlaceAnywhere(board, p));
 
@@ -3754,11 +3784,17 @@ const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (
 const $ = id => document.getElementById(id);
 function setScore(v) { score = v; $('score').textContent = score.toLocaleString('it-IT'); }
 function setBest(v) {
-  best = v; $('best').textContent = best.toLocaleString('it-IT'); $('menuBest').textContent = best.toLocaleString('it-IT');
-  try { localStorage.setItem('girasette_best', String(best)); } catch (e) {}
+  best = v; $('best').textContent = best.toLocaleString('it-IT');
+  try { localStorage.setItem(mode === 'daily' ? dailyKey : 'girasette_best', String(best)); } catch (e) {}
+  refreshMenu();
+}
+function refreshMenu() {
+  $('menuBest').textContent = readFree().toLocaleString('it-IT');
+  const d = readDay();
+  $('menuDaily').textContent = d ? d.toLocaleString('it-IT') : '—';
 }
 $('best').textContent = best.toLocaleString('it-IT');
-$('menuBest').textContent = best.toLocaleString('it-IT');
+refreshMenu();
 const syncMute = () => { $('mute').textContent = muted ? 'Suono: no' : 'Suono: sì'; };
 syncMute();
 
@@ -4046,6 +4082,7 @@ async function playStep(st, myGen) {
     if (myGen !== gen) return;
     st.from.forEach(([q, r]) => { board.delete(key(q, r)); anim.delete(key(q, r)); });
     board.set(ak, st.nv);
+    stat.tile = Math.max(stat.tile, st.nv); stat.chain = Math.max(stat.chain, st.chain);
     const an = getAnim(ak); an.s = 1.5; an.flash = 0.8;
     tween(an, 's', 1, 260, easeOutBack); tween(an, 'flash', 0, 260, linear);
     burst(ap.x, ap.y, COL[st.nv].base, 12 + st.size * 2);
@@ -4066,6 +4103,7 @@ async function playStep(st, myGen) {
     await tween(ca, 's', 1.35, 150, easeOutCubic);
     if (myGen !== gen) return;
     rings.push({ x: ap.x, y: ap.y, t: 0 });
+    stat.sevens++; stat.tile = Math.max(stat.tile, SEVEN); stat.chain = Math.max(stat.chain, st.chain);
     shake = 16; sfx.boom(); buzz([20, 40, 30]);
     st.removed.forEach(([q, r]) => {
       const p = cellPx(q, r);
@@ -4094,6 +4132,7 @@ async function placePiece(slot, q, r) {
   const myGen = gen;
   const cells = pieceCells(piece, q, r);
   placedCount++;
+  cells.forEach(c => { stat.tile = Math.max(stat.tile, c[2]); });
   tray[slot] = null;
   if (selected === slot) selected = null;
   document.getElementById('hint').style.opacity = '0';
@@ -4119,7 +4158,7 @@ async function placePiece(slot, q, r) {
   // Finiti i tre pezzi: la plancia gira, poi arriva la riserva nuova.
   if (tray.every(p => !p)) {
     if (!(await doRotation(myGen))) return false;
-    tray = makeTray(board);
+    tray = nextTray();
     tray.forEach(p => { p.pop = 0.4; tween(p, 'pop', 1, 280, easeOutBack); });
   }
   if (selected == null || !tray[selected]) selected = tray.findIndex(p => p);
@@ -4132,6 +4171,7 @@ async function placePiece(slot, q, r) {
 async function doRotation(myGen) {
   const moves = rotationMap(board);
   if (!moves.length) return true;
+  stat.spins++;
   floatText(gcx, gcy, 'GIRO!', '#8ff0ff', 32);
   sfx.spin(); buzz(25);
   await Promise.all(moves.flatMap(m => {
@@ -4160,23 +4200,33 @@ function rotateSelected() {
   sfx.rotate();
 }
 
+let shareText = '';
 function endGame() {
   over = true;
   const rec = score > best;
   if (rec) setBest(score);
   $('overScore').textContent = score.toLocaleString('it-IT');
   $('finalBest').textContent = best.toLocaleString('it-IT');
+  $('finalLbl').textContent = mode === 'daily' ? 'Record di oggi' : 'Record';
   $('newRecord').hidden = !rec || score === 0;
+  $('overMode').textContent = mode === 'daily' ? 'Partita del giorno · ' + todayLabel + ' · stessi pezzi per tutti' : 'Partita libera';
+  $('stTile').textContent = stat.tile || '—'; $('stSpins').textContent = stat.spins; $('stChain').textContent = stat.chain ? '×' + stat.chain : '—';
+  $('other').textContent = mode === 'daily' ? 'Partita libera' : 'Partita del giorno';
+  $('share').textContent = 'Copia risultato'; $('shareBox').hidden = true;
+  shareText = 'Girasette · ' + (mode === 'daily' ? 'partita del giorno ' + todayLabel : 'partita libera') + '\n' + score.toLocaleString('it-IT') + ' punti · tessera ' + (stat.tile || '—') + ' · ' + stat.spins + (stat.spins === 1 ? ' giro' : ' giri') + (stat.chain > 1 ? ' · catena ×' + stat.chain : '') + (stat.sevens ? ' · ' + stat.sevens + (stat.sevens === 1 ? ' esplosione' : ' esplosioni') + ' di 7' : '');
   sfx.over(); buzz(120);
   setTimeout(() => { if (over) $('over').hidden = false; }, 450 * TIMESCALE + 50);
 }
 
-function newGame() {
+function newGame(m) {
   gen++;
+  mode = m === 'daily' ? 'daily' : m === 'free' ? 'free' : mode;
   tweens.length = 0; particles.length = 0; floaters.length = 0; rings.length = 0; anim.clear();
-  board = new Map(); setScore(0); placedCount = 0;
+  board = new Map(); setScore(0); placedCount = 0; trayNo = 0;
+  stat.tile = 0; stat.spins = 0; stat.chain = 0; stat.sevens = 0;
+  best = mode === 'daily' ? readDay() : readFree(); $('best').textContent = best.toLocaleString('it-IT');
   over = false; busy = false; drag = null; hover = null;
-  tray = makeTray(board);
+  tray = nextTray();
   tray.forEach(p => { p.pop = 0.4; tween(p, 'pop', 1, 280, easeOutBack); });
   selected = tray.findIndex(p => p && p.vals.length === 2);
   if (selected < 0) selected = 0;
@@ -4239,9 +4289,16 @@ window.addEventListener('keydown', e => {
   else if (k === '1' || k === '2' || k === '3') { const i = +k - 1; if (tray[i]) { selected = i; sfx.pick(); } }
 });
 $('rot').addEventListener('click', () => { ac(); rotateSelected(); });
-$('restart').addEventListener('click', () => { ac(); $('menu').hidden = true; newGame(); });
-$('play').addEventListener('click', () => { ac(); $('menu').hidden = true; newGame(); });
-$('again').addEventListener('click', () => { ac(); newGame(); });
+$('restart').addEventListener('click', () => { ac(); $('menu').hidden = true; newGame(mode); });
+$('play').addEventListener('click', () => { ac(); $('menu').hidden = true; newGame('free'); });
+$('daily').addEventListener('click', () => { ac(); $('menu').hidden = true; newGame('daily'); });
+$('again').addEventListener('click', () => { ac(); newGame(mode); });
+$('other').addEventListener('click', () => { ac(); newGame(mode === 'daily' ? 'free' : 'daily'); });
+$('share').addEventListener('click', () => {
+  const txt = withName(shareText);
+  const fallback = () => { const b = $('shareBox'); b.value = txt; b.hidden = false; b.focus(); b.select(); $('share').textContent = 'Seleziona e copia il testo'; };
+  try { navigator.clipboard.writeText(txt).then(() => { $('share').textContent = 'Copiato'; }, fallback); } catch (e) { fallback(); }
+});
 $('mute').addEventListener('click', () => {
   muted = !muted; syncMute(); ac();
   try { localStorage.setItem('girasette_mute', muted ? '1' : '0'); } catch (e) {}
@@ -4260,6 +4317,7 @@ window.__M7 = {
   get score() { return score; }, get over() { return over; }, get busy() { return busy; },
   ringCells, rotationMap, ringOf, difficulty, get placedCount() { return placedCount; }, placePiece, newGame, hasAnyMove, setTimescale: v => { TIMESCALE = v; },
   select: i => { selected = i; },
+  get mode() { return mode; }, get stat() { return stat; }, get trayNo() { return trayNo; }, get shareText() { return shareText; }, mulberry, hashStr,
 };
 })();
     },

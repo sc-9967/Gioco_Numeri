@@ -125,3 +125,17 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 - **Corretto durante i test:** i giochi aggiornano il proprio record *prima* di mostrare la schermata finale, quindi il record di sempre risultava già "pari": ora si usa il record che c'era prima della partita. Un fotogramma di Cassaforte dopo il passaggio a un altro gioco dava un errore perché l'id `app` era già di un altro gioco.
 - **Girasette e Bilancia (partita libera):** nessun "Copia risultato" proprio → lo aggiunge il launcher, con il nome.
 - **Limite:** sono ingredienti noti, ma non è provato che trattengano i giocatori. Il segnale si vedrà nelle statistiche anonime: partite a testa, quanti arrivano a 3 partite e quanti tornano in giorni diversi.
+
+## Girasette: partita del giorno
+
+- **Stessi pezzi per tutti:** tre partite del giorno con strategie diverse (prima mossa valida, ultima, casuale) hanno visto le stesse 33 riserve (da 33 a 46 riserve per partita, fino al game over). La partita libera resta casuale.
+- **Costo:** nella partita del giorno manca l'aiuto della libera (che pesca il 40% delle volte tra i valori già in plancia, in calo col livello), perché dipende dalle mosse del giocatore e farebbe divergere i pezzi. Non è stata misurata la differenza di difficoltà. [Ipotesi: la partita del giorno è un po' più dura]
+- **Fine partita:** tessera massima, giri, catena; testo condiviso del tipo "Girasette · partita del giorno 03/10 · 9.385 punti · tessera 7 · 32 giri · catena ×2"; il record del giorno ha una chiave propria; le partite finite entrano nello storico del launcher; nessun "Copia risultato" duplicato.
+- **Osservato:** con la strategia "prima mossa valida" una partita libera è arrivata a 336 giri e 179.645 punti prima di finire: Girasette non ha un limite di durata proprio, finisce solo quando la plancia si riempie. Non l'ho modificato.
+- I test precedenti di Girasette (logica, giro, bot, launcher) passano ancora.
+
+## Prototipo valutato e non integrato: Number Tide
+
+- **Simulazione dell'acqua** (livello 1-6): un giocatore senza errori che tocca un numero ogni 0,4-2 s non perde mai; solo al livello 6, con un tocco ogni 3 s, la partita finisce (dopo 20 s). Il gioco non può finire per chi gioca bene, come il prototipo originale di Lampo.
+- **Difetti:** le vite non scendono mai (mostra sempre ❤️❤️❤️); combo senza tetto (300 tocchi perfetti = circa 2 milioni di punti); la sequenza Fibonacci contiene due "1" ma conta solo quello giusto per indice, quindi toccare l'altro "1" dà errore; i livelli 1-5 ripetono sempre la stessa sequenza.
+- **Sovrapposizione:** è Lampo (tocca in ordine con pressione di tempo) con l'acqua al posto della barra. Unica idea nuova: sequenze Fibonacci e numeri primi.

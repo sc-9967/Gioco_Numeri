@@ -38,6 +38,8 @@ Puzzle di fusione su griglia esagonale (raggio 3, 37 celle, coordinate assiali).
 - Fondendo tre o più 7, la cella centrale e le sei vicine esplodono.
 - Regola propria del gioco: finiti i tre pezzi, i tre anelli esterni ruotano di un passo (quello interno e quello esterno in un verso, quello medio nel verso opposto). Le fusioni causate dal giro valgono doppio. Con un solo pezzo rimasto, delle frecce mostrano dove andrà ogni tessera.
 - Pezzi doppi: si ruotano toccandoli, con il pulsante "Ruota" o con il tasto R.
+- **Partita del giorno:** gli stessi pezzi, nello stesso ordine, per tutti i giocatori (ogni riserva ha un seme ricavato dalla data di Roma e non guarda la plancia, quindi non cambia con le mosse). Per questo in quella modalità manca l'aiuto della partita libera, che pesca spesso i valori già presenti. Si può rigiocare; il record del giorno ha una chiave propria e non tocca il record della partita libera.
+- **Fine partita:** tessera massima, giri della plancia e catena più lunga; "Copia risultato" con il nome (partita libera o del giorno) e il pulsante per passare all'altra modalità.
 
 ## Raddoppio
 
@@ -108,6 +110,7 @@ node girasette-logica.js      # anelli, giro, moltiplicatori
 node girasette-giro.js        # fusione causata dal giro
 node girasette-bot.js         # partite automatiche di Girasette
 node launcher-girasette.js    # Girasette dentro il launcher
+node girasette-giorno.js      # partita del giorno (stessi pezzi per tutti), statistiche, condivisione
 node raddoppio-logica.js      # scorrimento, fusioni, undo, catena, martello, vittoria, game over
 node launcher-raddoppio.js    # Raddoppio dentro il launcher
 node sentiero-logica.js       # percorso ottimo, generatore, codici sfida, record per periodo

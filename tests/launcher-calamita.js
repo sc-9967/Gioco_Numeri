@@ -80,17 +80,13 @@ const days = k => { const d = new Date(); const t = new Intl.DateTimeFormat('en-
   // 6) record della settimana (ma non di sempre) e gioco senza "Copia risultato" (Girasette)
   page = await mk({ girasette_best: 5000, nit_hist: rec('girasette', days(20), 5000, 1) });
   await page.click('[data-game="girasette"]'); await sleep(500);
-  ok(!(await page.evaluate(() => !!document.querySelector('#share'))), 'Girasette non ha un proprio "Copia risultato"');
+  ok(await page.evaluate(() => !!document.querySelector('#share')), 'Girasette ha ora un proprio "Copia risultato"');
   await page.evaluate(() => { document.querySelector('#overScore').textContent = '1.234'; document.querySelector('#over').hidden = false; });
   await sleep(300);
   const hook6 = await page.evaluate(() => document.querySelector('.lx-hook').innerText);
   console.log(JSON.stringify(hook6));
-  ok(/Ti mancano 3\.766 punti per il record di sempre/.test(hook6) || /Ti mancano/.test(hook6), 'Girasette: distanza dal record');
-  ok(await page.isVisible('.lx-sharebtn'), 'il launcher aggiunge "Copia risultato"');
-  await page.click('.lx-sharebtn'); await sleep(200);
-  const shared = await page.evaluate(() => { const b = document.querySelector('.lx-sharebox'); return b && !b.hidden ? b.value : '(copiato)'; });
-  console.log('testo condiviso:', JSON.stringify(shared));
-  ok(shared === '(copiato)' || shared.startsWith('Prova · Girasette · 1.234 punti'), 'testo di condivisione con nome');
+  ok(/Ti mancano 3\.766 punti per il record di sempre/.test(hook6), 'Girasette: distanza dal record');
+  ok(!(await page.isVisible('.lx-sharebtn')) && !(await page.evaluate(() => !!document.querySelector('.lx-sharebtn'))), 'nessun "Copia risultato" duplicato dal launcher');
   await page.screenshot({ path: 'shots/cal-hook-girasette.png' });
   await page.context().close();
   // 7) Bilancia in partita libera: il suo "Copia risultato" e' nascosto, quindi lo mette il launcher
