@@ -149,9 +149,19 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 - **Corretti durante i test:** i nomi di classe `t` ed `e` della scheda coincidevano con quelli di Cassaforte (testo bianco su bianco); la scheda si apriva scorsa in fondo; i pulsanti coprivano il testo.
 - **Limite:** nessun bambino ha provato i testi. Che un bambino di 5 anni capisca "tre esagoni uguali vicini diventano uno" o "il resto" è un'ipotesi, non un dato.
 
-## Sentiero: percorso in rosa acceso
+## Sentiero: percorso in rosa tenue
 
-- **Cosa si vede:** per ogni passo un collegamento rosa (#ff1f8e) con bordo bianco, anello rosa e numero d'ordine (1, 2, 3…) sulle caselle toccate; la casella attuale pulsa con un alone. I collegamenti restano ai bordi delle caselle e non coprono i numeri.
-- **Verificato a 390×844 e 320×560:** nessun tratto all'inizio; 5 tratti dopo 5 mosse con colore e bordo corretti; "Indietro" e il tocco su una casella già percorsa tolgono i tratti e i numeri giusti; a griglia finita 8 tratti, e una nuova griglia riparte pulita; il disegno copre esattamente la griglia; nessuno scorrimento orizzontale; il foglio finale spiega i colori ("In rosa il tuo percorso, in blu il percorso ottimo").
-- **Corretti durante i test:** nella prima versione i collegamenti entravano troppo nelle caselle e coprivano le somme parziali ("=7"): ridotti; quando il percorso coincide con l'ottimo l'anello blu nascondeva quello rosa: ora si vedono entrambi.
+- **Cosa si vede:** anello rosa tenue (#e98aab) e numero d'ordine (1, 2, 3…) sulle caselle toccate; la casella attuale pulsa. **Nessuna linea** (tolte su richiesta: nella prima versione il rosa era #ff1f8e, troppo acceso, e i collegamenti coprivano le somme parziali).
+- **Verificato a 390×844 e 320×560:** nessuna linea disegnata; anello e numeri rosa sulle caselle del percorso; "Indietro" e il tocco su una casella già percorsa tolgono i segni giusti; a griglia finita 8 caselle numerate e una nuova griglia riparte pulita; nessuno scorrimento orizzontale; il foglio finale spiega i colori ("In rosa il tuo percorso, in blu il percorso ottimo").
+- **Corretto durante i test:** quando il percorso coincide con l'ottimo l'anello blu nascondeva quello rosa: ora si vedono entrambi.
 - **Limite:** a 320×560 il foglio dei risultati copre la parte bassa della griglia (comportamento già presente, non modificato).
+
+## Girasette: la difficoltà cresce (sassi)
+
+- **Il problema, misurato:** simulando solo la logica (le stesse funzioni del gioco), un giocatore automatico che sceglie la mossa che libera più celle **non perdeva mai**: 3.000 pezzi (1.000 giri) senza finire, 430.000 punti. Solo un giocatore a caso finiva (mediana 101 pezzi). Prima, con una partita reale, la strategia "prima mossa valida" era arrivata a 336 giri.
+- **La soluzione:** sassi grigi che non si fondono, girano con l'anello e restano finché un'esplosione di 7 non li raggiunge. Calendario: nessuno nelle prime 7 riserve, poi in numero crescente (primo verso la 13ª riserva; tra le riserve 20-29 ne arrivano 3, tra la 70 e la 79 ne arrivano 7). Una riga in alto annuncia il prossimo.
+- **Risultati con giocatori automatici (25 partite ciascuno, tutte finite):** a caso mediana 77 pezzi (min 44, max 127); che libera celle mediana 154 pezzi (min 103, max 224), cioè circa 50 riserve, probabilmente 8-12 minuti. Confrontate con altre tarature provate: più lente (mediana fino a 299 pezzi) o più rapide (mediana 128). [Ipotesi: una persona gioca peggio del bot "che libera celle" ma meglio di quello a caso, quindi tra 3 e 10 minuti]
+- **Test dentro al gioco:** la strategia che prima non finiva ora finisce dopo 27 giri e 82 pezzi; il primo sasso arriva alla riserva 14; i sassi si accumulano; annuncio ("Un sasso tra 2 riserve", "dopo questa riserva"); sassi che non si fondono, che girano, che si rompono con un'esplosione; plancia piena senza errori; nella partita del giorno stesse posizioni per tutti.
+- **Limite 1:** i punteggi ora sono di un altro ordine (mediana circa 13.000 per il bot, contro 430.000 senza fine). **Un record vecchio molto alto non si batte più**: decidi se azzerare il record di Girasette sui dispositivi dei tester.
+- **Limite 2:** nella partita del giorno le posizioni dei sassi non sono identiche per tutti: se la cella scelta dal seme è occupata si passa alla successiva, quindi dipende dalle mosse.
+- **Limite 3:** la taratura è su bot, non su persone. I tre numeri (`ROCK_START`, `ROCK_A`, `ROCK_B`) si cambiano in una riga.

@@ -1110,6 +1110,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .rules li{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center}
 .chip{font-weight:700;font-size:15px;text-align:center;color:var(--accent-ink);background:var(--accent);border-radius:9px;padding:5px 0}
 .chip.cy{background:#8ff0ff}
+.chip.rk{background:#9aa0b4}
 .btns{display:flex;flex-direction:column;gap:10px}
 .btns .btn{flex:none}
 .btn.link{border:none;background:none;color:var(--muted);font-weight:600;padding:6px}
@@ -1124,6 +1125,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .stats b{font-size:24px;font-variant-numeric:tabular-nums}
 .stats span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
 #shareBox{width:100%;box-sizing:border-box;font:13px/1.4 var(--ui);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;resize:none}
+@media (max-width:420px){.hud{gap:4px}.stat b{font-size:23px}.hud h1{font-size:25px}}
 @media (max-height:560px){.hud{padding-top:6px}.stat b{font-size:22px}h1{font-size:24px}.bar{padding-bottom:8px}}
 </style><div class="app" id="app">
   <header class="hud">
@@ -1148,6 +1150,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
         <li><span class="chip">3+</span><span>Trascina i pezzi sulla plancia: tre o più tessere uguali vicine si fondono e salgono di uno.</span></li>
         <li><span class="chip cy">↻</span><span>Finiti i 3 pezzi, gli anelli girano. Le fusioni create dal giro valgono doppio.</span></li>
         <li><span class="chip">7</span><span>Unisci tre 7: esplodono la cella e le sei vicine. Tocca un pezzo doppio per ruotarlo.</span></li>
+        <li><span class="chip rk">🪨</span><span>Col tempo arrivano dei sassi grigi: non si fondono e occupano posto. Solo un'esplosione li rompe. Quando la plancia è piena, finisce.</span></li>
       </ul>
       <div class="btns">
         <button class="btn primary" id="play" type="button">Gioca</button>
@@ -1355,7 +1358,7 @@ h1 span{color:var(--accent)}
 /* SENTIERO. Layout: HUD in alto, valore corrente, tabellone 5x5 quadrato, barra comandi. Tema chiaro "carta millimetrata", unico nella raccolta (gli altri giochi sono scuri o a colori pieni). */
 :root{
   --bg:#f4ecd8; --bg2:#fbf6e8; --ink:#1f2a24; --muted:#6d7668; --panel:#fffaf0; --line:#d9ceb2;
-  --accent:#1f7a5a; --accent-ink:#ffffff; --gold:#e0a526; --blue:#2b6fd6; --trail:#ff1f8e;
+  --accent:#1f7a5a; --accent-ink:#ffffff; --gold:#e0a526; --blue:#2b6fd6; --trail:#e98aab;
   --add:#d3eee2; --add-ink:#14583f; --mul:#fbe7b0; --mul-ink:#6e4a00; --sub:#f6d3c9; --sub-ink:#8a2f1c;
   --ui:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif; --num:"Courier Prime","Courier New",monospace;
   color-scheme:light;
@@ -1390,18 +1393,15 @@ h1 span{color:var(--accent)}
 .cell.mul{background:var(--mul);color:var(--mul-ink)}
 .cell.sub{background:var(--sub);color:var(--sub-ink)}
 .cell.start{background:var(--ink);color:#fff;font-size:5.4cqw}
-.cell.on{box-shadow:inset 0 0 0 1.1cqw var(--trail),0 0 2.4cqw rgba(255,31,142,.55),0 .6cqw 0 rgba(31,42,36,.18)}
-.cell.cur{box-shadow:inset 0 0 0 1.5cqw var(--trail),0 0 0 .9cqw rgba(255,31,142,.4),0 0 3.2cqw rgba(255,31,142,.8);animation:cur 1s ease-in-out infinite alternate}
-.cell[data-s]::before{content:attr(data-s);position:absolute;top:-1.4cqw;left:-1.4cqw;min-width:5.2cqw;height:5.2cqw;padding:0 .8cqw;box-sizing:border-box;border-radius:99px;background:var(--trail);color:#fff;border:.55cqw solid #fff;font-size:3.1cqw;display:grid;place-items:center;font-family:var(--ui);font-weight:800;z-index:3;box-shadow:0 .3cqw .8cqw rgba(0,0,0,.25)}
-.trail{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:4;overflow:visible}
-.trail .halo{stroke:#fff;stroke-linecap:round;fill:none}
-.trail .line{stroke:var(--trail);stroke-linecap:round;fill:none}
+.cell.on{box-shadow:inset 0 0 0 1cqw var(--trail),0 .6cqw 0 rgba(31,42,36,.18)}
+.cell.cur{box-shadow:inset 0 0 0 1.3cqw var(--trail),0 0 0 .8cqw rgba(233,138,171,.35);animation:cur 1s ease-in-out infinite alternate}
+.cell[data-s]::before{content:attr(data-s);position:absolute;top:-1.4cqw;left:-1.4cqw;min-width:5.2cqw;height:5.2cqw;padding:0 .8cqw;box-sizing:border-box;border-radius:99px;background:var(--trail);color:#fff;border:.5cqw solid #fff;font-size:3.1cqw;display:grid;place-items:center;font-family:var(--ui);font-weight:800;z-index:3}
 @keyframes cur{to{transform:scale(1.05)}}
 .cell.nx{box-shadow:inset 0 0 0 .6cqw rgba(31,42,36,.55),0 .6cqw 0 rgba(31,42,36,.18)}
 .cell:active{transform:translateY(.5cqw)}
 .cell.opt::after{content:attr(data-o);position:absolute;top:-1.2cqw;right:-1.2cqw;min-width:5cqw;height:5cqw;border-radius:99px;background:var(--blue);color:#fff;font-size:3.2cqw;display:grid;place-items:center;font-family:var(--ui);font-weight:800}
 .cell.opt{box-shadow:inset 0 0 0 .8cqw var(--blue),0 .6cqw 0 rgba(31,42,36,.18)}
-.cell.opt.on,.cell.opt.cur{box-shadow:inset 0 0 0 1.1cqw var(--trail),inset 0 0 0 2.2cqw var(--blue),0 0 2.4cqw rgba(255,31,142,.45),0 .6cqw 0 rgba(31,42,36,.18)}
+.cell.opt.on,.cell.opt.cur{box-shadow:inset 0 0 0 1cqw var(--trail),inset 0 0 0 2cqw var(--blue),0 .6cqw 0 rgba(31,42,36,.18)}
 .cell.shake{animation:shake .25s}
 @keyframes shake{25%{transform:translateX(-1.4cqw)}75%{transform:translateX(1.4cqw)}}
 .legend{display:flex;gap:6px;justify-content:center;padding-inline:14px;font-size:12px;color:var(--muted);padding-bottom:2px}
@@ -3575,6 +3575,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
 const R = 3;                         // raggio della griglia (3 -> 37 celle)
 const SQ3 = Math.sqrt(3);
 const SEVEN = 7;                     // valore speciale che esplode
+const ROCK = 9;                      // sasso: non si fonde mai, gira con il suo anello, si rompe solo con un'esplosione di 7
 // Le 6 direzioni di adiacenza in coordinate assiali, in senso antiorario sullo schermo.
 const DIRS = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];
 
@@ -3617,7 +3618,7 @@ function resolve(board, placed, mult = 1) {
     const [q, r] = pending.shift();
     if (!board.has(key(q, r))) continue;            // già assorbita da una fusione precedente
     const comp = flood(board, q, r);
-    if (comp.cells.length < 3) continue;
+    if (comp.v === ROCK || comp.cells.length < 3) continue;
     chain++;
     if (comp.v === SEVEN) {
       // MAKE 7: i sette si fondono nella cella di rilascio, che esplode insieme alle 6 vicine.
@@ -3696,7 +3697,7 @@ const BASE_W = [26, 24, 20, 15, 10, 5];   // pesi per i valori 1..6: i bassi son
 let placedCount = 0;                 // pezzi posizionati in questa partita: fa salire la difficoltà
 let rng = Math.random;               // nella partita del giorno e' un generatore con seme: stessi pezzi per tutti
 let mode = 'free', trayNo = 0;       // 'free' | 'daily'; trayNo: quante riserve sono state generate
-const stat = { tile: 0, spins: 0, chain: 0, sevens: 0 };
+const stat = { tile: 0, spins: 0, chain: 0, sevens: 0, rocks: 0 };
 function mulberry(seed) { let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 function hashStr(s) { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
 const today = romeDate(), todayLabel = today.slice(8, 10) + '/' + today.slice(5, 7), dailyKey = 'girasette_d_' + today;
@@ -3739,6 +3740,26 @@ function nextTray() {
   if (mode === 'daily') { rng = mulberry(hashStr('girasette-' + today + '-' + trayNo)); trayNo++; return makeTray(null); }
   rng = Math.random; trayNo++;
   return makeTray(board);
+}
+/* ---------------------------------------------------------- SASSI: LA DIFFICOLTA' CRESCE COL TEMPO
+   Fino alla 7ª riserva nessun sasso; poi ne arrivano sempre di più (all'inizio uno ogni 7 riserve circa, alla fine uno o più a riserva).
+   Misurato con giocatori automatici (solo logica): una partita finisce in media dopo 160 pezzi per chi gioca bene e 76 per chi gioca a caso.
+   I sassi occupano una cella per sempre: si tolgono solo con un'esplosione di 7 che li raggiunge. Quando la plancia si riempie, la partita finisce. */
+const ROCK_START = 7, ROCK_A = 0.15, ROCK_B = 0.004;
+const rockCount = t => { const d = t - ROCK_START; return d <= 0 ? 0 : Math.floor(ROCK_A * d + ROCK_B * d * d); };   // sassi arrivati in tutto dopo t riserve
+/** Aggiunge alla plancia i sassi dovuti dopo la riserva appena finita. Nella partita del giorno le posizioni hanno un seme (se la cella è occupata si scorre alla successiva). */
+function placeRocks() {
+  const n = rockCount(trayNo) - rockCount(trayNo - 1), added = [];
+  for (let i = 0; i < n; i++) {
+    const rnd = mode === 'daily' ? mulberry(hashStr('girasette-rock-' + today + '-' + trayNo + '-' + i)) : Math.random;
+    const start = Math.floor(rnd() * CELLS.length);
+    for (let j = 0; j < CELLS.length; j++) {
+      const c = CELLS[(start + j) % CELLS.length];
+      if ((c[0] === 0 && c[1] === 0) || board.has(key(c[0], c[1]))) continue;   // il centro non gira: lo lasciamo libero
+      board.set(key(c[0], c[1]), ROCK); added.push([c[0], c[1]]); break;
+    }
+  }
+  return added;
 }
 let board = new Map();               // "q,r" -> valore
 let tray = [null, null, null];
@@ -3803,6 +3824,7 @@ const sfx = {
   merge: n => [0, 4, 7].forEach((s, i) => tone(520 * Math.pow(2, (s + Math.min(n - 1, 6) * 2) / 12), 0.22, 'triangle', 0.12, i * 0.05)),
   boom,
   spin: () => { tone(300, 0.5, 'sine', 0.12, 0, 640); tone(450, 0.5, 'triangle', 0.06, 0.05, 900); },
+  rock: () => { tone(120, 0.28, 'triangle', 0.25, 0, 55); tone(90, 0.2, 'sine', 0.2, 0.05, 50); },
   over: () => [0, -3, -7].forEach((s, i) => tone(392 * Math.pow(2, s / 12), 0.35, 'triangle', 0.12, i * 0.14)),
 };
 const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
@@ -3877,6 +3899,7 @@ function bestPlacement(piece, x, y) {
 
 /* ---------------------------------------------------------------- 4) DISEGNO */
 const COL = {
+  9: { base: '#7b8094', light: '#a9aec2', dark: '#474c5e', text: '#2a2d38' },   // sasso
   1: { base: '#4cc9f0', light: '#9be6ff', dark: '#1f8fb5', text: '#06324a' },
   2: { base: '#3ddc97', light: '#8cf2c3', dark: '#1a9468', text: '#04331f' },
   3: { base: '#b5e24a', light: '#dcf78f', dark: '#7fa31c', text: '#2a3a05' },
@@ -3925,10 +3948,18 @@ function drawTile(x, y, s, v, scale = 1, alpha = 1, flash = 0) {
   ctx.fillStyle = g; ctx.fill();
   hexPath(x, y, r * 0.66);                            // incisione interna
   ctx.lineWidth = Math.max(1.2, s * 0.05); ctx.strokeStyle = 'rgba(255,255,255,.38)'; ctx.stroke();
-  ctx.fillStyle = c.text;
-  ctx.font = '700 ' + Math.round(s * 0.95 * scale) + 'px Fredoka, system-ui, sans-serif';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(String(v), x, y + s * 0.04);
+  if (v === ROCK) {                                   // sasso: crepe al posto del numero
+    ctx.strokeStyle = 'rgba(28,30,42,.8)'; ctx.lineWidth = Math.max(1.6, s * 0.07); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x - s * 0.38 * scale, y - s * 0.5 * scale); ctx.lineTo(x - s * 0.1 * scale, y - s * 0.1 * scale); ctx.lineTo(x - s * 0.32 * scale, y + s * 0.2 * scale); ctx.lineTo(x - s * 0.1 * scale, y + s * 0.5 * scale);
+    ctx.moveTo(x - s * 0.1 * scale, y - s * 0.1 * scale); ctx.lineTo(x + s * 0.3 * scale, y); ctx.lineTo(x + s * 0.46 * scale, y + s * 0.3 * scale);
+    ctx.stroke();
+  } else {
+    ctx.fillStyle = c.text;
+    ctx.font = '700 ' + Math.round(s * 0.95 * scale) + 'px Fredoka, system-ui, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(v), x, y + s * 0.04);
+  }
   if (v === SEVEN) {                                  // bordo dorato extra
     hexPath(x, y, r * 0.9); ctx.lineWidth = 2.5; ctx.strokeStyle = '#ffb300'; ctx.stroke();
   }
@@ -4162,7 +4193,6 @@ async function placePiece(slot, q, r) {
   cells.forEach(c => { stat.tile = Math.max(stat.tile, c[2]); });
   tray[slot] = null;
   if (selected === slot) selected = null;
-  document.getElementById('hint').style.opacity = '0';
   cells.forEach(([a, b, v]) => {
     board.set(key(a, b), v);
     const an = { s: 0.55, ox: 0, oy: 0, a: 1, flash: 0 };
@@ -4185,15 +4215,42 @@ async function placePiece(slot, q, r) {
   // Finiti i tre pezzi: la plancia gira, poi arriva la riserva nuova.
   if (tray.every(p => !p)) {
     if (!(await doRotation(myGen))) return false;
+    await dropRocks(myGen);
+    if (myGen !== gen) return false;
     tray = nextTray();
     tray.forEach(p => { p.pop = 0.4; tween(p, 'pop', 1, 280, easeOutBack); });
   }
   if (selected == null || !tray[selected]) selected = tray.findIndex(p => p);
+  updateRockInfo();
   busy = false;
   if (!hasAnyMove()) endGame();
   return true;
 }
 
+/** Dopo il giro arrivano i sassi dovuti: cadono dall'alto sulle celle libere. */
+async function dropRocks(myGen) {
+  const added = placeRocks();
+  if (!added.length) return;
+  stat.rocks += added.length;
+  added.forEach(([q, r]) => { const an = { s: 0.3, ox: 0, oy: -S * 2.4, a: 0, flash: 0 }; anim.set(key(q, r), an); tween(an, 's', 1, 260, easeOutBack); tween(an, 'oy', 0, 260, easeInCubic); tween(an, 'a', 1, 140, linear); });
+  sfx.rock(); buzz(30); shake = 7;
+  added.forEach(([q, r]) => { const p = cellPx(q, r); burst(p.x, p.y, '#9aa0b4', 10, 170); });
+  floatText(gcx, gcy - S * 3.2, added.length > 1 ? added.length + ' sassi!' : 'Sasso!', '#d5dae8', 26);
+  await wait(320);
+}
+/** Riga in alto: dopo la prima mossa dice quando arriva il prossimo sasso (così la difficoltà non è una sorpresa). */
+function rockText() {
+  const per = k => rockCount(trayNo + k - 1) - rockCount(trayNo + k - 2);
+  let k = 1; while (k <= 10 && per(k) <= 0) k++;
+  if (k > 10) { let t = 1; while (rockCount(t) < 1 && t < 99) t++; return '🪨 I sassi arrivano dalla riserva ' + t; }
+  const n = per(k);
+  return '🪨 ' + (n > 1 ? n + ' sassi' : 'Un sasso') + (k === 1 ? ' dopo questa riserva' : ' tra ' + k + ' riserve');
+}
+function updateRockInfo() {
+  const h = $('hint'); if (!h) return;
+  h.textContent = rockText(); h.style.opacity = '1';
+  h.style.color = /dopo questa/.test(h.textContent) ? '#ffd166' : '';
+}
 /** Gira gli anelli, poi risolve le fusioni create dal movimento (punti doppi). */
 async function doRotation(myGen) {
   const moves = rotationMap(board);
@@ -4240,7 +4297,7 @@ function endGame() {
   $('stTile').textContent = stat.tile || '—'; $('stSpins').textContent = stat.spins; $('stChain').textContent = stat.chain ? '×' + stat.chain : '—';
   $('other').textContent = mode === 'daily' ? 'Partita libera' : 'Partita del giorno';
   $('share').textContent = 'Copia risultato'; $('shareBox').hidden = true;
-  shareText = 'Girasette · ' + (mode === 'daily' ? 'partita del giorno ' + todayLabel : 'partita libera') + '\n' + score.toLocaleString('it-IT') + ' punti · tessera ' + (stat.tile || '—') + ' · ' + stat.spins + (stat.spins === 1 ? ' giro' : ' giri') + (stat.chain > 1 ? ' · catena ×' + stat.chain : '') + (stat.sevens ? ' · ' + stat.sevens + (stat.sevens === 1 ? ' esplosione' : ' esplosioni') + ' di 7' : '');
+  shareText = 'Girasette · ' + (mode === 'daily' ? 'partita del giorno ' + todayLabel : 'partita libera') + '\n' + score.toLocaleString('it-IT') + ' punti · tessera ' + (stat.tile || '—') + ' · ' + stat.spins + (stat.spins === 1 ? ' giro' : ' giri') + (stat.chain > 1 ? ' · catena ×' + stat.chain : '') + (stat.sevens ? ' · ' + stat.sevens + (stat.sevens === 1 ? ' esplosione' : ' esplosioni') + ' di 7' : '') + (stat.rocks ? ' · ' + stat.rocks + (stat.rocks === 1 ? ' sasso' : ' sassi') : '');
   sfx.over(); buzz(120);
   setTimeout(() => { if (over) $('over').hidden = false; }, 450 * TIMESCALE + 50);
 }
@@ -4250,7 +4307,7 @@ function newGame(m) {
   mode = m === 'daily' ? 'daily' : m === 'free' ? 'free' : mode;
   tweens.length = 0; particles.length = 0; floaters.length = 0; rings.length = 0; anim.clear();
   board = new Map(); setScore(0); placedCount = 0; trayNo = 0;
-  stat.tile = 0; stat.spins = 0; stat.chain = 0; stat.sevens = 0;
+  stat.tile = 0; stat.spins = 0; stat.chain = 0; stat.sevens = 0; stat.rocks = 0;
   best = mode === 'daily' ? readDay() : readFree(); $('best').textContent = best.toLocaleString('it-IT');
   over = false; busy = false; drag = null; hover = null;
   tray = nextTray();
@@ -4258,7 +4315,7 @@ function newGame(m) {
   selected = tray.findIndex(p => p && p.vals.length === 2);
   if (selected < 0) selected = 0;
   $('over').hidden = true;
-  $('hint').style.opacity = '1';
+  $('hint').textContent = 'Trascina i pezzi · dopo il terzo, la plancia gira'; $('hint').style.opacity = '1'; $('hint').style.color = '';
 }
 
 /* -------------------------------------------------------------------- 5) INPUT */
@@ -4344,7 +4401,7 @@ window.__M7 = {
   get score() { return score; }, get over() { return over; }, get busy() { return busy; },
   ringCells, rotationMap, ringOf, difficulty, get placedCount() { return placedCount; }, placePiece, newGame, hasAnyMove, setTimescale: v => { TIMESCALE = v; },
   select: i => { selected = i; },
-  get mode() { return mode; }, get stat() { return stat; }, get trayNo() { return trayNo; }, get shareText() { return shareText; }, mulberry, hashStr,
+  ROCK, rockCount, placeRocks, rockText, get mode() { return mode; }, get stat() { return stat; }, get trayNo() { return trayNo; }, set trayNo(v) { trayNo = v; }, get shareText() { return shareText; }, mulberry, hashStr,
 };
 })();
     },
@@ -4940,26 +4997,6 @@ function buildBoard() {
       cellEl[r].push(b);
     }
   }
-  trailEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); trailEl.setAttribute('class', 'trail'); trailEl.setAttribute('aria-hidden', 'true');
-  boardEl.appendChild(trailEl);
-}
-/** Il percorso di chi gioca, in rosa acceso: un collegamento tra una casella e la successiva (bordo bianco per leggersi su ogni colore),
- *  un anello e un numero d'ordine sulle caselle toccate. I collegamenti restano ai bordi: non coprono i numeri al centro. */
-let trailEl = null;
-function drawTrail() {
-  if (!trailEl) return;
-  const W = boardEl.clientWidth, H = boardEl.clientHeight;
-  trailEl.setAttribute('viewBox', '0 0 ' + W + ' ' + H); trailEl.textContent = '';
-  if (!W || !path.length) return;
-  const mk = (n, a) => { const e = document.createElementNS('http://www.w3.org/2000/svg', n); Object.keys(a).forEach(k => e.setAttribute(k, a[k])); return e; };
-  const ctr = ([r, c]) => { const e = cellEl[r][c]; return { x: e.offsetLeft + e.offsetWidth / 2, y: e.offsetTop + e.offsetHeight / 2, w: e.offsetWidth }; };
-  for (let i = 1; i < path.length; i++) {
-    const a = ctr(path[i - 1]), b = ctr(path[i]), half = a.w / 2, ext = a.w * 0.07, lw = Math.max(3, a.w * 0.095);
-    const dx = Math.sign(b.x - a.x), dy = Math.sign(b.y - a.y);
-    const x1 = a.x + dx * (half - ext), y1 = a.y + dy * (half - ext), x2 = b.x - dx * (half - ext), y2 = b.y - dy * (half - ext);
-    trailEl.appendChild(mk('line', { class: 'halo', x1, y1, x2, y2, 'stroke-width': lw * 2.1 }));
-    trailEl.appendChild(mk('line', { class: 'line', x1, y1, x2, y2, 'stroke-width': lw }));
-  }
 }
 function renderBoard() {
   const sums = [], cur = path[path.length - 1];
@@ -4975,7 +5012,6 @@ function renderBoard() {
     el.lastChild.textContent = idx > 0 ? '=' + sums[r * N + c] : '';
     if (idx > 0) el.dataset.s = idx; else delete el.dataset.s;
   }
-  drawTrail();
 }
 function setVal(v, dir) {
   const el = $('val'); el.textContent = v;
@@ -5189,8 +5225,6 @@ window.addEventListener('keydown', e => {
   else if (e.key === 'ArrowDown') { tap(cur[0] + 1, cur[1]); e.preventDefault(); }
   else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'Backspace') { back(); e.preventDefault(); }
 });
-
-window.addEventListener('resize', drawTrail);
 
 /* Interfaccia di prova (usata dai test automatici; innocua per il gioco). */
 window.__SN = {
@@ -6188,7 +6222,8 @@ requestAnimationFrame(frame);
       ['🤝', 'Se tre esagoni con lo stesso numero sono vicini, diventano uno solo, con il numero più grande di uno.'],
       ['🌀', 'Quando hai messo tutti e tre i pezzi, la griglia gira! Se girando se ne uniscono altri, valgono doppio.'],
       ['💥', 'Se unisci tre 7, BOOM: esplode e fa spazio intorno.'],
-      ['↻', 'Tocca un pezzo doppio per girarlo. Il gioco finisce quando non c\'è più posto.']], tip: 'Metti i numeri uguali vicini vicini.' },
+      ['🪨', 'Col tempo arrivano dei sassi grigi. Non si uniscono e occupano posto. Solo un BOOM li rompe.'],
+      ['🛑', 'Tocca un pezzo doppio per girarlo. Il gioco finisce quando la griglia è piena.']], tip: 'Metti i numeri uguali vicini vicini.' },
     raddoppio: { icon: '🔢', intro: 'Hai una griglia con delle tessere con i numeri.', steps: [
       ['👉', 'Scorri il dito (o usa le frecce): tutte le tessere scivolano da quella parte.'],
       ['➕', 'Due tessere con lo stesso numero si uniscono e il numero diventa il doppio: 2 e 2 fanno 4.'],

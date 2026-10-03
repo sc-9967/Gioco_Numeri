@@ -39,6 +39,7 @@ Puzzle di fusione su griglia esagonale (raggio 3, 37 celle, coordinate assiali).
 - Regola propria del gioco: finiti i tre pezzi, i tre anelli esterni ruotano di un passo (quello interno e quello esterno in un verso, quello medio nel verso opposto). Le fusioni causate dal giro valgono doppio. Con un solo pezzo rimasto, delle frecce mostrano dove andrà ogni tessera.
 - Pezzi doppi: si ruotano toccandoli, con il pulsante "Ruota" o con il tasto R.
 - **Partita del giorno:** gli stessi pezzi, nello stesso ordine, per tutti i giocatori (ogni riserva ha un seme ricavato dalla data di Roma e non guarda la plancia, quindi non cambia con le mosse). Per questo in quella modalità manca l'aiuto della partita libera, che pesca spesso i valori già presenti. Si può rigiocare; il record del giorno ha una chiave propria e non tocca il record della partita libera.
+- **La difficoltà cresce: i sassi.** Fino alla 12ª riserva circa nessun sasso; poi arrivano sassi grigi che non si fondono mai, girano con il loro anello e occupano una cella per sempre. All'inizio uno ogni 7 riserve circa, alla fine uno o più a riserva. Si rompono solo con un'esplosione di 7 che li raggiunge. In alto una riga annuncia quando arriva il prossimo ("🪨 Un sasso tra 2 riserve"). Quando la plancia è piena la partita finisce: prima, con le stesse regole, un giocatore bravo non perdeva mai. Nella partita del giorno il calendario è uguale per tutti e le posizioni hanno un seme (se la cella scelta è occupata si scorre alla successiva). I valori sono in `ROCK_START`, `ROCK_A`, `ROCK_B` all'inizio del gioco.
 - **Fine partita:** tessera massima, giri della plancia e catena più lunga; "Copia risultato" con il nome (partita libera o del giorno) e il pulsante per passare all'altra modalità.
 
 ## Raddoppio
@@ -62,7 +63,7 @@ Puzzle di calcolo: griglia 5×5, si parte da 1 in alto a sinistra e si arriva in
 - **Record** per giorno, settimana (da lunedì), anno e sempre, con migliore, media e giorni giocati, più la serie di giorni consecutivi. Sono calcolati dallo storico salvato **sul dispositivo**: senza un server non esiste una classifica condivisa.
 - **Con gli amici, senza server:** il risultato si copia come testo con le caselle colorate; dopo un allenamento il testo contiene un codice sfida `SEN-…-punti` (e, se la pagina è online, un link `#sentiero?c=…`). Chi lo incolla nella schermata iniziale gioca le stesse 5 griglie e vede se ha battuto il punteggio.
 - **Limite:** i punteggi non sono verificabili. Va bene tra amici, non per una classifica pubblica.
-- **Il tuo percorso è rosa acceso:** collegamento rosa con bordo bianco tra una casella e la successiva (leggibile su ogni colore), anello rosa e numero d'ordine sulle caselle toccate. Alla fine della griglia il percorso ottimo compare in blu; dove i due coincidono si vedono entrambi gli anelli (rosa fuori, blu dentro).
+- **Il tuo percorso è rosa tenue:** anello rosa e numero d'ordine (1, 2, 3…) sulle caselle toccate, senza linee. Alla fine della griglia il percorso ottimo compare in blu; dove i due coincidono si vedono entrambi gli anelli (rosa fuori, blu dentro).
 
 ## Lampo
 
@@ -120,12 +121,14 @@ node girasette-giro.js        # fusione causata dal giro
 node girasette-bot.js         # partite automatiche di Girasette
 node launcher-girasette.js    # Girasette dentro il launcher
 node girasette-giorno.js      # partita del giorno (stessi pezzi per tutti), statistiche, condivisione
+node girasette-durata.js      # sassi: regole, calendario, durata delle partite con giocatori automatici
+node girasette-sassi.js       # sassi nel gioco vero: arrivo, annuncio, fine partita
 node raddoppio-logica.js      # scorrimento, fusioni, undo, catena, martello, vittoria, game over
 node launcher-raddoppio.js    # Raddoppio dentro il launcher
 node sentiero-logica.js       # percorso ottimo, generatore, codici sfida, record per periodo
 node sentiero-partita.js      # partita completa, una sola sfida al giorno, condivisione
 node launcher-sentiero.js     # Sentiero dentro il launcher
-node sentiero-percorso.js     # percorso rosa: collegamenti, anelli, numeri d'ordine, indietro, fine griglia
+node sentiero-percorso.js     # percorso rosa tenue: anelli, numeri d'ordine, indietro, fine griglia
 node lampo.js                 # regole, punteggio, partita perfetta, bonus, launcher, schermi
 node cassaforte.js            # regole, punteggio, partite complete del bot
 node launcher-cassaforte.js   # tastierino, note, indizio, vite, tempo, codice del giorno, record, schermi
