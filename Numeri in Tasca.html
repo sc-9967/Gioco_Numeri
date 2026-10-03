@@ -1355,7 +1355,7 @@ h1 span{color:var(--accent)}
 /* SENTIERO. Layout: HUD in alto, valore corrente, tabellone 5x5 quadrato, barra comandi. Tema chiaro "carta millimetrata", unico nella raccolta (gli altri giochi sono scuri o a colori pieni). */
 :root{
   --bg:#f4ecd8; --bg2:#fbf6e8; --ink:#1f2a24; --muted:#6d7668; --panel:#fffaf0; --line:#d9ceb2;
-  --accent:#1f7a5a; --accent-ink:#ffffff; --gold:#e0a526; --blue:#2b6fd6;
+  --accent:#1f7a5a; --accent-ink:#ffffff; --gold:#e0a526; --blue:#2b6fd6; --trail:#ff1f8e;
   --add:#d3eee2; --add-ink:#14583f; --mul:#fbe7b0; --mul-ink:#6e4a00; --sub:#f6d3c9; --sub-ink:#8a2f1c;
   --ui:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif; --num:"Courier Prime","Courier New",monospace;
   color-scheme:light;
@@ -1390,13 +1390,18 @@ h1 span{color:var(--accent)}
 .cell.mul{background:var(--mul);color:var(--mul-ink)}
 .cell.sub{background:var(--sub);color:var(--sub-ink)}
 .cell.start{background:var(--ink);color:#fff;font-size:5.4cqw}
-.cell.on{box-shadow:inset 0 0 0 .9cqw var(--accent),0 .6cqw 0 rgba(31,42,36,.18)}
-.cell.cur{box-shadow:inset 0 0 0 1.1cqw var(--accent),0 0 0 .8cqw rgba(31,122,90,.28);animation:cur 1s ease-in-out infinite alternate}
+.cell.on{box-shadow:inset 0 0 0 1.1cqw var(--trail),0 0 2.4cqw rgba(255,31,142,.55),0 .6cqw 0 rgba(31,42,36,.18)}
+.cell.cur{box-shadow:inset 0 0 0 1.5cqw var(--trail),0 0 0 .9cqw rgba(255,31,142,.4),0 0 3.2cqw rgba(255,31,142,.8);animation:cur 1s ease-in-out infinite alternate}
+.cell[data-s]::before{content:attr(data-s);position:absolute;top:-1.4cqw;left:-1.4cqw;min-width:5.2cqw;height:5.2cqw;padding:0 .8cqw;box-sizing:border-box;border-radius:99px;background:var(--trail);color:#fff;border:.55cqw solid #fff;font-size:3.1cqw;display:grid;place-items:center;font-family:var(--ui);font-weight:800;z-index:3;box-shadow:0 .3cqw .8cqw rgba(0,0,0,.25)}
+.trail{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:4;overflow:visible}
+.trail .halo{stroke:#fff;stroke-linecap:round;fill:none}
+.trail .line{stroke:var(--trail);stroke-linecap:round;fill:none}
 @keyframes cur{to{transform:scale(1.05)}}
 .cell.nx{box-shadow:inset 0 0 0 .6cqw rgba(31,42,36,.55),0 .6cqw 0 rgba(31,42,36,.18)}
 .cell:active{transform:translateY(.5cqw)}
 .cell.opt::after{content:attr(data-o);position:absolute;top:-1.2cqw;right:-1.2cqw;min-width:5cqw;height:5cqw;border-radius:99px;background:var(--blue);color:#fff;font-size:3.2cqw;display:grid;place-items:center;font-family:var(--ui);font-weight:800}
 .cell.opt{box-shadow:inset 0 0 0 .8cqw var(--blue),0 .6cqw 0 rgba(31,42,36,.18)}
+.cell.opt.on,.cell.opt.cur{box-shadow:inset 0 0 0 1.1cqw var(--trail),inset 0 0 0 2.2cqw var(--blue),0 0 2.4cqw rgba(255,31,142,.45),0 .6cqw 0 rgba(31,42,36,.18)}
 .cell.shake{animation:shake .25s}
 @keyframes shake{25%{transform:translateX(-1.4cqw)}75%{transform:translateX(1.4cqw)}}
 .legend{display:flex;gap:6px;justify-content:center;padding-inline:14px;font-size:12px;color:var(--muted);padding-bottom:2px}
@@ -1461,7 +1466,7 @@ td:first-child{font-family:var(--ui);font-weight:700}
   </header>
   <div class="valbar"><span class="lbl">Valore</span><b id="val">1</b></div>
   <div class="stage" id="stage"><div class="board" id="board" aria-label="Griglia 5 per 5"></div></div>
-  <div class="legend"><i class="a">+n</i><i class="m">×n</i><i class="s">−n</i><span>solo verso → e ↓</span></div>
+  <div class="legend"><i class="a">+n</i><i class="m">×n</i><i class="s">−n</i><span>solo verso → e ↓ · la tua strada è rosa</span></div>
   <footer class="bar">
     <button class="btn" id="back" type="button" disabled>Indietro</button>
     <button class="btn" id="reset" type="button" disabled>Da capo</button>
@@ -4935,6 +4940,26 @@ function buildBoard() {
       cellEl[r].push(b);
     }
   }
+  trailEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); trailEl.setAttribute('class', 'trail'); trailEl.setAttribute('aria-hidden', 'true');
+  boardEl.appendChild(trailEl);
+}
+/** Il percorso di chi gioca, in rosa acceso: un collegamento tra una casella e la successiva (bordo bianco per leggersi su ogni colore),
+ *  un anello e un numero d'ordine sulle caselle toccate. I collegamenti restano ai bordi: non coprono i numeri al centro. */
+let trailEl = null;
+function drawTrail() {
+  if (!trailEl) return;
+  const W = boardEl.clientWidth, H = boardEl.clientHeight;
+  trailEl.setAttribute('viewBox', '0 0 ' + W + ' ' + H); trailEl.textContent = '';
+  if (!W || !path.length) return;
+  const mk = (n, a) => { const e = document.createElementNS('http://www.w3.org/2000/svg', n); Object.keys(a).forEach(k => e.setAttribute(k, a[k])); return e; };
+  const ctr = ([r, c]) => { const e = cellEl[r][c]; return { x: e.offsetLeft + e.offsetWidth / 2, y: e.offsetTop + e.offsetHeight / 2, w: e.offsetWidth }; };
+  for (let i = 1; i < path.length; i++) {
+    const a = ctr(path[i - 1]), b = ctr(path[i]), half = a.w / 2, ext = a.w * 0.07, lw = Math.max(3, a.w * 0.095);
+    const dx = Math.sign(b.x - a.x), dy = Math.sign(b.y - a.y);
+    const x1 = a.x + dx * (half - ext), y1 = a.y + dy * (half - ext), x2 = b.x - dx * (half - ext), y2 = b.y - dy * (half - ext);
+    trailEl.appendChild(mk('line', { class: 'halo', x1, y1, x2, y2, 'stroke-width': lw * 2.1 }));
+    trailEl.appendChild(mk('line', { class: 'line', x1, y1, x2, y2, 'stroke-width': lw }));
+  }
 }
 function renderBoard() {
   const sums = [], cur = path[path.length - 1];
@@ -4948,7 +4973,9 @@ function renderBoard() {
     el.classList.toggle('cur', isCur || (locked && idx === path.length - 1));
     el.classList.toggle('nx', nx);
     el.lastChild.textContent = idx > 0 ? '=' + sums[r * N + c] : '';
+    if (idx > 0) el.dataset.s = idx; else delete el.dataset.s;
   }
+  drawTrail();
 }
 function setVal(v, dir) {
   const el = $('val'); el.textContent = v;
@@ -5048,7 +5075,7 @@ function finishGrid() {
   $('msg').innerHTML = '';
   const m = document.createElement('span');
   m.append(pct >= 100 ? 'Percorso perfetto! ' : pct >= 90 ? 'Quasi perfetto. ' : pct >= 70 ? 'Buon percorso. ' : 'Il percorso migliore era un altro. ');
-  m.append('Tu ', Object.assign(document.createElement('b'), { textContent: val }), ' · ottimo ', Object.assign(document.createElement('b'), { textContent: opt }), '. In blu il percorso ottimo.');
+  m.append('Tu ', Object.assign(document.createElement('b'), { textContent: val }), ' · ottimo ', Object.assign(document.createElement('b'), { textContent: opt }), '. In rosa il tuo percorso, in blu il percorso ottimo.');
   $('msg').appendChild(m);
   $('next').textContent = gi < SERIES - 1 ? 'Prossima griglia' : 'Vedi il totale';
   sfx.grid(pct); buzz(pct >= 100 ? [10, 30, 10] : 14);
@@ -5162,6 +5189,8 @@ window.addEventListener('keydown', e => {
   else if (e.key === 'ArrowDown') { tap(cur[0] + 1, cur[1]); e.preventDefault(); }
   else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'Backspace') { back(); e.preventDefault(); }
 });
+
+window.addEventListener('resize', drawTrail);
 
 /* Interfaccia di prova (usata dai test automatici; innocua per il gioco). */
 window.__SN = {
@@ -6168,7 +6197,7 @@ requestAnimationFrame(frame);
       ['🛑', 'Il gioco finisce quando non puoi più muovere nessuna tessera.']], tip: 'Tieni le tessere grandi in un angolo.' },
     sentiero: { icon: '🗺️', intro: 'Hai una griglia di quadretti. Trova la strada giusta!', steps: [
       ['🏁', 'Parti dal quadretto in alto a sinistra, con il numero 1.'],
-      ['👉', 'Puoi andare solo a destra o in basso, fino al quadretto in basso a destra.'],
+      ['👉', 'Puoi andare solo a destra o in basso, fino al quadretto in basso a destra. La tua strada diventa rosa.'],
       ['➕', 'Ogni quadretto cambia il tuo numero: + aggiunge, × moltiplica, − toglie.'],
       ['🏆', 'Prova a finire con il numero più grande che puoi: più è grande, più punti prendi.'],
       ['📅', 'Sono 5 griglie. Ogni giorno ce ne sono di nuove, uguali per tutti.']], tip: 'Il × fa crescere tanto: cercalo!' },

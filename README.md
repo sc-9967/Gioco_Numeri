@@ -62,6 +62,7 @@ Puzzle di calcolo: griglia 5×5, si parte da 1 in alto a sinistra e si arriva in
 - **Record** per giorno, settimana (da lunedì), anno e sempre, con migliore, media e giorni giocati, più la serie di giorni consecutivi. Sono calcolati dallo storico salvato **sul dispositivo**: senza un server non esiste una classifica condivisa.
 - **Con gli amici, senza server:** il risultato si copia come testo con le caselle colorate; dopo un allenamento il testo contiene un codice sfida `SEN-…-punti` (e, se la pagina è online, un link `#sentiero?c=…`). Chi lo incolla nella schermata iniziale gioca le stesse 5 griglie e vede se ha battuto il punteggio.
 - **Limite:** i punteggi non sono verificabili. Va bene tra amici, non per una classifica pubblica.
+- **Il tuo percorso è rosa acceso:** collegamento rosa con bordo bianco tra una casella e la successiva (leggibile su ogni colore), anello rosa e numero d'ordine sulle caselle toccate. Alla fine della griglia il percorso ottimo compare in blu; dove i due coincidono si vedono entrambi gli anelli (rosa fuori, blu dentro).
 
 ## Lampo
 
@@ -124,6 +125,7 @@ node launcher-raddoppio.js    # Raddoppio dentro il launcher
 node sentiero-logica.js       # percorso ottimo, generatore, codici sfida, record per periodo
 node sentiero-partita.js      # partita completa, una sola sfida al giorno, condivisione
 node launcher-sentiero.js     # Sentiero dentro il launcher
+node sentiero-percorso.js     # percorso rosa: collegamenti, anelli, numeri d'ordine, indietro, fine griglia
 node lampo.js                 # regole, punteggio, partita perfetta, bonus, launcher, schermi
 node cassaforte.js            # regole, punteggio, partite complete del bot
 node launcher-cassaforte.js   # tastierino, note, indizio, vite, tempo, codice del giorno, record, schermi

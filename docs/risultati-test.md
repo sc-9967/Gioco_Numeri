@@ -148,3 +148,10 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 - **Schermo 360×700:** titolo in cima e pulsanti sempre in vista; i passi scorrono (compare "⬇ Scorri per vedere tutto").
 - **Corretti durante i test:** i nomi di classe `t` ed `e` della scheda coincidevano con quelli di Cassaforte (testo bianco su bianco); la scheda si apriva scorsa in fondo; i pulsanti coprivano il testo.
 - **Limite:** nessun bambino ha provato i testi. Che un bambino di 5 anni capisca "tre esagoni uguali vicini diventano uno" o "il resto" è un'ipotesi, non un dato.
+
+## Sentiero: percorso in rosa acceso
+
+- **Cosa si vede:** per ogni passo un collegamento rosa (#ff1f8e) con bordo bianco, anello rosa e numero d'ordine (1, 2, 3…) sulle caselle toccate; la casella attuale pulsa con un alone. I collegamenti restano ai bordi delle caselle e non coprono i numeri.
+- **Verificato a 390×844 e 320×560:** nessun tratto all'inizio; 5 tratti dopo 5 mosse con colore e bordo corretti; "Indietro" e il tocco su una casella già percorsa tolgono i tratti e i numeri giusti; a griglia finita 8 tratti, e una nuova griglia riparte pulita; il disegno copre esattamente la griglia; nessuno scorrimento orizzontale; il foglio finale spiega i colori ("In rosa il tuo percorso, in blu il percorso ottimo").
+- **Corretti durante i test:** nella prima versione i collegamenti entravano troppo nelle caselle e coprivano le somme parziali ("=7"): ridotti; quando il percorso coincide con l'ottimo l'anello blu nascondeva quello rosa: ora si vedono entrambi.
+- **Limite:** a 320×560 il foglio dei risultati copre la parte bassa della griglia (comportamento già presente, non modificato).
