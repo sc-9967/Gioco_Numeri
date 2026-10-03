@@ -176,3 +176,10 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 - **Segnalazione:** «a fine gioco la combinazione non si vede». Nei miei test si vedeva già (provato anche con una partita a velocità normale, tre vite perse con tocchi veri sul tastierino: compare «Il codice che non hai aperto era: 7425»). La causa più probabile è che il file usato fosse una versione precedente. [Ipotesi, non l'ho potuto verificare]
 - **Cosa ho comunque migliorato:** a ogni cassaforte mancata il codice compare grande al centro del tabellone per circa 3 secondi (prima: una riga piccola per 2 secondi); a fine serie si vedono l'ultimo codice e gli altri mancati prima («Prima: 123 · 2483»).
 - **Numero di versione** in fondo alla home (`BUILD`, ora 2026-10-03.4): se qualcosa non corrisponde a quello che leggi qui, controlla prima quel numero.
+
+## Cassaforte: l'indizio ora si vede e serve (versione 2026-10-03.5)
+
+- **Segnalazione:** «una volta premuto non succede nulla». Il vecchio indizio segnava come escluso un numero assente dal codice: sul tastierino un tasto sbiadito e una riga di testo piccola per due secondi. In pratica invisibile, e di poco aiuto (toglie una cifra su dieci).
+- **Ora:** l'indizio regala **una cifra giusta nel posto giusto**. Compare tratteggiata e dorata nella riga che stai scrivendo, con il riquadro «💡 posto 4: il 4», un messaggio, un testo che sale e il tasto lampeggiante. Va scritta lo stesso, così il giocatore resta protagonista. Costo: 120 punti (prima 50); 250 nel codice del giorno (prima 100). Un solo indizio per cassaforte. Nella partita del giorno la posizione è la stessa per tutti e si ritrova se si esce e si rientra.
+- **Verificato a 360×700 e 320×560:** posizione scelta valida, cifra tratteggiata nel posto giusto, messaggio e riquadro coerenti, un solo indizio per cassaforte, punti ridotti di 120.
+- **Non misurato:** quanto cambi la difficoltà. Una cifra giusta in posizione riduce molto i casi possibili (un codice a 4 cifre ha 5.040 combinazioni, con una cifra nota ne restano circa 504): potrebbe essere troppo conveniente a 120 punti. Il prezzo si cambia in `HINT_COST`. [Ipotesi]

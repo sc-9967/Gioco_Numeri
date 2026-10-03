@@ -1695,6 +1695,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
 .row.act .t.on{background:linear-gradient(160deg,#36456f,#222c4d);border-color:var(--gold2);animation:put .12s}
 .row.done .t{background:linear-gradient(160deg,#2c3a64,#1c2543);border-color:#4a5a8c}
 .t.flip{animation:flip .4s both;animation-delay:var(--d,0ms)}
+.t.ghost{border:2px dashed var(--gold);color:var(--gold);background:rgba(245,196,81,.14);box-shadow:0 0 14px rgba(245,196,81,.35);animation:pulse 1s infinite}
 .pegs{flex:none;display:grid;grid-template-columns:repeat(var(--pc,2),11px);gap:4px;width:calc(var(--pc,2)*11px + (var(--pc,2) - 1)*4px)}
 .p{width:11px;height:11px;border-radius:50%;box-sizing:border-box;border:1.5px solid rgba(255,255,255,.14)}
 .p.e{background:var(--ok);border-color:var(--ok);box-shadow:0 0 6px rgba(46,213,115,.6)}
@@ -1861,7 +1862,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
   // Contributo nascosto per ora: metti true per riattivare il riquadro e il link a fine partita.
   const SHOW_DONATE = true;
   const AUTHOR = 'Silvio Chiaverini';
-  const BUILD = '2026-10-03.4';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
+  const BUILD = '2026-10-03.5';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
   // Nome del giocatore: salvato solo sul dispositivo, compare nei testi che si condividono (mai nelle statistiche anonime).
   const cleanName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
   const playerName = () => { try { return cleanName(JSON.parse(localStorage.getItem('nit_name'))); } catch (e) { return ''; } };
@@ -5675,7 +5676,7 @@ requestAnimationFrame(frame);
    QUANTE cifre sono giuste al posto giusto (●) e QUANTE sono giuste ma fuori posto (○), non quali.
    Due modi: "Serie" (fino a 20 casseforti, codici sempre piu' lunghi, 3 vite, tempo per ogni cassaforte)
    e "Codice del giorno" (4 cifre, 8 tentativi, uguale per tutti, una sola partita al giorno, si puo' riprendere).
-   Punti serie: (100 x cifre + 40 x tentativi rimasti + fino a 100 di tempo - 50 se usi l'indizio) x moltiplicatore (tetto x5).
+   Punti serie: (100 x cifre + 40 x tentativi rimasti + fino a 100 di tempo - 120 se usi l'indizio) x moltiplicatore (tetto x5).
    Struttura: 1) regole e logica pura  2) stato  3) disegno del tabellone  4) audio ed effetti  5) flusso e schermate
    ============================================================================ */
 (() => {
@@ -5689,15 +5690,16 @@ const clock = s => { s = Math.max(0, Math.ceil(s)); return Math.floor(s / 60) + 
 
 /* ---------------------------------------------------------------- 1) REGOLE E LOGICA PURA */
 const LIVES = 3, MAX_CODES = 20, DAILY_LEN = 4;
+const HINT_COST = 120, DAILY_HINT_COST = 250;   // l'indizio regala una cifra giusta nel posto giusto: costa abbastanza da non essere sempre conveniente
 const LEN_AT = n => n < 2 ? 3 : n < 6 ? 4 : n < 12 ? 5 : 6;                 // lunghezza del codice alla n-esima cassaforte
 const TRIES_OF = { 3: 8, 4: 8, 5: 9, 6: 10 };
 const TIME_OF = { 3: 60, 4: 90, 5: 120, 6: 150 };
 const timeLimit = (len, n) => Math.max(40, TIME_OF[len] - Math.max(0, n - 8) * 5);   // dopo l'ottava cassaforte il tempo cala
 const mult = streak => Math.min(5, 1 + 0.25 * streak);                      // tetto x5: punteggi confrontabili
 const codePoints = (len, triesLeft, timeLeft, limit, hints) =>
-  Math.max(50, 100 * len + 40 * triesLeft + Math.round(100 * clamp(timeLeft / limit, 0, 1)) - 50 * hints);
+  Math.max(50, 100 * len + 40 * triesLeft + Math.round(100 * clamp(timeLeft / limit, 0, 1)) - HINT_COST * hints);
 const dailyPoints = (triesLeft, secs, hints) =>
-  Math.max(100, 500 + 100 * triesLeft + Math.round(200 * clamp((280 - secs) / 240, 0, 1)) - 100 * hints);
+  Math.max(100, 500 + 100 * triesLeft + Math.round(200 * clamp((280 - secs) / 240, 0, 1)) - DAILY_HINT_COST * hints);
 function mulberry(seed) { let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 function hashStr(s) { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
 function makeCode(len, rnd) {
@@ -5733,7 +5735,7 @@ let code = '', len = 3, maxTries = 7, guesses = [], cur = [], excl = new Set(), 
 let n = 0, solved = 0, lives = LIVES, streak = 0, maxStreak = 0, score = 0, dispScore = 0, totalTries = 0;
 let tLeft = 0, tLimit = 0, elapsed = 0, codeSecs = 0, animRow = -1, angle = 0, msgTok = 0, hintRnd = Math.random;
 let best = store.get('cass_best', 0), prevBest = best, over = false, muted = store.get('cass_mute', false);
-let lastKind = '', dailyGrid = [], hintDigit = '', tickSec = -1, lastMiss = '', missed = [], TS = 1;   // TS: scala dei ritardi (solo per i test)
+let lastKind = '', dailyGrid = [], hintDigit = '', hintPos = -1, tickSec = -1, lastMiss = '', missed = [], TS = 1;   // TS: scala dei ritardi (solo per i test)
 
 /* ---------------------------------------------------------------- 4) AUDIO ED EFFETTI */
 let AC = null;
@@ -5810,8 +5812,9 @@ function render() {
     const gu = guesses[i], active = i === guesses.length && state === 'play';
     let tiles = '', pegs = '';
     for (let k = 0; k < len; k++) {
-      const ch = gu ? gu.g[k] : active && cur[k] !== undefined ? cur[k] : '';
-      tiles += '<span class="t' + (ch !== '' ? ' on' : '') + (gu && i === animRow ? ' flip' : '') + '" style="--d:' + k * 110 + 'ms">' + ch + '</span>';
+      const ghost = active && hintPos === k && cur[k] === undefined;
+      const ch = gu ? gu.g[k] : active && cur[k] !== undefined ? cur[k] : ghost ? code[k] : '';
+      tiles += '<span class="t' + (ch !== '' && !ghost ? ' on' : '') + (ghost ? ' ghost' : '') + (gu && i === animRow ? ' flip' : '') + '" style="--d:' + k * 110 + 'ms">' + ch + '</span>';
     }
     for (let k = 0; k < len; k++) {
       const cls = gu ? (k < gu.exact ? 'e' : k < gu.exact + gu.present ? 'h' : '') : '';
@@ -5831,9 +5834,9 @@ function updatePad() {
   });
   $('go').classList.toggle('ready', state === 'play' && cur.length === len);
   $('note').classList.toggle('on', noteMode); $('note').setAttribute('aria-pressed', noteMode ? 'true' : 'false');
-  const canHint = state === 'play' && !locked && hintUsed === 0 && [...'0123456789'].some(d => !code.includes(d) && !excl.has(d));
+  const canHint = state === 'play' && !locked && hintUsed === 0;
   $('hint').disabled = !canHint;
-  $('hint').textContent = hintUsed ? 'Indizio usato' : 'Indizio −' + (mode === 'daily' ? 100 : 50);
+  $('hint').textContent = hintUsed ? 'Indizio usato' : 'Indizio −' + (mode === 'daily' ? DAILY_HINT_COST : HINT_COST);
 }
 let hc = {};
 function hud() {
@@ -5849,7 +5852,8 @@ function hud() {
   const chips = [];
   if (mode === 'daily') chips.push('<span class="chip day">Uguale per tutti</span>');
   else if (streak > 0) chips.push('<span class="chip combo">🔥 ' + streak + ' di fila · ' + fmtMult(mult(streak)) + '</span>');
-  if (hintUsed) chips.push('<span class="chip hint">💡 indizio</span>');
+  if (hintUsed && hintPos >= 0) chips.push('<span class="chip hint">💡 posto ' + (hintPos + 1) + ': il ' + code[hintPos] + '</span>');
+  else if (hintUsed) chips.push('<span class="chip hint">💡 indizio usato</span>');
   if (noteMode) chips.push('<span class="chip note">✎ note: tocca le cifre da escludere</span>');
   set('chips', chips.join(''), true);
 }
@@ -5858,13 +5862,13 @@ function hud() {
 function dailyCode() { return makeCode(DAILY_LEN, mulberry(hashStr('cassaforte-' + today))); }
 function saveProgress() {
   if (mode !== 'daily') return;
-  store.set(progKey, { g: guesses.map(x => x.g), h: hintDigit ? [hintDigit] : [], s: Math.round(elapsed), u: hintUsed });
+  store.set(progKey, { g: guesses.map(x => x.g), h: hintDigit ? [hintDigit] : [], hp: hintPos, s: Math.round(elapsed), u: hintUsed });
 }
 function newCode() {
   len = mode === 'daily' ? DAILY_LEN : LEN_AT(n);
   maxTries = TRIES_OF[len];
   code = mode === 'daily' ? dailyCode() : makeCode(len, Math.random);
-  guesses = []; cur = []; excl = new Set(); hintUsed = 0; hintDigit = ''; tickSec = -1; codeSecs = 0; animRow = -1; locked = false; noteMode = false;
+  guesses = []; cur = []; excl = new Set(); hintUsed = 0; hintDigit = ''; hintPos = -1; tickSec = -1; codeSecs = 0; animRow = -1; locked = false; noteMode = false;
   tLimit = mode === 'daily' ? 0 : timeLimit(len, n); tLeft = tLimit;
   hintRnd = mode === 'daily' ? mulberry(hashStr('indizio-' + today)) : Math.random;
   if (mode === 'daily') {
@@ -5873,6 +5877,7 @@ function newCode() {
       p.g.forEach(g => { if (validGuess(g, len) && guesses.length < maxTries) guesses.push(Object.assign({ g }, feedback(code, g))); });
       (p.h || []).forEach(d => { if (/^\d$/.test(d) && !code.includes(d)) { excl.add(d); hintDigit = d; } });
       hintUsed = p.u ? 1 : 0; elapsed = +p.s || 0;
+      if (Number.isInteger(p.hp) && p.hp >= 0 && p.hp < len) hintPos = p.hp;
     }
   }
   emblemReset(); state = 'play';
@@ -5921,13 +5926,13 @@ function submit() {
 }
 function useHint() {
   if (state !== 'play' || locked || hintUsed) return;
-  const pool = [...'0123456789'].filter(d => !code.includes(d) && !excl.has(d));
-  if (!pool.length) return;
   ac();
-  const d = pool[Math.floor(hintRnd() * pool.length)];
-  excl.add(d); hintDigit = d; hintUsed = 1; sfx.hint(); buzz(15);
-  msg('Indizio: il ' + d + ' non c\'è nel codice.');
-  updatePad(); hud(); saveProgress();
+  // una cifra giusta nel posto giusto: compare tratteggiata nella riga che stai scrivendo, ma va scritta lo stesso
+  hintPos = Math.floor(hintRnd() * len); hintUsed = 1; sfx.hint(); buzz([20, 30, 20]);
+  const d = code[hintPos];
+  msg('Indizio: al posto ' + (hintPos + 1) + ' c\'è il ' + d + '. Compare tratteggiato nella riga.');
+  const p = rect(board); floatText('💡 posto ' + (hintPos + 1) + ': ' + d, p.x, p.y - 20);
+  render(); updatePad(); hud(); saveProgress();
   const k = document.querySelector('#pad .key[data-d="' + d + '"]'); if (k) { k.classList.add('flash'); setTimeout(() => k.classList.remove('flash'), 1000); }
 }
 function onSolved() {
@@ -6101,7 +6106,8 @@ window.__C = {
   start, pressDigit, backspace, submit, useHint, type(s) { [...s].forEach(pressDigit); },
   setCode(c) { code = c; len = c.length; maxTries = TRIES_OF[len] || maxTries; guesses = []; cur = []; render(); updatePad(); },
   setTime(v) { tLeft = v; }, setTimescale(x) { TS = x; },
-  get S() { return { state, mode, code, len, maxTries, guesses, cur, n, solved, lives, streak, maxStreak, score, tLeft, tLimit, elapsed, locked, hintUsed, excl: [...excl], over }; },
+  get S() { return { state, mode, code, len, maxTries, guesses, cur, n, solved, lives, streak, maxStreak, score, tLeft, tLimit, elapsed, locked, hintUsed, hintPos, excl: [...excl], over }; },
+  HINT_COST, DAILY_HINT_COST,
 };
 
 fit(); demo(); refreshMenu();
@@ -6269,7 +6275,7 @@ requestAnimationFrame(frame);
       ['🟢', 'Un pallino pieno vuol dire: un numero giusto, e nel posto giusto.'],
       ['⚪', 'Un pallino vuoto vuol dire: un numero giusto, ma nel posto sbagliato.'],
       ['🤔', 'Non ti dico quale numero è! Pensa e riprova, finché la cassaforte si apre.'],
-      ['💡', '"Note" ti fa segnare i numeri che non ci sono. "Indizio" te ne dice uno che non c\'è.'],
+      ['💡', '"Indizio" ti regala un numero giusto, nel posto giusto: lo vedi tratteggiato. "Note" ti fa segnare i numeri che non ci sono.'],
       ['❤️', 'Hai tre cuori. Se non apri una cassaforte, ne perdi uno.']], tip: 'Un numero che non c\'è? Non usarlo più.' },
   };
   let howEsc = null;

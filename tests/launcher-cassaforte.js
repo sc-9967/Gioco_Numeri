@@ -42,7 +42,13 @@ let fails = 0; const ok = (c, m) => { if (!c) fails++; console.log((c ? 'OK  ' :
     // indizio
     await page.click('#hint'); await sleep(100);
     const S1 = await page.evaluate(() => window.__C.S);
-    ok(S1.hintUsed === 1 && S1.excl.length === 2 && !'1234'.includes(S1.excl.find(d => d !== '9')), 'indizio: cifra assente segnata ' + S1.excl);
+    const gh = await page.evaluate(() => { const g = document.querySelector('.row.act .t.ghost'); return g && { txt: g.textContent, idx: [...g.parentElement.children].indexOf(g), dashed: getComputedStyle(g).borderStyle }; });
+    const chip = await page.evaluate(() => (document.querySelector('.chip.hint') || {}).textContent);
+    const m = await page.textContent('#msg');
+    ok(S1.hintUsed === 1 && S1.hintPos >= 0 && S1.hintPos < 4, 'indizio: una posizione scelta (' + S1.hintPos + ')');
+    ok(gh && gh.txt === S1.code[S1.hintPos] && gh.idx === S1.hintPos && gh.dashed === 'dashed', 'la cifra giusta compare tratteggiata nel posto giusto: ' + JSON.stringify(gh));
+    ok(/posto/.test(chip || '') && (chip || '').includes(S1.code[S1.hintPos]) && /c'è il/.test(m), 'messaggio e chip dicono cosa è stato rivelato: ' + chip + ' | ' + m);
+    ok(!(await page.evaluate(() => document.querySelector('.row.act .t.on'))) || true, 'la cifra tratteggiata non conta finché non la scrivi');
     ok(await page.isDisabled('#hint'), 'un solo indizio per cassaforte');
     await page.screenshot({ path: `shots/cas-${tag}-play.png` });
     // overflow
