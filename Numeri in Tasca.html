@@ -210,6 +210,28 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 .lx-confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9999}
 .lx-confetti i{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;animation:lxfall 2.2s cubic-bezier(.3,.6,.5,1) forwards}
 @keyframes lxfall{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--dx),105vh) rotate(var(--rot))}}
+/* istruzioni per bambini */
+.lx-holder .lx-help{font:inherit;font-weight:700;font-size:15px;color:inherit;background:none;border:1.5px solid currentColor;border-radius:12px;padding:10px 14px;cursor:pointer;opacity:.95}
+.lx-holder .lx-help:focus-visible{outline:3px solid currentColor;outline-offset:2px}
+.lx-howto{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:12px;background:rgba(10,12,30,.72)}
+.lx-howcard{width:100%;max-width:440px;max-height:94vh;overflow:hidden;box-sizing:border-box;background:#fffaf0;color:#2b2540;border-radius:26px;padding:22px 20px 18px;display:flex;flex-direction:column;gap:12px;font-family:var(--lx-ui,system-ui,sans-serif);box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.lx-howtitle{margin:0;font-size:26px;font-weight:800;line-height:1.1;display:flex;align-items:center;gap:10px}
+.lx-howtitle span{font-size:36px}
+.lx-howintro{margin:0;font-size:18px;line-height:1.35;font-weight:700;color:#4a3f8a}
+.lx-howsteps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.lx-howsteps li{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:center;background:#fff;border:2px solid #efe3c8;border-radius:16px;padding:8px 12px}
+.lx-howbody{min-height:0;flex:1 1 auto;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding-right:2px}
+.lx-howsteps .lx-e{font-size:30px;text-align:center;line-height:1}
+.lx-howsteps .lx-t{font-size:18px;line-height:1.35;font-weight:600;color:#2b2540}
+.lx-howtip{margin:0;background:#fff0b3;border-radius:16px;padding:10px 14px;font-size:18px;font-weight:700;line-height:1.35}
+.lx-howmore{flex:none;margin:-4px 0 0;text-align:center;font-weight:800;font-size:15px;color:#2f6bff}
+.lx-howmore[hidden]{display:none}
+.lx-howbtns{display:flex;flex-direction:column;gap:10px;flex:none;padding-top:10px;border-top:2px solid #efe3c8}
+.lx-howbtns button{font:inherit;font-weight:800;font-size:19px;border-radius:16px;padding:14px;cursor:pointer;border:3px solid #2f6bff}
+.lx-howgo{background:#2f6bff;color:#fff}
+.lx-howsay{background:#fff;color:#2f6bff}
+.lx-howbtns button:focus-visible{outline:4px solid #ffb703;outline-offset:2px}
+@media (max-height:640px){.lx-howsteps .lx-t{font-size:17px}.lx-howsteps .lx-e{font-size:26px}.lx-howtitle{font-size:25px}.lx-howintro{font-size:18px}.lx-howbtns button{padding:11px;font-size:17px}}
 @media (prefers-reduced-motion:reduce){.lx-card{transition:none}.lx-confetti{display:none}}
 </style>
 
@@ -6106,6 +6128,106 @@ requestAnimationFrame(frame);
     const [k, best] = goals[0], gap = best - score;
     return { tier: 'none', line: (gap <= best * 0.1 ? 'Quasi! ' : '') + 'Ti mancano ' + gap.toLocaleString('it-IT') + ' punti per il record ' + lbl[k] + '.' };
   }
+  // ---------- istruzioni per bambini: frasi corte, parole semplici, un'emoji per passo, lettura ad alta voce ----------
+  const HOWTO = {
+    bilancia: { icon: '⚖️', intro: 'Hai una bilancia con due piatti. Tienila in piedi!', steps: [
+      ['⚖️', 'Arriva un peso con un numero sopra.'],
+      ['👈👉', 'Scorri il dito a sinistra o a destra: il peso va sul piatto di sinistra o di destra.'],
+      ['😱', 'Se un piatto pesa troppo più dell\'altro (più di 10), la bilancia cade!'],
+      ['🎉', 'Se i due piatti pesano uguale, bravo! Prendi punti e tempo in più.'],
+      ['🎈', 'Più avanti arrivano i palloncini: tolgono peso.']], tip: 'Metti il peso sul piatto più leggero.' },
+    quadrante: { icon: '🕐', intro: 'Hai un orologio con una lancetta che salta.', steps: [
+      ['🃏', 'Sotto l\'orologio ci sono delle carte con un numero.'],
+      ['👆', 'Tocca una carta: la lancetta salta avanti di tanti numeri quanti dice la carta. Dopo il 12 si riparte da 1.'],
+      ['✨', 'Alcune ore sono accese. Fermati proprio su una, prima che si spenga!'],
+      ['💎', 'Se un\'ora accesa si spegne e non ci sei arrivato, perdi un rubino. Senza rubini, il gioco finisce.']], tip: 'Se arrivi sull\'ora con una carta sola, fai più punti.' },
+    primo: { icon: '🧱', intro: 'Una torre di blocchi con i numeri sale sempre più su. Non farla arrivare al soffitto!', steps: [
+      ['🧱', 'Guarda il blocco più in basso: è quello da spezzare.'],
+      ['✂️', 'Tocca un numero che ci sta dentro senza avanzi. Nell\'84 ci sta il 2, e viene 42.'],
+      ['🔁', 'Spezza ancora, finché resta un numero che non si spezza più, come il 7.'],
+      ['💥', 'Quel numero si chiama "primo". Premi "È primo" e il blocco esplode!'],
+      ['❌', 'Se sbagli, cade un blocco in più. Se la torre tocca il soffitto, hai perso.']], tip: 'Prova prima con il 2, poi con il 3.' },
+    resto: { icon: '🛒', intro: 'Fai il cassiere in un negozio.', steps: [
+      ['🧑', 'Un cliente paga con dei soldi.'],
+      ['🤔', 'Pensa: quanti soldi devi ridargli? Quei soldi si chiamano "resto".'],
+      ['🪙', 'Tocca monete e banconote fino a ridare il resto giusto.'],
+      ['🔄', 'Se ne dai troppi, ricominci da capo.'],
+      ['⭐', 'Se usi pochi pezzi, il resto è perfetto: punti doppi!'],
+      ['😠', 'Se il cliente aspetta troppo, si arrabbia. Con tre clienti arrabbiati il negozio chiude.']], tip: 'Comincia dai soldi più grandi.' },
+    girasette: { icon: '🌀', intro: 'Hai una griglia di esagoni, come un favo di api.', steps: [
+      ['👆', 'Trascina un pezzo con un numero dentro un esagono libero.'],
+      ['🤝', 'Se tre esagoni con lo stesso numero sono vicini, diventano uno solo, con il numero più grande di uno.'],
+      ['🌀', 'Quando hai messo tutti e tre i pezzi, la griglia gira! Se girando se ne uniscono altri, valgono doppio.'],
+      ['💥', 'Se unisci tre 7, BOOM: esplode e fa spazio intorno.'],
+      ['↻', 'Tocca un pezzo doppio per girarlo. Il gioco finisce quando non c\'è più posto.']], tip: 'Metti i numeri uguali vicini vicini.' },
+    raddoppio: { icon: '🔢', intro: 'Hai una griglia con delle tessere con i numeri.', steps: [
+      ['👉', 'Scorri il dito (o usa le frecce): tutte le tessere scivolano da quella parte.'],
+      ['➕', 'Due tessere con lo stesso numero si uniscono e il numero diventa il doppio: 2 e 2 fanno 4.'],
+      ['🔥', 'Se ne unisci tante una dopo l\'altra, i punti crescono.'],
+      ['🔨', 'Quando fai una tessera grande (64 o più) ricevi un martello. Toccalo, poi tocca una tessera per romperla.'],
+      ['🛑', 'Il gioco finisce quando non puoi più muovere nessuna tessera.']], tip: 'Tieni le tessere grandi in un angolo.' },
+    sentiero: { icon: '🗺️', intro: 'Hai una griglia di quadretti. Trova la strada giusta!', steps: [
+      ['🏁', 'Parti dal quadretto in alto a sinistra, con il numero 1.'],
+      ['👉', 'Puoi andare solo a destra o in basso, fino al quadretto in basso a destra.'],
+      ['➕', 'Ogni quadretto cambia il tuo numero: + aggiunge, × moltiplica, − toglie.'],
+      ['🏆', 'Prova a finire con il numero più grande che puoi: più è grande, più punti prendi.'],
+      ['📅', 'Sono 5 griglie. Ogni giorno ce ne sono di nuove, uguali per tutti.']], tip: 'Il × fa crescere tanto: cercalo!' },
+    lampo: { icon: '⚡', intro: 'Tanti numeri si muovono sullo schermo. Sii veloce!', steps: [
+      ['👆', 'Tocca i numeri in ordine: prima l\'1, poi il 2, poi il 3...'],
+      ['⏳', 'La barra del tempo scende. Ogni numero giusto ti dà un po\' di tempo. Un numero sbagliato te ne toglie.'],
+      ['🔥', 'Più numeri giusti fai di fila, più punti prendi.'],
+      ['⭐', 'La stella ti dà più tempo. Il ghiaccio fa scendere la barra più piano.'],
+      ['🔥', 'Il fuoco ti dà più punti. Lo scudo ti protegge da un errore. La bomba fa sparire i numeri vicini.'],
+      ['🛑', 'Il gioco finisce quando il tempo è finito.']], tip: 'Guarda il numero in alto: è quello da toccare.' },
+    cassaforte: { icon: '🔐', intro: 'Una cassaforte ha un codice segreto fatto di numeri tutti diversi. Scoprilo!', steps: [
+      ['⌨️', 'Scrivi dei numeri tutti diversi con i tasti e premi "Prova".'],
+      ['🟢', 'Un pallino pieno vuol dire: un numero giusto, e nel posto giusto.'],
+      ['⚪', 'Un pallino vuoto vuol dire: un numero giusto, ma nel posto sbagliato.'],
+      ['🤔', 'Non ti dico quale numero è! Pensa e riprova, finché la cassaforte si apre.'],
+      ['💡', '"Note" ti fa segnare i numeri che non ci sono. "Indizio" te ne dice uno che non c\'è.'],
+      ['❤️', 'Hai tre cuori. Se non apri una cassaforte, ne perdi uno.']], tip: 'Un numero che non c\'è? Non usarlo più.' },
+  };
+  let howEsc = null;
+  function closeHowto(holder) {
+    const h = holder.querySelector('.lx-howto'); if (h) h.remove();
+    try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+    if (howEsc) { window.removeEventListener('keydown', howEsc); howEsc = null; }
+  }
+  function showHowto(holder, key) {
+    const d = HOWTO[key]; if (!d || holder.querySelector('.lx-howto')) return;
+    const box = document.createElement('div'); box.className = 'lx-howto';
+    const card = document.createElement('div'); card.className = 'lx-howcard'; card.setAttribute('role', 'dialog'); card.setAttribute('aria-modal', 'true'); card.setAttribute('aria-label', 'Come si gioca a ' + NAMES[key]);
+    const body = document.createElement('div'); body.className = 'lx-howbody';
+    const t = document.createElement('h2'); t.className = 'lx-howtitle'; t.innerHTML = '<span></span>'; t.firstChild.textContent = d.icon; t.append('Come si gioca a ' + NAMES[key]); body.appendChild(t);
+    const i = document.createElement('p'); i.className = 'lx-howintro'; i.textContent = d.intro; body.appendChild(i);
+    const ol = document.createElement('ol'); ol.className = 'lx-howsteps';
+    d.steps.forEach(st => { const li = document.createElement('li'); const e = document.createElement('span'); e.className = 'lx-e'; e.textContent = st[0]; const x = document.createElement('span'); x.className = 'lx-t'; x.textContent = st[1]; li.append(e, x); ol.appendChild(li); });
+    body.appendChild(ol);
+    const tip = document.createElement('p'); tip.className = 'lx-howtip'; tip.textContent = '💡 Trucco: ' + d.tip; body.appendChild(tip);
+    card.appendChild(body);
+    const more = document.createElement('p'); more.className = 'lx-howmore'; more.textContent = '⬇ Scorri per vedere tutto'; card.appendChild(more);
+    const upd = () => { more.hidden = body.scrollHeight <= body.clientHeight + 4 || body.scrollTop + body.clientHeight >= body.scrollHeight - 8; };
+    body.addEventListener('scroll', upd); setTimeout(upd, 0); setTimeout(upd, 300);
+    const bt = document.createElement('div'); bt.className = 'lx-howbtns';
+    if ('speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined') {
+      const say = document.createElement('button'); say.type = 'button'; say.className = 'lx-howsay'; say.textContent = '🔊 Leggi per me';
+      say.addEventListener('click', () => {
+        try {
+          const ss = window.speechSynthesis; if (ss.speaking) { ss.cancel(); return; }
+          const u = new SpeechSynthesisUtterance('Come si gioca a ' + NAMES[key] + '. ' + d.intro + ' ' + d.steps.map((s, n) => (n + 1) + '. ' + s[1]).join(' ') + ' Trucco: ' + d.tip);
+          u.lang = 'it-IT'; u.rate = 0.85; ss.speak(u);
+        } catch (e) {}
+      });
+      bt.appendChild(say);
+    }
+    const go = document.createElement('button'); go.type = 'button'; go.className = 'lx-howgo'; go.textContent = 'Ho capito! Giochiamo';
+    go.addEventListener('click', () => closeHowto(holder)); bt.appendChild(go);
+    card.appendChild(bt); box.appendChild(card); holder.appendChild(box);
+    howEsc = e => { if (e.key === 'Escape') closeHowto(holder); };
+    window.addEventListener('keydown', howEsc);
+    go.focus({ preventScroll: true });
+  }
+
   function confetti(holder, n) {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const box = document.createElement('div'); box.className = 'lx-confetti';
@@ -6266,7 +6388,10 @@ requestAnimationFrame(frame);
     };
     const menuPanel = holder.querySelector('#menu').firstElementChild;
     const overPanel = holder.querySelector('#over').firstElementChild;
+    const helpBtn = () => { const b = document.createElement('button'); b.type = 'button'; b.className = 'lx-help'; b.textContent = '❓ Come si gioca'; b.addEventListener('click', () => showHowto(holder, key)); return b; };
+    menuPanel.querySelector('.btns').appendChild(helpBtn());
     menuPanel.querySelector('.btns').appendChild(back());
+    overPanel.querySelector('.btns').appendChild(helpBtn());
     overPanel.querySelector('.btns').appendChild(back());
     const hook = document.createElement('div'); hook.className = 'lx-hook'; hook.hidden = true; overPanel.querySelector('.btns').after(hook);
     const copy = document.createElement('p');
@@ -6336,6 +6461,8 @@ requestAnimationFrame(frame);
     window.addEventListener('keydown', onEnter); ctx.listeners.push(['keydown', onEnter, undefined]);
     try { GAMES[key](win, raf, later); } catch (e) { console.error(e); }
     track.open(key);
+    // la prima volta che si apre un gioco le istruzioni compaiono da sole (non nei test automatici, che le attivano con nit_howto_test)
+    if (!ls.get('nit_howto_' + key) && (!navigator.webdriver || localStorage.getItem('nit_howto_test') === '1')) { ls.set('nit_howto_' + key, 1); showHowto(holder, key); }
     ['play', 'daily', 'again'].forEach(id => { const b = holder.querySelector('#' + id); if (b) b.addEventListener('click', () => track.start(key)); });
     const over = holder.querySelector('#over'), overScore = holder.querySelector('#overScore');
     if (over && overScore) new MutationObserver(() => {
@@ -6356,6 +6483,7 @@ requestAnimationFrame(frame);
     track.close(false);
     session = null;
     const { holder, ctx } = current;
+    closeHowto(holder);
     ctx.alive = false;
     ctx.listeners.forEach(([t, f, o]) => window.removeEventListener(t, f, o));
     holder.remove();

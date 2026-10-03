@@ -96,6 +96,14 @@ Uno strato del launcher che vale per tutti i giochi, senza toccare le loro regol
 - **Invio** nella schermata finale = "Rigioca".
 - Nessun avviso, nessuna notifica, nessun conto alla rovescia finto: la serie si perde solo davvero.
 
+## Istruzioni per bambini
+
+Ogni gioco ha le istruzioni scritte per un bambino di 5 anni: frasi corte (in media 9-14 parole), parole semplici, un'emoji per ogni passo e un "trucco" finale. Compaiono da sole la prima volta che si apre un gioco e si riaprono quando si vuole con "❓ Come si gioca", nel menu e a fine partita.
+
+- **Leggi per me:** il pulsante legge le istruzioni ad alta voce in italiano con la voce del telefono o del browser (un bambino di 5 anni di solito non sa ancora leggere). Esc chiude; uscendo dal gioco la voce si ferma.
+- **Limite:** capire le regole non vuol dire saper giocare: Primo (divisioni), Resto (soldi) e Sentiero (somme e moltiplicazioni) richiedono matematica da scuola elementare.
+- Il testo sta nella tabella `HOWTO` del launcher, una voce per gioco: si cambia lì.
+
 ## Test
 
 I test usano Playwright e si trovano in `tests/`:
@@ -120,6 +128,7 @@ node lampo.js                 # regole, punteggio, partita perfetta, bonus, laun
 node cassaforte.js            # regole, punteggio, partite complete del bot
 node launcher-cassaforte.js   # tastierino, note, indizio, vite, tempo, codice del giorno, record, schermi
 node launcher-calamita.js    # serie, obiettivo, gancio di fine partita, coriandoli, condivisione
+node istruzioni.js            # istruzioni per bambini: prima apertura, riapertura, lettura, lunghezza delle frasi
 node launcher-nome.js         # nome obbligatorio, testi condivisi, statistiche anonime
 node launcher-uscita.js       # uscita dalla partita in ogni gioco, record oggi/settimana/mese/anno/sempre
 node launcher-record.js       # storico, periodi, backup e ripristino, avviso archiviazione

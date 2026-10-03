@@ -139,3 +139,12 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 - **Simulazione dell'acqua** (livello 1-6): un giocatore senza errori che tocca un numero ogni 0,4-2 s non perde mai; solo al livello 6, con un tocco ogni 3 s, la partita finisce (dopo 20 s). Il gioco non può finire per chi gioca bene, come il prototipo originale di Lampo.
 - **Difetti:** le vite non scendono mai (mostra sempre ❤️❤️❤️); combo senza tetto (300 tocchi perfetti = circa 2 milioni di punti); la sequenza Fibonacci contiene due "1" ma conta solo quello giusto per indice, quindi toccare l'altro "1" dà errore; i livelli 1-5 ripetono sempre la stessa sequenza.
 - **Sovrapposizione:** è Lampo (tocca in ordine con pressione di tempo) con l'acqua al posto della barra. Unica idea nuova: sequenze Fibonacci e numeri primi.
+
+## Istruzioni per bambini
+
+- **Nove giochi su nove:** le istruzioni compaiono da sole alla prima apertura, si chiudono con il pulsante o con Esc, non ricompaiono alla seconda apertura, si riaprono dal menu e dalla schermata finale.
+- **Lettura ad alta voce:** il pulsante "Leggi per me" chiama la sintesi vocale del browser in italiano (`it-IT`, velocità 0,85) con titolo, introduzione, passi e trucco; uscire dal gioco la ferma. Nei test la voce è simulata: non ho sentito l'audio reale, e la qualità dipende dalle voci italiane installate sul dispositivo. [Ipotesi che su alcuni telefoni la voce sia scadente o manchi]
+- **Lunghezza:** da 4 a 6 passi per gioco; in media 9-14 parole per frase, al massimo 21; nessuna parola da 11 lettere o più (misurate nei testi).
+- **Schermo 360×700:** titolo in cima e pulsanti sempre in vista; i passi scorrono (compare "⬇ Scorri per vedere tutto").
+- **Corretti durante i test:** i nomi di classe `t` ed `e` della scheda coincidevano con quelli di Cassaforte (testo bianco su bianco); la scheda si apriva scorsa in fondo; i pulsanti coprivano il testo.
+- **Limite:** nessun bambino ha provato i testi. Che un bambino di 5 anni capisca "tre esagoni uguali vicini diventano uno" o "il resto" è un'ipotesi, non un dato.
