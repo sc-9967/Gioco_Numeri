@@ -160,13 +160,14 @@ Copyright © 2026 Silvio Chiaverini. Licenza GNU GPL v3: vedi il file `LICENSE`.
 
 ## Classifiche pubbliche (versione 2026-10-04.6)
 
-- **Cosa è pubblico:** solo le due sfide del giorno, uguali per tutti: **Sentiero** (sfida del giorno, massimo 500) e **Cassaforte** (codice del giorno aperto, massimo 1.400). Primi 10 per oggi, settimana (da lunedì), mese e sempre, più la tua posizione. Pulsante «Classifiche» in home e «Vedi la classifica» a fine sfida.
+- **Cosa è pubblico:** la **sfida del giorno di ognuno dei dieci giochi** (stessa partita per tutti, quindi i punteggi sono confrontabili). Primi 10 per oggi, settimana (da lunedì), mese e sempre, con il nome scelto da chi ha fatto il punteggio, più la tua posizione. Si arriva da «Classifiche» in home (menu a tendina), da «Vedi la classifica» a fine sfida, da «🌍 Classifica pubblica» nel pannello Record di ogni gioco e, nel Sentiero, dal pulsante «🌍 Classifica». Il pannello «🏆 Record» dentro i giochi è invece **personale** (solo questo dispositivo).
 - **Dove:** database Supabase del progetto. Lo schema e le protezioni sono in `docs/classifica.sql`, da eseguire una volta nello SQL Editor.
 - **Privacy:** nessun account. Il dispositivo genera un segreto casuale (salvato solo qui; sul server resta solo l'impronta). Il nome in classifica lo **componi tu da un elenco**: sesso (maschio/femmina), animale declinato (Lupo/Lupa, Leone/Leonessa…) e numero da 1 a 999, per esempio «Volpe 27». Il server compone il nome: non si scrive testo libero, quindi niente insulti né dati personali. Fino alla scelta si ha un nome casuale.
 - **Sicurezza:** le tabelle non sono leggibili né scrivibili dal browser; si possono solo chiamare 4 funzioni. Il server decide il giorno (Roma), scarta punteggi fuori scala, accetta un invio ogni 8 secondi e 200 al giorno per giocatore, tiene il migliore del giorno, può escludere un giocatore.
+- **Massimi:** Sentiero 500, Cassaforte 1.400, Dieci 3.000. Negli altri sette giochi il punteggio non ha un massimo vero: il tetto nel database è volutamente largo (1.000.000; Raddoppio 5.000.000) e blocca solo numeri assurdi.
 - **Limite onesto:** il server **non rifà la partita**. Un punteggio falso entro il massimo passa. Per rimuoverlo: istruzioni di moderazione in fondo a `docs/classifica.sql`.
 - **Offline:** se il server non risponde il gioco funziona come prima e compare un avviso; il punteggio non viene rinviato in seguito.
-- **Non pubblico:** serie normali, allenamenti e gli altri sette giochi. Accendere un'altra classifica = una riga in `nit_boards` + il gioco che segna la partita (`over.dataset.board`).
+- **Non pubblico:** serie normali, partite libere e sfide tra amici. Accendere un'altra classifica = una riga in `nit_boards` + il gioco che segna la partita (`over.dataset.board`).
 - Sotto test automatici (`navigator.webdriver`) il launcher non chiama il server vero, salvo `nit_pub_test=1`.
 
 ## Dieci (versione 2026-10-05.2)
@@ -188,3 +189,8 @@ Copyright © 2026 Silvio Chiaverini. Licenza GNU GPL v3: vedi il file `LICENSE`.
 - Prefissi: BIL, QUA, PRI, RES, RAD, CAS, DIE. «Rigioca» dopo una sfida avvia una partita libera nuova.
 - **Cosa significa «stessa partita»:** stesso seme del generatore casuale, come nella sfida del giorno. Nei giochi in cui le scelte del giocatore cambiano quale casella o posto viene scelto (per esempio Quadrante) la sequenza è la stessa ma il tabellone può divergere secondo le mosse. I punteggi nel codice non sono verificabili.
 - **Non hanno la sfida: Girasette e Lampo.** Girasette in partita libera pesca i pezzi guardando la plancia (un aiuto): per renderla riproducibile bisognerebbe toglierlo e cambierebbe la difficoltà. In Lampo i numeri si muovono con valori casuali a ogni fotogramma e le posizioni dipendono dalle dimensioni dello schermo, quindi due telefoni non vedrebbero mai la stessa partita.
+
+## Classifiche in tutti i giochi (versione 2026-10-05.6)
+
+- Ora ogni gioco ha la sua classifica pubblica della sfida del giorno: bilancia-giorno, quadrante-giorno, primo-giorno, resto-giorno, girasette-giorno, raddoppio-giorno, lampo-giorno, dieci-giorno (più sentiero-giorno e cassaforte-giorno). Il database si aggiorna con l'ultimo `docs/classifica.sql` (basta anche solo il blocco `insert into public.nit_boards`).
+- **Meno a prova di imbroglio dove il punteggio non ha un massimo.** Se un punteggio è sospetto: istruzioni di moderazione in fondo a `docs/classifica.sql`.

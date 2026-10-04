@@ -58,3 +58,9 @@ Fonti: [Google Play Console](https://support.google.com/googleplay/android-devel
 - **Girasette:** in partita libera i pezzi sono scelti guardando la plancia. Per avere un seme riproducibile serve la modalità della sfida del giorno (pezzi indipendenti dalla plancia), che è più difficile. Decisione rimandata: va misurato l'effetto sulla difficoltà prima di cambiare la partita libera.
 - **Lampo:** il generatore casuale è usato a ogni fotogramma per far deviare i numeri e le posizioni dipendono dallo schermo: non riproducibile.
 - Per aggiungere un altro gioco: farlo chiedere un seme con `window.nitSeed(modo)`, generare il contenuto dal seme, ascoltare il pulsante nascosto `#chal`, scrivere `data-seed` e `data-mode` in `#over` a fine partita e aggiungere la chiave a `CHAL_ON` nel launcher.
+
+
+## Classifiche pubbliche in tutti i giochi (2026-10-05)
+
+- Richiesta del titolare dopo la domanda «i record del pulsante sono personali o di tutti?»: i record dentro i giochi sono personali; la classifica con i nomi esisteva solo per Sentiero e Cassaforte. Ora c'è per la sfida del giorno di tutti i giochi.
+- **Accettato il rischio:** dove il punteggio non ha un massimo (sette giochi) il server non può distinguere un risultato vero da uno inventato. Con pochi tester va bene; con un pubblico vero serve moderazione a mano o rifare la partita sul server (non fatto: richiederebbe riscrivere i giochi in SQL).

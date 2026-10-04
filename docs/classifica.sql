@@ -44,12 +44,21 @@ alter table public.nit_boards  enable row level security;
 alter table public.nit_scores  enable row level security;
 revoke all on public.nit_players, public.nit_boards, public.nit_scores from public, anon, authenticated;
 
--- classifiche attive adesso: le due sfide del giorno (stessa partita per tutti)
---   sentiero-giorno: massimo 500 (5 griglie x 100)
---   cassaforte-giorno: massimo 500 + 100x7 tentativi rimasti + 200 = 1400
+-- classifiche attive: la sfida del giorno di ogni gioco (stessa partita per tutti, quindi punteggi confrontabili)
+--   sentiero-giorno: massimo 500 (5 griglie x 100); cassaforte-giorno: 500 + 100x7 tentativi rimasti + 200 = 1400; dieci-giorno: 3000 (150 s)
+--   gli altri giochi non hanno un massimo vero: il tetto e' volutamente largo (serve solo contro numeri assurdi) e si puo' cambiare:
+--   update nit_boards set max_score = 50000 where board = 'bilancia-giorno';
 insert into public.nit_boards (board, max_score, enabled) values
   ('sentiero-giorno', 500, true),
-  ('cassaforte-giorno', 1400, true)
+  ('cassaforte-giorno', 1400, true),
+  ('dieci-giorno', 3000, true),
+  ('bilancia-giorno', 1000000, true),
+  ('quadrante-giorno', 1000000, true),
+  ('primo-giorno', 1000000, true),
+  ('resto-giorno', 1000000, true),
+  ('girasette-giorno', 1000000, true),
+  ('raddoppio-giorno', 5000000, true),
+  ('lampo-giorno', 1000000, true)
 on conflict (board) do nothing;
 
 -- ---------------------------------------------------------------- funzioni

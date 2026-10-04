@@ -177,6 +177,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 .lx-rectable td:first-child{font-weight:800}
 .lx-recrow{display:flex;gap:8px;flex-wrap:wrap}
 .lx-pubtabs{display:flex;gap:6px;flex-wrap:wrap}
+.lx-pubsel{font:inherit;font-size:15px;font-weight:700;padding:9px 10px;border-radius:10px;border:2px solid var(--l-ink);background:var(--l-card);color:var(--l-ink);width:100%}
 .lx-pubtabs button{font:inherit;font-weight:800;font-size:13px;padding:7px 11px;border-radius:99px;border:2px solid var(--l-ink);background:var(--l-card);color:var(--l-ink);cursor:pointer}
 .lx-pubtabs button[aria-pressed="true"]{background:var(--l-ink);color:var(--l-bg)}
 .lx-publist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;min-height:48px}
@@ -309,6 +310,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
       <p class="lx-recwho" id="lx-grecwho"></p>
       <div class="lx-recwrap"><table class="lx-rectable"><thead><tr><th>Quando</th><th>Migliore</th><th>Media</th><th>Partite</th></tr></thead><tbody id="lx-grecrows"></tbody></table></div>
       <p class="lx-recnote" id="lx-grecnote"></p>
+      <div class="lx-recbtns"><button type="button" id="lx-grecpub">🌍 Classifica pubblica (tutti i giocatori)</button></div>
       <button class="lx-recclose" id="lx-grecclose" type="button">Chiudi</button>
     </div>
   </div>
@@ -316,7 +318,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
   <div class="lx-modal" id="lx-pubpanel" role="dialog" aria-modal="true" aria-labelledby="lx-pubtitle" hidden>
     <div class="lx-modalcard">
       <h2 id="lx-pubtitle">Classifiche</h2>
-      <div class="lx-pubtabs" id="lx-pubboards" role="group" aria-label="Classifica"></div>
+      <select class="lx-pubsel" id="lx-pubboardsel" aria-label="Classifica"></select>
       <div class="lx-pubtabs" id="lx-pubperiods" role="group" aria-label="Periodo"></div>
       <ol class="lx-publist" id="lx-publist"></ol>
       <p class="lx-recnote" id="lx-pubme"></p>
@@ -2089,7 +2091,7 @@ h1 span{color:var(--accent)}
   // Contributo nascosto per ora: metti true per riattivare il riquadro e il link a fine partita.
   const SHOW_DONATE = true;
   const AUTHOR = 'Silvio Chiaverini';
-  const BUILD = '2026-10-05.5';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
+  const BUILD = '2026-10-05.6';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
   // Nome del giocatore: salvato solo sul dispositivo, compare nei testi che si condividono (mai nelle statistiche anonime).
   const cleanName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
   const playerName = () => { try { return cleanName(JSON.parse(localStorage.getItem('nit_name'))); } catch (e) { return ''; } };
@@ -2345,6 +2347,7 @@ h1 span{color:var(--accent)}
     const isRecord = S.score > prev;
     if (isRecord) store.set(key, S.score);
     $('overMode').textContent = S.mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : S.mode === 'chal' ? 'Sfida di un amico' : 'Partita libera';
+    if (S.mode === 'daily') el.over.dataset.board = 'bilancia-giorno'; else delete el.over.dataset.board;
     if (S.mode === 'daily') { delete el.over.dataset.seed; delete el.over.dataset.mode; } else { el.over.dataset.seed = S.tok; el.over.dataset.mode = S.mode; }   // il launcher ne ricava il codice sfida
     $('overWhy').textContent = why === 'tip' ? 'Si è ribaltata!' : 'Tempo scaduto';
     $('overScore').textContent = S.score.toLocaleString('it-IT');
@@ -2887,6 +2890,7 @@ h1 span{color:var(--accent)}
     const prev = store.get(key, 0), isRecord = S.score > prev;
     if (isRecord) store.set(key, S.score);
     $('overMode').textContent = S.mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : S.mode === 'chal' ? 'Sfida di un amico' : 'Partita libera';
+    if (S.mode === 'daily') el.over.dataset.board = 'quadrante-giorno'; else delete el.over.dataset.board;
     if (S.mode === 'daily') { delete el.over.dataset.seed; delete el.over.dataset.mode; } else { el.over.dataset.seed = S.tok; el.over.dataset.mode = S.mode; }   // il launcher ne ricava il codice sfida
     $('overScore').textContent = S.score.toLocaleString('it-IT');
     $('overRecord').hidden = !isRecord || S.score === 0;
@@ -3301,6 +3305,7 @@ h1 span{color:var(--accent)}
     const prev = store.get(key, 0), isRecord = S.score > prev;
     if (isRecord) store.set(key, S.score);
     $('overMode').textContent = S.mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : S.mode === 'chal' ? 'Sfida di un amico' : 'Partita libera';
+    if (S.mode === 'daily') el.over.dataset.board = 'primo-giorno'; else delete el.over.dataset.board;
     if (S.mode === 'daily') { delete el.over.dataset.seed; delete el.over.dataset.mode; } else { el.over.dataset.seed = S.tok; el.over.dataset.mode = S.mode; }   // il launcher ne ricava il codice sfida
     $('overScore').textContent = S.score.toLocaleString('it-IT');
     $('overRecord').hidden = !isRecord || S.score === 0;
@@ -3740,6 +3745,7 @@ h1 span{color:var(--accent)}
     const prev = store.get(key, 0), isRecord = S.score > prev;
     if (isRecord) store.set(key, S.score);
     $('overMode').textContent = S.mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : S.mode === 'chal' ? 'Sfida di un amico' : 'Partita libera';
+    if (S.mode === 'daily') $('over').dataset.board = 'resto-giorno'; else delete $('over').dataset.board;
     if (S.mode === 'daily') { delete $('over').dataset.seed; delete $('over').dataset.mode; } else { $('over').dataset.seed = S.tok; $('over').dataset.mode = S.mode; }   // il launcher ne ricava il codice sfida
     $('overScore').textContent = S.score.toLocaleString('it-IT');
     $('overRecord').hidden = !isRecord || S.score === 0;
@@ -4558,6 +4564,7 @@ function endGame() {
   $('finalLbl').textContent = mode === 'daily' ? 'Record di oggi' : 'Record';
   $('newRecord').hidden = !rec || score === 0;
   $('overMode').textContent = mode === 'daily' ? 'Partita del giorno · ' + todayLabel + ' · stessi pezzi per tutti' : 'Partita libera';
+  if (mode === 'daily') $('over').dataset.board = 'girasette-giorno'; else delete $('over').dataset.board;   // il launcher invia il punteggio alla classifica pubblica
   $('stTile').textContent = stat.tile || '—'; $('stSpins').textContent = stat.spins; $('stChain').textContent = stat.chain ? '×' + stat.chain : '—';
   $('other').textContent = mode === 'daily' ? 'Partita libera' : 'Partita del giorno';
   $('share').textContent = 'Copia risultato'; $('shareBox').hidden = true;
@@ -4664,7 +4671,7 @@ window.__M7 = {
   get tray() { return tray; }, set tray(t) { tray = t; },
   get score() { return score; }, get over() { return over; }, get busy() { return busy; },
   ringCells, rotationMap, ringOf, difficulty, get placedCount() { return placedCount; }, placePiece, newGame, hasAnyMove, setTimescale: v => { TIMESCALE = v; },
-  select: i => { selected = i; },
+  select: i => { selected = i; }, setScore, endGame,
   ROCK, rockCount, placeRocks, rockText, get mode() { return mode; }, get stat() { return stat; }, get trayNo() { return trayNo; }, set trayNo(v) { trayNo = v; }, get shareText() { return shareText; }, mulberry, hashStr,
 };
 })();
@@ -5011,6 +5018,7 @@ function finish() {
   bumpBest();
   const isRecord = score > prevBest && score > 0;
   $('overMode').textContent = mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : mode === 'chal' ? 'Sfida di un amico' : 'Partita libera';
+  if (mode === 'daily') $('over').dataset.board = 'raddoppio-giorno'; else delete $('over').dataset.board;
   if (mode === 'daily') { delete $('over').dataset.seed; delete $('over').dataset.mode; } else { $('over').dataset.seed = seedTok; $('over').dataset.mode = mode; }   // il launcher ne ricava il codice sfida
   $('overScore').textContent = score.toLocaleString('it-IT');
   $('newRecord').hidden = !isRecord;
@@ -5763,6 +5771,7 @@ function gameOver() {
   if (mode === 'daily' && score > store.get('lampo_best', 0) && false) store.set('lampo_best', score);
   for (let i = 0; i < 60; i++) particles.push({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - 0.5) * 300, vy: (Math.random() - 0.5) * 300, life: 1, decay: 0.6 + Math.random() * 0.5, size: 3 + Math.random() * 7, color: 'hsl(' + Math.random() * 60 + ',100%,60%)', grav: 80 });
   $('overMode').textContent = mode === 'daily' ? 'Regola del giorno · ' + rule.name + ' · ' + todayLabel : rule.name;
+  if (mode === 'daily') $('over').dataset.board = 'lampo-giorno'; else delete $('over').dataset.board;   // il launcher invia il punteggio alla classifica pubblica
   $('overScore').textContent = Math.floor(score).toLocaleString('it-IT');
   $('newRecord').hidden = !isRecord;
   const gap = Math.floor(prevBest - score);
@@ -5922,7 +5931,7 @@ window.addEventListener('visibilitychange', () => { if (document.hidden && state
 window.__L = {
   RULES, seqVal, comboMult, basePts, recoverAt, drainAt, difficultyAt, dailyRule, hit, start, update, target, spawn, mulberry,
   get S() { return { state, score, idx, combo, maxCombo, hits, timer, fever, feverCD, fire, ice, shield, elapsed, numbers, paused, mode, rule }; },
-  set timer(v) { timer = v; }, setTimescale(x) { TS = x; },
+  set timer(v) { timer = v; }, setTimescale(x) { TS = x; }, gameOver, setScore(v) { score = v; },
 };
 
 fit(); startMenuDemo(); refreshMenu(); hud();
@@ -6605,7 +6614,8 @@ function finish() {
   const isRecord = score > prevBest && score > 0;
   $('overMode').textContent = mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : mode === 'chal' ? 'Sfida di un amico' : 'Partita libera';
   $('overTitle').textContent = 'Tempo scaduto';
-  const ov = $('over'); if (mode === 'daily') { delete ov.dataset.seed; delete ov.dataset.mode; } else { ov.dataset.seed = seedTok; ov.dataset.mode = mode; }   // il launcher ne ricava il codice sfida
+  const ov = $('over'); if (mode === 'daily') ov.dataset.board = 'dieci-giorno'; else delete ov.dataset.board;
+  if (mode === 'daily') { delete ov.dataset.seed; delete ov.dataset.mode; } else { ov.dataset.seed = seedTok; ov.dataset.mode = mode; }   // il launcher ne ricava il codice sfida
   $('overScore').textContent = score.toLocaleString('it-IT');
   $('newRecord').hidden = !isRecord; $('newRecord').textContent = mode === 'daily' ? 'Il tuo migliore di oggi' : 'Nuovo record';
   $('stTaken').textContent = score; $('stMoves').textContent = moves; $('stBig').textContent = gridNo + 1;
@@ -7081,7 +7091,8 @@ refreshMenu(); render();
     const helpBtn = () => { const b = document.createElement('button'); b.type = 'button'; b.className = 'lx-help'; b.textContent = '❓ Come si gioca'; b.addEventListener('click', () => showHowto(holder, key)); return b; };
     const recOpenBtn = () => { const b = document.createElement('button'); b.type = 'button'; b.className = 'lx-help lx-recopen'; b.textContent = '🏆 Record'; b.addEventListener('click', () => openGameRec(key)); return b; };
     // il Sentiero ha gia' il suo pulsante Record: li' basta «Come si gioca»; negli altri giochi i due pulsanti stanno affiancati (meno altezza)
-    const helpRow = () => { if (holder.querySelector('#recBtn')) return helpBtn(); const r = document.createElement('div'); r.className = 'lx-brow'; r.append(helpBtn(), recOpenBtn()); return r; };
+    const pubOpenBtn = () => { const b = document.createElement('button'); b.type = 'button'; b.className = 'lx-help lx-pubopen'; b.textContent = '🌍 Classifica'; b.addEventListener('click', () => openPub(BOARD_OF(key))); return b; };
+    const helpRow = () => { const r = document.createElement('div'); r.className = 'lx-brow'; r.append(helpBtn(), holder.querySelector('#recBtn') ? pubOpenBtn() : recOpenBtn()); return r; };
     menuPanel.querySelector('.btns').appendChild(helpRow());
     if (CHAL_ON.has(key)) {
       const hb = document.createElement('button'); hb.type = 'button'; hb.id = 'chal'; hb.hidden = true; menuPanel.appendChild(hb);   // il gioco ascolta questo pulsante: il launcher lo preme per avviare una sfida
@@ -7294,7 +7305,7 @@ refreshMenu(); render();
     hook.appendChild(b); hook.appendChild(box);
   }
   // ---------- record di un gioco (pulsante «Record» dentro ogni gioco): migliore, media e partite per periodo ----------
-  const grecPanel = document.getElementById('lx-grecpanel');
+  const grecPanel = document.getElementById('lx-grecpanel'), grecPub = document.getElementById('lx-grecpub');
   function recDetail(game) {
     const g = recLoad()[game] || {}, today = romeDate(), ws = mondayOf(today), we = shiftDay(ws, 6);
     const P = {}; ['day', 'week', 'month', 'year', 'all'].forEach(k => { P[k] = { best: 0, plays: 0, sum: 0, days: 0 }; });
@@ -7314,7 +7325,7 @@ refreshMenu(); render();
   function openGameRec(key) {
     const P = recDetail(key), today = romeDate(), tb = document.getElementById('lx-grecrows');
     document.getElementById('lx-grectitle').textContent = 'Record · ' + NAMES[key];
-    document.getElementById('lx-grecwho').textContent = (playerName() ? playerName() + ' · ' : '') + 'giorno e settimana secondo il fuso di Roma (settimana da lunedì).';
+    document.getElementById('lx-grecwho').textContent = 'I TUOI record, salvati su questo dispositivo' + (playerName() ? ' (' + playerName() + ')' : '') + '. Giorno e settimana secondo il fuso di Roma (settimana da lunedì).';
     tb.textContent = '';
     [['day', 'Oggi'], ['week', 'Questa settimana'], ['month', 'Questo mese'], ['year', 'Quest\'anno'], ['all', 'Sempre']].forEach(([k, label]) => {
       const o = P[k], tr = document.createElement('tr'), has = o.best > 0 || o.plays > 0;
@@ -7323,6 +7334,7 @@ refreshMenu(); render();
     });
     const st = streakInfo(recLoad(), today);
     document.getElementById('lx-grecnote').textContent = 'Serie di giorni di gioco: ' + st.cur + (st.cur === 1 ? ' giorno' : ' giorni') + ' (la migliore: ' + st.best + '). Le partite contano da quando esiste lo storico; i record sono salvati su questo dispositivo.';
+    grecPub.hidden = !BOARD_OF(key); grecPub.onclick = () => { closeGameRec(); openPub(BOARD_OF(key)); };
     grecPanel.hidden = false;
     document.getElementById('lx-grecclose').focus({ preventScroll: true });
   }
@@ -7333,7 +7345,10 @@ refreshMenu(); render();
   // ---------- classifiche pubbliche (Supabase): solo le sfide del giorno, uguali per tutti ----------
   // Schema e protezioni: docs/classifica.sql. Il browser chiama solo funzioni del database (nessun accesso diretto alle tabelle).
   const PUB = { url: 'https://jjdykknfepdlpaxgryou.supabase.co', key: 'sb_publishable_5I67JFJFARsKSzDtGesZYQ_ciJIxwNN' };
-  const BOARDS = { 'sentiero-giorno': 'Sentiero · sfida del giorno', 'cassaforte-giorno': 'Cassaforte · codice del giorno' };
+  // una classifica pubblica per la sfida del giorno di ogni gioco (stessa partita per tutti); i massimi sono nel database (docs/classifica.sql)
+  const BOARD_LBL = { sentiero: 'Sentiero · sfida del giorno', cassaforte: 'Cassaforte · codice del giorno', girasette: 'Girasette · partita del giorno', lampo: 'Lampo · regola del giorno' };
+  const BOARDS = {}; Object.keys(NAMES).forEach(k => { BOARDS[k + '-giorno'] = BOARD_LBL[k] || NAMES[k] + ' · sfida del giorno'; });
+  const BOARD_OF = k => (BOARDS[k + '-giorno'] ? k + '-giorno' : null);
   // gli stessi elenchi sono in docs/classifica.sql (nit_set_nick): il server compone il nome, qui si sceglie solo la posizione
   const ANIMALS = {
     m: ['Lupo', 'Gatto', 'Orso', 'Leone', 'Cervo', 'Gufo', 'Falco', 'Delfino', 'Riccio', 'Tasso', 'Cigno', 'Pavone', 'Coniglio', 'Scoiattolo', 'Pinguino', 'Leopardo'],
@@ -7399,7 +7414,10 @@ refreshMenu(); render();
   }
   const pubPanel = document.getElementById('lx-pubpanel');
   document.body.appendChild(pubPanel);   // fuori dalla home: deve restare visibile anche dalla schermata finale di un gioco
-  let pubSel = { board: Object.keys(BOARDS)[0], period: 'day' }, pubTok = 0;
+  const pubBoardSel = document.getElementById('lx-pubboardsel');
+  Object.entries(BOARDS).forEach(([k, label]) => { const o = document.createElement('option'); o.value = k; o.textContent = label; pubBoardSel.appendChild(o); });
+  pubBoardSel.addEventListener('change', () => { pubSel.board = pubBoardSel.value; pubLoad(); });
+  let pubSel = { board: 'sentiero-giorno', period: 'day' }, pubTok = 0;
   const pubMsg = (t, bad) => { const m = document.getElementById('lx-pubmsg'); m.textContent = t; m.style.color = bad ? '#c0392b' : 'inherit'; };
   function pubTabs(el, items, cur, onPick) {
     el.textContent = '';
@@ -7407,7 +7425,7 @@ refreshMenu(); render();
   }
   async function pubLoad() {
     const tok = ++pubTok, list = document.getElementById('lx-publist'), meEl = document.getElementById('lx-pubme');
-    pubTabs(document.getElementById('lx-pubboards'), Object.entries(BOARDS), pubSel.board, k => { pubSel.board = k; pubLoad(); });
+    pubBoardSel.value = pubSel.board;
     pubTabs(document.getElementById('lx-pubperiods'), PERIODS, pubSel.period, k => { pubSel.period = k; pubLoad(); });
     const mine = pubStore.get();
     meEl.textContent = mine ? 'Il tuo nome in classifica: ' + mine.nick : 'Comparirai con un nome generato dal momento in cui invii il primo punteggio.';

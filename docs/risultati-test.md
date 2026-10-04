@@ -260,3 +260,9 @@ Prova di `tests/dieci.js` (browser vero, mouse reale per il trascinamento):
 - **Cassaforte, controllo più profondo:** i primi 4 codici della serie (094, 517, 4186, 3215) sono identici in due sfide con lo stesso seme.
 - **Non provato:** il pulsante «Copia» negli appunti su un telefono vero (in prova compare il testo da copiare a mano); due telefoni diversi che giocano lo stesso seme. [Ipotesi] Che in Quadrante e Raddoppio la sequenza resti identica a parità di mosse.
 - **Esclusi per motivi tecnici:** Girasette (in partita libera i pezzi dipendono dalla plancia) e Lampo (casualità a ogni fotogramma e posizioni legate alle dimensioni dello schermo).
+
+## Classifiche pubbliche in tutti i giochi (versione 2026-10-05.6)
+
+Prova di `tests/classifica-giochi.js` con lo schema SQL vero su PostgreSQL locale. Per Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio, Lampo e Dieci: la sfida del giorno finita invia il punteggio, la schermata finale dice «Sei 1° oggi su 1», un secondo giocatore con meno punti è 2° su 2 con quanti punti mancano al primo; dal pannello **Record** del gioco il pulsante «🌍 Classifica pubblica» apre la classifica giusta con i due nomi e «(tu)»; il pannello Record dice che sono «I TUOI record». Il menu delle classifiche ha 10 voci; nel Sentiero c'è «🌍 Classifica» accanto a «Come si gioca».
+- **Non provato:** i tetti dei punteggi (1.000.000, Raddoppio 5.000.000) sono scelti da me e non verificati contro partite vere. [Ipotesi] Un punteggio legittimo molto alto sopra il tetto verrebbe rifiutato e il giocatore non lo vedrebbe in classifica.
+- **Rischio noto:** nei giochi senza massimo vero chi invia un numero enorme sotto il tetto vince. Il server non rifà la partita.

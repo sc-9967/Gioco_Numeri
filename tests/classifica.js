@@ -95,7 +95,7 @@ const count = sql => run(sql).trim().split('\n').pop();
     await page.click(`#lx-pubperiods button:has-text("${label}")`); await sleep(500);
     ok((await page.$$eval('#lx-publist li.me', l => l.length)) === 1, 'periodo ' + label + ': il punteggio c\'e\'');
   }
-  await page.click('#lx-pubboards button:has-text("Cassaforte")'); await sleep(500);
+  await page.selectOption('#lx-pubboardsel', 'cassaforte-giorno'); await sleep(500);
   ok(/Nessun punteggio in questo periodo/.test(await page.textContent('#lx-publist')), 'Cassaforte ancora vuota');
   // scelta del nome: sesso, animale declinato, numero
   const oldNick = nick;
@@ -135,7 +135,7 @@ const count = sql => run(sql).trim().split('\n').pop();
   ok(/1° oggi su 1/.test(await page.textContent('.lx-hook .lx-pub')), 'Cassaforte: primo nella sua classifica');
   ok(count("select score from nit_scores where board='cassaforte-giorno';") === String(cs), 'sul server: ' + cs);
   await page.click('.lx-hook .lx-sharebtn:has-text("Vedi la classifica")'); await sleep(700);
-  ok(await page.isVisible('#lx-pubpanel') && /Cassaforte/.test(await page.textContent('#lx-pubboards button[aria-pressed="true"]')), 'il pulsante apre la classifica della Cassaforte');
+  ok(await page.isVisible('#lx-pubpanel') && (await page.inputValue('#lx-pubboardsel')) === 'cassaforte-giorno', 'il pulsante apre la classifica della Cassaforte');
   await page.click('#lx-pubclose');
   await page.keyboard.press('Escape'); await sleep(300);
   const nReq = requests.length;
@@ -163,7 +163,7 @@ const count = sql => run(sql).trim().split('\n').pop();
   ok(count("select score from nit_scores where board='sentiero-giorno';") === '500', 'un punteggio piu\' basso non sostituisce il migliore');
   // escludere un giocatore lo toglie dalle classifiche
   run(`update nit_players set banned = true where id = '${pl.id}';`);
-  await page.click('#lx-pubbtn'); await sleep(700); await page.click('#lx-pubboards button:has-text("Sentiero")'); await sleep(500);
+  await page.click('#lx-pubbtn'); await sleep(700); await page.selectOption('#lx-pubboardsel', 'sentiero-giorno'); await sleep(500);
   ok(/Nessun/.test(await page.textContent('#lx-publist')), 'giocatore escluso: non compare piu\'');
   await page.click('#lx-pubclose');
 
