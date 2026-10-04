@@ -228,3 +228,14 @@ Misura: per ogni gioco si apre e si esce 12 volte (dopo 3 di riscaldamento) e si
 - Sesso → animale declinato (Lupo/Lupa, Leone/Leonessa, Volpe, Aquila…) → numero 1-999; anteprima «Comparirai come: Volpe 27» e salvataggio sul server (`nit_set_nick`). Dopo la prima sfida compare anche il pulsante «Scegli il tuo nome».
 - Prova (`tests/classifica.js`, schema SQL vero su PostgreSQL locale): nome salvato sul server e sul dispositivo; **le 32 combinazioni del gioco coincidono con quelle del server**; sesso, animale o numero fuori elenco rifiutati. Layout controllato a 360 px.
 - **Da rieseguire in Supabase:** tutto `docs/classifica.sql` (rimuove `nit_new_nick`, aggiunge `nit_set_nick`). Finché non lo fai, «Salva» il nome dà errore.
+
+## Dieci (versione 2026-10-05.1)
+
+Prova di `tests/dieci.js` (browser vero, mouse reale per il trascinamento):
+- Home con 10 giochi; 400 griglie con 100 cifre da 1 a 9 e somma multipla di 10; la ricerca di tutte le mosse coincide con la forza bruta su 30 griglie con buchi e costa meno di 1 ms.
+- Rettangolo con somma 9 neutro e senza effetti; somma 10 verde e le cifre spariscono (+2 punti); oltre 10 rosso; un buco in mezzo vale 0; 4 cifre insieme regalano 1 s; l'aiuto mostra un rettangolo giallo e costa 6 s e sparisce da solo.
+- Fine partita: nessuna somma 10 rimasta, tabellone pulito, tempo scaduto; record salvato e registrato nello storico del launcher; gancio di fine partita presente.
+- Sfida del giorno: stessa griglia a ogni tentativo (24 mosse possibili nel caso provato). Tastiera: Spazio, freccia, Spazio toglie 3+7.
+- Uscita senza residui; a 320×560 il tabellone sta nello schermo senza scorrimento orizzontale; uscendo e rientrando 12 volte: 0 elementi e 0 ascoltatori persi.
+- **Trovato e corretto durante la prova:** (1) un fotogramma già in coda dopo l'uscita dal gioco scriveva su elementi non più presenti (errore in pagina); (2) dopo aver premuto «Nuova» o «Aiuto» la tastiera restava intrappolata sul pulsante: ora la partita toglie il focus ai pulsanti.
+- **Non provato:** il gioco con un dito vero su un telefono vero (precisione del rettangolo con dita grosse, scorrimento della pagina durante il trascinamento). [Ipotesi] che a 10×10 su 360 px le caselle (circa 30 px) bastino.

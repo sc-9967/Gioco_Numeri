@@ -12,6 +12,7 @@ Nove giochi di numeri da partite brevi, pensati per il telefono. Sono tutti dent
 | **Sentiero** | Da in alto a sinistra a in basso a destra di una griglia 5×5: ogni casella somma, moltiplica o sottrae. Trova il percorso che dà il valore più alto. Una serie di 5 griglie al giorno, uguale per tutti. |
 | **Lampo** | Gioco di riflessi: tocca i numeri in movimento nell'ordine giusto prima che finisca il tempo. Combo, febbre, bonus e regole diverse. |
 | **Cassaforte** | Scassina un codice di cifre tutte diverse: dopo ogni tentativo sai quante cifre sono giuste al posto giusto (●) e quante giuste ma altrove (○). Serie di 20 casseforti con tre vite e codice del giorno uguale per tutti. |
+| **Dieci** | Trascina un rettangolo sui numeri di una griglia 10×10: se la somma di quelli dentro è 10, spariscono (i buchi valgono 0). Due minuti, un punto per numero tolto; togliere 4 o più numeri insieme regala secondi. Aiuto a pagamento (−6 s) e sfida del giorno. |
 | **Raddoppio** | Scorri la griglia 4×4 e fondi le tessere uguali. Le catene di fusioni moltiplicano i punti, il martello rompe una tessera. |
 
 `index.html` è il launcher con tutti e nove i giochi (la copia `Numeri in Tasca.html` è identica). I file singoli dei giochi sono stati eliminati: ogni gioco si apre direttamente con `index.html#bilancia`, `#quadrante`, `#primo`, `#resto`, `#girasette`, `#raddoppio`, `#sentiero`, `#lampo`, `#cassaforte`.
@@ -167,3 +168,12 @@ Copyright © 2026 Silvio Chiaverini. Licenza GNU GPL v3: vedi il file `LICENSE`.
 - **Offline:** se il server non risponde il gioco funziona come prima e compare un avviso; il punteggio non viene rinviato in seguito.
 - **Non pubblico:** serie normali, allenamenti e gli altri sette giochi. Accendere un'altra classifica = una riga in `nit_boards` + il gioco che segna la partita (`over.dataset.board`).
 - Sotto test automatici (`navigator.webdriver`) il launcher non chiama il server vero, salvo `nit_pub_test=1`.
+
+## Dieci (versione 2026-10-05.1)
+
+- **Regola:** griglia 10×10 di cifre da 1 a 9. Si trascina un rettangolo (dito, mouse, oppure frecce e Spazio): il cerchietto mostra la somma. A 10 il rettangolo diventa verde e, rilasciando, le cifre spariscono. Oltre 10 diventa rosso. I posti vuoti valgono 0.
+- **Punteggio:** una cifra tolta = un punto (massimo 100). Togliere 4 o più cifre in una mossa regala 1 secondo, 6 o più ne regalano 2.
+- **Tempo:** 120 secondi. Se la pagina resta in secondo piano il tempo non scorre. «Aiuto» mostra un rettangolo valido e costa 6 secondi.
+- **Fine:** a tempo scaduto, subito se non esiste più nessun rettangolo con somma 10, o con il tabellone pulito.
+- **Griglia:** somma sempre multipla di 10. La sfida del giorno usa lo stesso seme (data di Roma) per tutti, con più tentativi e il migliore del giorno.
+- **Non ha classifica pubblica:** il server non potrebbe verificare il punteggio.

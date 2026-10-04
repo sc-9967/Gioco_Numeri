@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!--
-  Numeri in Tasca: Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio, Sentiero, Lampo, Cassaforte.
+  Numeri in Tasca: Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio, Sentiero, Lampo, Cassaforte, Dieci.
   © 2026 Silvio Chiaverini.
   Giochi ideati e realizzati da Silvio Chiaverini.
   Licenza: GNU GPL v3 (vedi LICENSE).
@@ -92,6 +92,10 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 .g-cas .lx-name{font-family:"Fredoka",system-ui,sans-serif;font-weight:700;font-size:30px;color:#ffffff}
 .g-cas .lx-name i{font-style:normal;color:#f5c451}
 .g-cas .lx-play{background:#f5c451;color:#241800}
+.g-die{background:radial-gradient(ellipse at 30% 10%,#0f6a74,#05202a);color:#e4fbff}
+.g-die .lx-name{font-family:"Fredoka",system-ui,sans-serif;font-weight:700;font-size:30px;color:#ffffff}
+.g-die .lx-name i{font-style:normal;color:#ffd34e}
+.g-die .lx-play{background:#ffd34e;color:#2a1d00}
 .lx-grid>:last-child:nth-child(odd){grid-column:1 / -1}   /* l'ultima carta dispari occupa tutta la riga */
 
 .lx-donate{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;background:var(--l-card);border:1px solid var(--l-line);border-radius:18px;padding:14px 16px}
@@ -259,7 +263,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 
 <div id="lx-launcher" class="lx-page">
   <header>
-    <p class="lx-eyebrow">Nove giochi di numeri</p>
+    <p class="lx-eyebrow">Dieci giochi di numeri</p>
     <h1 class="lx-title">Numeri <span>in Tasca</span></h1>
     <p class="lx-sub">Partite da un minuto. Scegli un gioco e batti il tuo record.</p>
   </header>
@@ -371,6 +375,11 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
       <span class="lx-desc">Scassina il codice di cifre tutte diverse: ● giusta e al suo posto, ○ giusta ma altrove. Serie di 20 casseforti e codice del giorno.</span>
       <span class="lx-best"><span>Record <b data-best="cass_best">0</b></span><span class="lx-play">Gioca</span></span>
     </button>
+    <button class="lx-card g-die" type="button" data-game="dieci">
+      <span class="lx-name">Die<i>ci</i></span>
+      <span class="lx-desc">Trascina un rettangolo sui numeri: se la somma fa 10, spariscono. Due minuti: ogni numero tolto è un punto.</span>
+      <span class="lx-best"><span>Record <b data-best="dieci_best">0</b></span><span class="lx-play">Gioca</span></span>
+    </button>
   </main>
 
   <aside class="lx-donate" aria-label="Contributo volontario" hidden>
@@ -404,7 +413,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
   <footer class="lx-foot">
     <p><strong>© 2026 Silvio Chiaverini.</strong></p>
     <p class="lx-ver" id="lx-ver" style="font-size:12px;opacity:.7"></p>
-    <p>Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio, Sentiero, Lampo e Cassaforte sono giochi ideati e realizzati da Silvio Chiaverini. Codice rilasciato con licenza GNU GPL v3 (vedi LICENSE).</p>
+    <p>Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio, Sentiero, Lampo, Cassaforte e Dieci sono giochi ideati e realizzati da Silvio Chiaverini. Codice rilasciato con licenza GNU GPL v3 (vedi LICENSE).</p>
   </footer>
 </div>
 
@@ -1896,6 +1905,154 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
     </div>
   </section>
 </div></template>
+<template id="tpl-dieci"><style>
+/* DIECI. Layout: HUD (punti, titolo, tempo), barra del tempo, tabellone 10x10 quadrato, barra comandi. Tema verde mare con tessere colorate (un colore per cifra). Si trascina un rettangolo: se i numeri dentro sommano 10, spariscono. */
+:root{
+  --bg:#06232d; --bg2:#0f4a57; --panel:#0f2f3a; --line:#2a6a7a; --ink:#effafc; --muted:#8fbac4;
+  --accent:#ffd34e; --accent-ink:#2a1d00; --ok:#43d68b; --bad:#ff6b6b; --board:#0a2a35;
+  --ui:"Fredoka",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overflow:hidden;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+.app{height:100%;display:flex;flex-direction:column;position:relative;
+  background:radial-gradient(ellipse 120% 70% at 50% 30%,var(--bg2) 0%,var(--bg) 72%)}
+.hud{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:8px;padding:12px 16px 2px;width:100%;max-width:560px;margin-inline:auto;box-sizing:border-box}
+.stat{display:flex;flex-direction:column;min-width:0}
+.stat.r{align-items:flex-end}
+.lbl{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.stat b{font-size:28px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.stat b.bump{animation:scorebump .25s ease-out}
+@keyframes scorebump{40%{transform:scale(1.14);color:var(--accent)}}
+.stat b.low{color:var(--bad);animation:lowpulse .5s ease-in-out infinite alternate}
+@keyframes lowpulse{to{transform:scale(1.1)}}
+h1{margin:0;font-size:28px;font-weight:700;letter-spacing:.01em;line-height:1}
+h1 span{color:var(--accent)}
+.tbar{width:calc(100% - 32px);max-width:528px;height:7px;border-radius:99px;background:rgba(255,255,255,.1);margin:6px auto 4px;overflow:hidden}
+.tbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--ok),var(--accent));border-radius:99px;transition:width .2s linear}
+.tbar.low i{background:var(--bad)}
+.stage{flex:1;min-height:0;position:relative;display:grid;place-items:center;container-type:size;touch-action:none;padding:0 14px 8px}
+.board{position:relative;width:min(100cqw,100cqh,520px);aspect-ratio:1;box-sizing:border-box;padding:2.4%;container-type:inline-size;
+  background:var(--board);border-radius:3.4%;box-shadow:0 18px 40px rgba(0,0,0,.4),inset 0 0 0 2px rgba(255,255,255,.05)}
+.cells{position:relative;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.grid,.selgrid{width:100%;height:100%;display:grid;grid-template:repeat(10,1fr)/repeat(10,1fr);gap:1.1cqw}
+.selgrid{position:absolute;inset:0;pointer-events:none;z-index:3}
+.t{display:grid;place-items:center;border-radius:22%;font-style:normal;font-weight:700;font-size:5.2cqw;line-height:1;color:#15222b;
+  box-shadow:inset 0 -.55cqw 0 rgba(0,0,0,.15);transition:transform .22s ease-in,opacity .22s}
+.v1{background:#bff0d4}.v2{background:#cfdcea}.v3{background:#ffe08a}.v4{background:#ff9d8a}.v5{background:#ff9fcf}
+.v6{background:#9fdcf5}.v7{background:#ffb866}.v8{background:#c6ec7a}.v9{background:#c9a8ff}
+.t.gone{transform:scale(.15) rotate(50deg);opacity:0;box-shadow:none}
+.t.kc{outline:.7cqw solid #fff;outline-offset:-.3cqw}
+.sel{position:relative;border:.7cqw solid #fff;border-radius:2.4cqw;background:rgba(255,255,255,.14);box-sizing:border-box}
+.sel[hidden]{display:none}
+.sel b{position:absolute;top:-1.6cqw;right:-1.6cqw;min-width:6.4cqw;height:6.4cqw;padding:0 1.2cqw;box-sizing:border-box;display:grid;place-items:center;border-radius:99px;
+  background:#fff;color:#15222b;font-size:4.2cqw;font-weight:700;box-shadow:0 .6cqw 1.6cqw rgba(0,0,0,.4)}
+.sel.ok{border-color:var(--ok);background:rgba(67,214,139,.3);box-shadow:0 0 3cqw rgba(67,214,139,.7)}
+.sel.ok b{background:var(--ok)}
+.sel.bad{border-color:var(--bad);background:rgba(255,107,107,.22)}
+.sel.bad b{background:var(--bad);color:#fff}
+.sel.hint{border-color:var(--accent);background:rgba(255,211,78,.28);animation:hintp .5s ease-in-out infinite alternate}
+@keyframes hintp{to{box-shadow:0 0 3.4cqw rgba(255,211,78,.9)}}
+.sel.no{animation:shake .25s}
+@keyframes shake{25%{transform:translateX(-1.4cqw)}75%{transform:translateX(1.4cqw)}}
+.fx{position:absolute;inset:0;pointer-events:none;z-index:5}
+.pts{position:absolute;font-weight:700;font-size:7cqw;color:var(--accent);text-shadow:0 .5cqw 0 rgba(0,0,0,.55);transform:translate(-50%,-50%);animation:pts .9s ease-out forwards;white-space:nowrap}
+@keyframes pts{to{transform:translate(-50%,-190%);opacity:0}}
+.toast{position:absolute;left:50%;top:-4.6cqw;transform:translate(-50%,0);background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:4cqw;padding:1.2cqw 3.4cqw;border-radius:99px;opacity:0;pointer-events:none;transition:opacity .2s;white-space:nowrap;z-index:6}
+.toast.on{opacity:1}
+.bar{display:flex;gap:8px;justify-content:center;padding:6px 16px calc(12px + env(safe-area-inset-bottom,0px));width:100%;max-width:560px;margin-inline:auto;box-sizing:border-box}
+.btn{font:inherit;font-weight:600;font-size:14px;color:var(--ink);background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:10px 6px;cursor:pointer;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ask{border-color:var(--accent);color:var(--accent)}
+#menu,#over{position:absolute;inset:0;display:grid;place-items:center;padding:16px;background:rgba(3,16,22,.82);z-index:8}
+#menu[hidden],#over[hidden]{display:none}
+.card{width:100%;max-width:340px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--panel);border:1.5px solid var(--line);border-radius:22px;padding:24px 22px 20px;display:flex;flex-direction:column;gap:14px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.card h1{font-size:44px}
+.card h2{margin:0;font-size:30px;font-weight:700;color:var(--accent)}
+.card .eyebrow{margin:0;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.35;text-align:left}
+.rules li{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center}
+.chip{font-weight:700;font-size:15px;text-align:center;color:var(--accent-ink);background:var(--accent);border-radius:9px;padding:5px 0}
+.chip.ok{background:var(--ok)}.chip.cy{background:#62cdbd}
+.btns{display:flex;flex-direction:column;gap:10px}
+.btns .btn{flex:none;font-size:16px;padding:12px 14px}
+.btn.link{border:none;background:none;color:var(--muted);font-weight:600;padding:6px}
+.card .small{margin:0;font-size:13px;color:var(--muted)}
+.card .small b{color:var(--ink)}
+.card .big{font-size:60px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.card .rec{align-self:center;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--accent);color:var(--accent-ink);border-radius:99px;padding:3px 12px}
+.card .rec[hidden]{display:none}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats div{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line);padding-top:8px}
+.stats b{font-size:24px;font-variant-numeric:tabular-nums}
+.stats span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+#shareBox{width:100%;box-sizing:border-box;font:13px/1.4 var(--ui);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;resize:none}
+@media (max-height:560px){.hud{padding-top:6px}.stat b{font-size:22px}h1{font-size:22px}.bar{padding-bottom:8px}.card{padding:16px 18px;gap:10px}.card h1{font-size:34px}.rules{font-size:13px;gap:6px}.card .big{font-size:44px}}
+@media (prefers-reduced-motion:reduce){.t,.sel,.pts,.stat b,.tbar i{animation:none!important;transition-duration:.01ms!important}}
+</style><div class="app" id="app">
+  <header class="hud">
+    <div class="stat"><span class="lbl">Punti</span><b id="score">0</b></div>
+    <h1>Die<span>ci</span></h1>
+    <div class="stat r"><span class="lbl">Tempo</span><b id="time">120</b></div>
+  </header>
+  <div class="tbar" id="tbar"><i id="tfill"></i></div>
+  <div class="stage" id="stage">
+    <div class="board" id="board" aria-label="Tabellone 10 per 10: trascina un rettangolo sui numeri">
+      <div class="cells" id="cells">
+        <div class="grid" id="grid"></div>
+        <div class="selgrid"><div class="sel" id="sel" hidden><b id="selSum">0</b></div></div>
+      </div>
+      <div class="fx" id="fx"></div>
+      <div class="toast" id="toast"></div>
+    </div>
+  </div>
+  <footer class="bar">
+    <button class="btn" id="restart" type="button">Nuova</button>
+    <button class="btn" id="hint" type="button" disabled>Aiuto −6 s</button>
+    <button class="btn" id="mute" type="button">Suono</button>
+  </footer>
+
+  <section id="menu">
+    <div class="card">
+      <p class="eyebrow">Puzzle di somme · due minuti</p>
+      <h1>Die<span>ci</span></h1>
+      <ul class="rules">
+        <li><span class="chip">☝️</span><span>Trascina un rettangolo sui numeri. Il cerchietto mostra la somma di quelli dentro.</span></li>
+        <li><span class="chip ok">10</span><span>Se la somma è proprio 10 il rettangolo diventa verde: lascia il dito e i numeri spariscono.</span></li>
+        <li><span class="chip cy">+1 s</span><span>Ogni numero tolto è un punto. Con 4 o più numeri in una volta guadagni secondi.</span></li>
+      </ul>
+      <div class="btns">
+        <button class="btn primary" id="play" type="button">Gioca</button>
+        <button class="btn" id="daily" type="button">Sfida del giorno</button>
+      </div>
+      <p class="small">Record: <b id="menuBest">0</b> · Sfida di oggi: <b id="menuDaily">—</b></p>
+    </div>
+  </section>
+
+  <section id="over" hidden>
+    <div class="card">
+      <p class="eyebrow" id="overMode">Partita libera</p>
+      <h2 id="overTitle">Tempo scaduto</h2>
+      <div class="big" id="overScore">0</div>
+      <span class="rec" id="newRecord" hidden>Nuovo record</span>
+      <div class="stats">
+        <div><b id="stTaken">0</b><span>Tolti su 100</span></div>
+        <div><b id="stMoves">0</b><span>Mosse</span></div>
+        <div><b id="stBig">0</b><span>Il più grosso</span></div>
+      </div>
+      <div class="btns">
+        <button class="btn primary" id="again" type="button">Rigioca</button>
+        <button class="btn" id="share" type="button" hidden>Copia risultato</button>
+        <textarea id="shareBox" rows="3" readonly hidden></textarea>
+        <button class="btn link" id="toMenu" type="button">Menu</button>
+      </div>
+    </div>
+  </section>
+</div></template>
 
 <script>
 /* © 2026 Silvio Chiaverini. */
@@ -1908,13 +2065,13 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
   // Contributo nascosto per ora: metti true per riattivare il riquadro e il link a fine partita.
   const SHOW_DONATE = true;
   const AUTHOR = 'Silvio Chiaverini';
-  const BUILD = '2026-10-04.6';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
+  const BUILD = '2026-10-05.1';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
   // Nome del giocatore: salvato solo sul dispositivo, compare nei testi che si condividono (mai nelle statistiche anonime).
   const cleanName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
   const playerName = () => { try { return cleanName(JSON.parse(localStorage.getItem('nit_name'))); } catch (e) { return ''; } };
   const withName = txt => { const n = playerName(); return n ? n + ' · ' + txt : txt; };
   // ---------- record salvati sul dispositivo: storico per gioco e per giorno (giorno di Roma) ----------
-  const REC_KEY = 'nit_hist', BEST_KEYS = ['bil_best', 'quad_best', 'primo_best', 'resto_best', 'girasette_best', 'rad_best', 'sent_best', 'lampo_best', 'cass_best'];
+  const REC_KEY = 'nit_hist', BEST_KEYS = ['bil_best', 'quad_best', 'primo_best', 'resto_best', 'girasette_best', 'rad_best', 'sent_best', 'lampo_best', 'cass_best', 'dieci_best'];
   const romeDate = d => { d = d || new Date(); try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d); } catch (e) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); } };
   const shiftDay = (ds, k) => { const d = new Date(ds + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + k); return d.toISOString().slice(0, 10); };
   const mondayOf = ds => shiftDay(ds, -((new Date(ds + 'T00:00:00Z').getUTCDay() + 6) % 7));
@@ -1929,7 +2086,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
     recSave(h);
   }
   // Migliore e numero di partite per periodo (oggi, settimana da lunedi', anno, sempre).
-  const BEST_OF = { bilancia: 'bil_best', quadrante: 'quad_best', primo: 'primo_best', resto: 'resto_best', girasette: 'girasette_best', raddoppio: 'rad_best', sentiero: 'sent_best', lampo: 'lampo_best', cassaforte: 'cass_best' };
+  const BEST_OF = { bilancia: 'bil_best', quadrante: 'quad_best', primo: 'primo_best', resto: 'resto_best', girasette: 'girasette_best', raddoppio: 'rad_best', sentiero: 'sent_best', lampo: 'lampo_best', cassaforte: 'cass_best', dieci: 'dieci_best' };
   function recAgg(h, game, today, floorOverride) {
     const g = h[game] || {}, ws = mondayOf(today), we = shiftDay(ws, 6), out = { day: null, week: null, month: null, year: null, all: null };
     const take = (k, r) => { const o = out[k] || (out[k] = { best: 0, plays: 0 }); o.best = Math.max(o.best, r.b); o.plays += r.n; };
@@ -6174,6 +6331,309 @@ fit(); demo(); refreshMenu();
 requestAnimationFrame(frame);
 })();
 },
+    dieci: function (window, requestAnimationFrame, setTimeout) {
+/* ============================================================================
+   DIECI: puzzle di somme su griglia 10x10 di cifre da 1 a 9, due minuti.
+   Si trascina un rettangolo: se la somma delle cifre rimaste al suo interno e' 10, spariscono (i buchi contano 0).
+   Ogni cifra tolta e' un punto; togliere 4 o piu' cifre in una volta regala secondi (+1 s da 4, +2 s da 6).
+   La griglia ha sempre somma multipla di 10 (quindi una pulizia totale e' almeno possibile in teoria).
+   Sfida del giorno: stessa griglia per tutti (seme = data di Roma). "Aiuto" mostra un rettangolo valido e costa 6 secondi.
+   Il gioco finisce a tempo scaduto, o subito se non esiste piu' nessun rettangolo con somma 10.
+   Struttura: 1) logica pura  2) stato  3) audio  4) partita  5) input e schermate
+   ============================================================================ */
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+
+/* ---------------------------------------------------------------- 1) LOGICA PURA */
+const N = 10, TIME = 120, HINT_COST = 6;
+const mulberry = seed => { let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; };
+const hashStr = s => { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
+
+// Griglia piatta di N*N cifre 1-9 con somma multipla di 10.
+function makeGrid(rand) {
+  const g = Array.from({ length: N * N }, () => 1 + Math.floor(rand() * 9));
+  const d = (10 - g.reduce((a, b) => a + b, 0) % 10) % 10;
+  if (d) for (let k = 0; k < 500; k++) {
+    const i = Math.floor(rand() * g.length), v = g[i];
+    if (v + d <= 9) { g[i] = v + d; break; }
+    if (v + d >= 11) { g[i] = v + d - 10; break; }
+  }
+  return g;
+}
+// Somma e numero di cifre rimaste nel rettangolo (r1,c1)-(r2,c2) (estremi inclusi, in qualunque ordine).
+function rectInfo(g, ra, ca, rb, cb) {
+  const r1 = Math.min(ra, rb), r2 = Math.max(ra, rb), c1 = Math.min(ca, cb), c2 = Math.max(ca, cb);
+  let sum = 0, n = 0;
+  for (let r = r1; r <= r2; r++) for (let c = c1; c <= c2; c++) { const v = g[r * N + c]; if (v) { sum += v; n++; } }
+  return { r1, c1, r2, c2, sum, n };
+}
+// Tutti i rettangoli con somma 10 (con prefissi: costo trascurabile anche su 3025 rettangoli).
+function allMoves(g) {
+  const P = Array.from({ length: N + 1 }, () => new Array(N + 1).fill(0)), Q = Array.from({ length: N + 1 }, () => new Array(N + 1).fill(0));
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const v = g[r * N + c];
+    P[r + 1][c + 1] = P[r][c + 1] + P[r + 1][c] - P[r][c] + v;
+    Q[r + 1][c + 1] = Q[r][c + 1] + Q[r + 1][c] - Q[r][c] + (v ? 1 : 0);
+  }
+  const out = [];
+  for (let r1 = 0; r1 < N; r1++) for (let c1 = 0; c1 < N; c1++) for (let r2 = r1; r2 < N; r2++) for (let c2 = c1; c2 < N; c2++) {
+    if (P[r2 + 1][c2 + 1] - P[r1][c2 + 1] - P[r2 + 1][c1] + P[r1][c1] !== 10) continue;
+    out.push({ r1, c1, r2, c2, n: Q[r2 + 1][c2 + 1] - Q[r1][c2 + 1] - Q[r2 + 1][c1] + Q[r1][c1] });
+  }
+  return out;
+}
+const hasMove = g => allMoves(g).length > 0;
+const bonusOf = n => (n >= 6 ? 2 : n >= 4 ? 1 : 0);
+
+/* ---------------------------------------------------------------- 2) STATO */
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+const today = romeDate();
+const todayLabel = today.slice(8, 10) + '/' + today.slice(5, 7);
+const dailyKey = 'dieci_d_' + today;
+let grid = new Array(N * N).fill(0), cellEls = [];
+let score = 0, best = 0, prevBest = 0, moves = 0, biggest = 0, hints = 0, tLeft = TIME, lastSec = -1, lastT = 0;
+let mode = 'free', lastMode = 'free', running = false, over = false, gen = 0, TS = 1;
+let drag = null, kc = { r: 0, c: 0 }, kAnchor = null, hintTimer = 0;
+const APP = $('app'), gridEl = $('grid'), selEl = $('sel'), fxEl = $('fx');
+
+function buildCells() {
+  gridEl.textContent = ''; cellEls = [];
+  for (let i = 0; i < N * N; i++) { const el = document.createElement('i'); el.className = 't'; gridEl.appendChild(el); cellEls.push(el); }
+}
+function paint() {
+  grid.forEach((v, i) => { const el = cellEls[i]; el.className = 't' + (v ? ' v' + v : ' gone'); el.textContent = v ? v : ''; });
+}
+
+/* ---------------------------------------------------------------- 3) AUDIO */
+let AC = null, muted = store.get('dieci_mute', false);
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC = null; } }
+  if (AC && AC.state === 'suspended') AC.resume().catch(() => {});
+  return AC;
+}
+function tone(freq, dur, type = 'sine', vol = 0.15, when = 0, slide = 0) {
+  if (muted || !AC) return;
+  const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime + when;
+  o.type = type; o.frequency.setValueAtTime(freq, t);
+  if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(AC.destination); o.start(t); o.stop(t + dur + 0.03);
+}
+const PENTA = [0, 2, 4, 7, 9, 12];
+const sfx = {
+  clear: n => { const k = Math.min(n, 8); for (let i = 0; i < Math.min(k, 5); i++) tone(523.25 * 2 ** (PENTA[i] / 12), 0.22, 'triangle', 0.12, i * 0.05); },
+  deny: () => tone(170, 0.1, 'sine', 0.07, 0, 120),
+  hint: () => tone(660, 0.14, 'sine', 0.08, 0, 880),
+  tick: () => tone(880, 0.06, 'square', 0.04),
+  over: () => [0, -3, -7, -12].forEach((s, i) => tone(392 * 2 ** (s / 12), 0.38, 'triangle', 0.12, i * 0.14)),
+  win: () => [0, 4, 7, 12, 16].forEach((s, i) => tone(523.25 * 2 ** (s / 12), 0.4, 'triangle', 0.13, i * 0.11)),
+};
+const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
+
+/* ---------------------------------------------------------------- 4) PARTITA */
+const bestKey = () => (mode === 'daily' ? dailyKey : 'dieci_best');
+let toastTok = 0;
+function toast(t) { const el = $('toast'), k = ++toastTok; el.textContent = t; el.classList.add('on'); setTimeout(() => { if (k === toastTok) el.classList.remove('on'); }, 1100 * TS); }
+function floatText(text, r1, c1, r2, c2) {
+  const el = document.createElement('div'); el.className = 'pts'; el.textContent = text;
+  el.style.left = (2.4 + 95.2 * (c1 + c2 + 1) / (2 * N)) + '%'; el.style.top = (2.4 + 95.2 * (r1 + r2 + 1) / (2 * N)) + '%';
+  el.addEventListener('animationend', () => el.remove()); fxEl.appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+function showSel(a, b, cls) {
+  const info = rectInfo(grid, a[0], a[1], b[0], b[1]);
+  selEl.style.gridArea = (info.r1 + 1) + ' / ' + (info.c1 + 1) + ' / ' + (info.r2 + 2) + ' / ' + (info.c2 + 2);
+  selEl.className = 'sel ' + (cls || (info.sum === 10 ? 'ok' : info.sum > 10 ? 'bad' : ''));
+  $('selSum').textContent = info.sum; $('selSum').hidden = info.r1 === info.r2 && info.c1 === info.c2;
+  selEl.hidden = false;
+}
+function hideSel() { selEl.hidden = true; selEl.className = 'sel'; }
+
+function render(pulse) {
+  const sc = $('score'); sc.textContent = score.toLocaleString('it-IT');
+  if (pulse && !reduceMotion) { sc.classList.remove('bump'); void sc.offsetWidth; sc.classList.add('bump'); }
+  renderTime();
+  $('hint').disabled = !running || tLeft <= HINT_COST;
+}
+function renderTime() {
+  const s = Math.ceil(tLeft), t = $('time'), low = running && tLeft <= 10;
+  t.textContent = s; t.classList.toggle('low', low);
+  $('tfill').style.width = Math.max(0, Math.min(100, tLeft / TIME * 100)) + '%';
+  $('tbar').classList.toggle('low', low);
+  if (running && tLeft <= 5 && s !== lastSec) { lastSec = s; sfx.tick(); }
+}
+function refreshMenu() {
+  $('menuBest').textContent = store.get('dieci_best', 0).toLocaleString('it-IT');
+  const d = store.get(dailyKey, null);
+  $('menuDaily').textContent = d === null ? '—' : d.toLocaleString('it-IT');
+  $('daily').textContent = 'Sfida del giorno · ' + todayLabel;
+}
+
+function start(m) {
+  ac(); lastMode = m; mode = m; gen++;
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();   // la tastiera deve comandare il tabellone, non l'ultimo pulsante premuto
+  const rand = m === 'daily' ? mulberry(hashStr('dieci-' + today)) : Math.random;
+  grid = makeGrid(rand); paint();
+  score = 0; moves = 0; biggest = 0; hints = 0; tLeft = TIME; lastSec = -1; lastT = 0;
+  running = true; over = false; drag = null; kAnchor = null; hideSel();
+  best = store.get(bestKey(), 0); prevBest = best;
+  $('menu').hidden = true; $('over').hidden = true;
+  armRestart(false); render();
+  const g0 = gen;
+  const frame = t => {
+    if (!running || g0 !== gen) return;                       // un solo ciclo attivo: quello dell'ultima partita
+    if (!APP.isConnected) { running = false; return; }        // il gioco e' stato chiuso mentre il fotogramma era in coda
+    const dt = lastT ? Math.min(0.25, (t - lastT) / 1000) : 0;   // se la pagina resta in secondo piano il tempo non scorre
+    lastT = t; tLeft -= dt;
+    if (tLeft <= 0) { tLeft = 0; render(); finish('time'); return; }
+    renderTime();
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+
+function commit(a, b) {
+  if (!running) return false;
+  const info = rectInfo(grid, a[0], a[1], b[0], b[1]);
+  if (info.sum !== 10 || info.n < 2) { if (info.n > 1) { selEl.classList.add('no'); sfx.deny(); } return false; }
+  for (let r = info.r1; r <= info.r2; r++) for (let c = info.c1; c <= info.c2; c++) {
+    const i = r * N + c;
+    if (grid[i]) { grid[i] = 0; const el = cellEls[i]; el.className = 't gone'; }
+  }
+  score += info.n; moves++; biggest = Math.max(biggest, info.n);
+  const bonus = bonusOf(info.n); tLeft += bonus;
+  floatText('+' + info.n, info.r1, info.c1, info.r2, info.c2);
+  if (bonus) toast('+' + bonus + ' s');
+  sfx.clear(info.n); buzz(info.n >= 4 ? 25 : 12);
+  render(true);
+  const g0 = gen;
+  if (grid.every(v => !v)) setTimeout(() => { if (g0 === gen && running) finish('clean'); }, 300 * TS);
+  else if (!hasMove(grid)) setTimeout(() => { if (g0 === gen && running) finish('stuck'); }, 500 * TS);
+  return true;
+}
+
+function hint() {
+  if (!running || tLeft <= HINT_COST) return;
+  const list = allMoves(grid).sort((x, y) => (x.n - y.n) || ((x.r2 - x.r1 + 1) * (x.c2 - x.c1 + 1) - (y.r2 - y.r1 + 1) * (y.c2 - y.c1 + 1)));
+  if (!list.length) return;
+  const m = list[0]; hints++; tLeft -= HINT_COST; sfx.hint(); toast('−' + HINT_COST + ' s');
+  showSel([m.r1, m.c1], [m.r2, m.c2], 'hint');
+  const k = ++hintTimer;
+  setTimeout(() => { if (k === hintTimer && !drag && !kAnchor) hideSel(); }, 1800 * TS);
+  render();
+}
+
+function finish(why) {
+  over = true; running = false; drag = null; kAnchor = null; hideSel();
+  const key = bestKey(), old = store.get(key, 0);
+  if (score > old) store.set(key, score);
+  const isRecord = score > prevBest && score > 0;
+  $('overMode').textContent = mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : 'Partita libera';
+  $('overTitle').textContent = why === 'clean' ? 'Tabellone pulito!' : why === 'stuck' ? 'Nessuna somma 10 rimasta' : 'Tempo scaduto';
+  $('overScore').textContent = score.toLocaleString('it-IT');
+  $('newRecord').hidden = !isRecord; $('newRecord').textContent = mode === 'daily' ? 'Il tuo migliore di oggi' : 'Nuovo record';
+  $('stTaken').textContent = score; $('stMoves').textContent = moves; $('stBig').textContent = biggest;
+  $('share').hidden = mode !== 'daily'; $('share').textContent = 'Copia risultato'; $('shareBox').hidden = true;
+  why === 'clean' ? sfx.win() : sfx.over(); buzz(80);
+  render();
+  const g0 = gen;
+  setTimeout(() => { if (g0 === gen) { $('over').hidden = false; $('again').focus({ preventScroll: true }); } }, 450 * TS);
+}
+
+/* ---------------------------------------------------------------- 5) INPUT E SCHERMATE */
+let restartArmed = 0;
+function armRestart(on) {
+  const b = $('restart'); b.classList.toggle('ask', on); b.textContent = on ? 'Sicuro?' : 'Nuova';
+  const k = ++restartArmed;
+  if (on) setTimeout(() => { if (k === restartArmed) armRestart(false); }, 2500);
+}
+$('play').addEventListener('click', () => start('free'));
+$('daily').addEventListener('click', () => start('daily'));
+$('again').addEventListener('click', () => start(lastMode));
+$('toMenu').addEventListener('click', () => { refreshMenu(); $('over').hidden = true; $('menu').hidden = false; });
+$('restart').addEventListener('click', () => {
+  if (!running) return;
+  if (score === 0 || $('restart').classList.contains('ask')) start(lastMode); else armRestart(true);
+});
+$('hint').addEventListener('click', () => { hint(); $('hint').blur(); });
+$('share').addEventListener('click', () => {
+  const txt = withName('Dieci · sfida del ' + todayLabel + '\n' + score + ' caselle tolte su 100 · ' + moves + ' mosse · il più grosso ' + biggest);
+  const fallback = () => { const b = $('shareBox'); b.value = txt; b.hidden = false; b.focus(); b.select(); $('share').textContent = 'Seleziona e copia il testo'; };
+  try { navigator.clipboard.writeText(txt).then(() => { $('share').textContent = 'Copiato'; }, fallback); } catch (e) { fallback(); }
+});
+const muteBtn = $('mute');
+const syncMute = () => { muteBtn.textContent = muted ? 'Muto' : 'Suono'; };
+muteBtn.addEventListener('click', () => { muted = !muted; store.set('dieci_mute', muted); ac(); syncMute(); });
+syncMute();
+
+// Trascinamento: dal punto di partenza al punto attuale, il rettangolo si aggiorna mentre ci si muove.
+const cellsEl = $('cells');
+const cellAtPoint = (x, y) => {
+  const R = cellsEl.getBoundingClientRect();
+  return [Math.max(0, Math.min(N - 1, Math.floor((y - R.top) / R.height * N))), Math.max(0, Math.min(N - 1, Math.floor((x - R.left) / R.width * N)))];
+};
+cellsEl.addEventListener('pointerdown', e => {
+  if (!running) return;
+  ac(); hintTimer++; kAnchor = null;
+  try { cellsEl.setPointerCapture(e.pointerId); } catch (err) {}
+  const p = cellAtPoint(e.clientX, e.clientY);
+  drag = { id: e.pointerId, a: p, b: p }; showSel(p, p); e.preventDefault();
+});
+cellsEl.addEventListener('pointermove', e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  const p = cellAtPoint(e.clientX, e.clientY);
+  if (p[0] === drag.b[0] && p[1] === drag.b[1]) return;
+  drag.b = p; showSel(drag.a, drag.b);
+});
+cellsEl.addEventListener('pointerup', e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  const d = drag; drag = null;
+  const ok = commit(d.a, d.b);
+  if (ok) hideSel(); else setTimeout(hideSel, 180 * TS);
+});
+cellsEl.addEventListener('pointercancel', () => { drag = null; hideSel(); });
+
+// Tastiera: frecce per muovere il cursore, Spazio o Invio per fissare un angolo e poi l'angolo opposto.
+function showCursor() { cellEls.forEach(el => el.classList.remove('kc')); if (running && kc) cellEls[kc.r * N + kc.c].classList.add('kc'); }
+window.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey || !running) return;
+  const tag = e.target && e.target.tagName;
+  if (tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'BUTTON') return;
+  const mv = { ArrowLeft: [0, -1], ArrowRight: [0, 1], ArrowUp: [-1, 0], ArrowDown: [1, 0] }[e.key];
+  if (mv) {
+    ac(); kc = { r: Math.max(0, Math.min(N - 1, kc.r + mv[0])), c: Math.max(0, Math.min(N - 1, kc.c + mv[1])) };
+    if (kAnchor) showSel(kAnchor, [kc.r, kc.c]);
+    showCursor(); e.preventDefault(); return;
+  }
+  if (e.key === ' ' || e.key === 'Enter') {
+    ac(); e.preventDefault();
+    if (!kAnchor) { kAnchor = [kc.r, kc.c]; showSel(kAnchor, kAnchor); showCursor(); return; }
+    const a = kAnchor; kAnchor = null;
+    const ok = commit(a, [kc.r, kc.c]);
+    if (ok) hideSel(); else setTimeout(hideSel, 180 * TS);
+  } else if (e.key === 'h' || e.key === 'H') { hint(); e.preventDefault(); }
+});
+
+/* Interfaccia di prova (usata dai test automatici; innocua per il gioco). */
+window.__D = {
+  makeGrid, rectInfo, allMoves, hasMove, bonusOf, mulberry, hashStr,
+  get S() { return { score, best, moves, biggest, hints, tLeft, running, over, mode, grid: grid.slice() }; },
+  start, hint, finish, commit(r1, c1, r2, c2) { return commit([r1, c1], [r2, c2]); },
+  setGrid(rows) { grid = rows.flat(); paint(); },
+  setTime(v) { tLeft = v; renderTime(); },
+  setTimescale(x) { TS = x; },
+};
+
+best = store.get('dieci_best', 0);
+buildCells(); grid = makeGrid(Math.random); paint();   // tabellone di esempio dietro al menu
+refreshMenu(); render();
+})();
+    },
   };
 
   const launcher = document.getElementById('lx-launcher');
@@ -6199,7 +6659,7 @@ requestAnimationFrame(frame);
   }
 
   // ---------- conteggio per il test: quale gioco viene rigiocato di più ----------
-  const NAMES = { bilancia: 'Bilancia', quadrante: 'Quadrante', primo: 'Primo', resto: 'Resto', girasette: 'Girasette', raddoppio: 'Raddoppio', sentiero: 'Sentiero', lampo: 'Lampo', cassaforte: 'Cassaforte' };
+  const NAMES = { bilancia: 'Bilancia', quadrante: 'Quadrante', primo: 'Primo', resto: 'Resto', girasette: 'Girasette', raddoppio: 'Raddoppio', sentiero: 'Sentiero', lampo: 'Lampo', cassaforte: 'Cassaforte', dieci: 'Dieci' };
   const KEYS = Object.keys(NAMES);
   const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   const ls = {
@@ -6337,6 +6797,13 @@ requestAnimationFrame(frame);
       ['🤔', 'Non ti dico quale numero è! Pensa e riprova, finché la cassaforte si apre.'],
       ['💡', '"Indizio" ti regala un numero giusto, nel posto giusto: lo vedi tratteggiato. "Note" ti fa segnare i numeri che non ci sono.'],
       ['❤️', 'Hai tre cuori. Se non apri una cassaforte, ne perdi uno.']], tip: 'Un numero che non c\'è? Non usarlo più.' },
+    dieci: { icon: '🔟', intro: 'Tanti numeri in una griglia. Fai sparire quelli che messi insieme fanno dieci!', steps: [
+      ['☝️', 'Metti il dito su un numero e trascina: appare un rettangolo.'],
+      ['➕', 'Il gioco somma tutti i numeri dentro il rettangolo. Il totale lo vedi in un cerchietto.'],
+      ['🟢', 'Se il totale è proprio 10, il rettangolo diventa verde. Togli il dito: i numeri spariscono!'],
+      ['🔴', 'Se superi 10, il rettangolo diventa rosso. Prova con meno numeri.'],
+      ['⏱️', 'Hai due minuti. Ogni numero che sparisce è un punto. Se ne togli tanti insieme, guadagni secondi.'],
+      ['💡', '"Aiuto" ti fa vedere dove fare dieci, ma ti costa 6 secondi.']], tip: 'I posti vuoti valgono zero: puoi tirare il rettangolo anche sopra i buchi.' },
   };
   let howEsc = null;
   function closeHowto(holder) {

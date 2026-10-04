@@ -1,7 +1,7 @@
 // Uscita dalla partita ("← Tutti i giochi") in ogni gioco e record oggi/settimana/mese/anno/sempre per gioco.
 const { chromium } = require('playwright');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const GAMES = ['bilancia', 'quadrante', 'primo', 'resto', 'girasette', 'raddoppio', 'sentiero', 'lampo', 'cassaforte'];
+const GAMES = ['bilancia', 'quadrante', 'primo', 'resto', 'girasette', 'raddoppio', 'sentiero', 'lampo', 'cassaforte', 'dieci'];
 (async () => {
   const b = await chromium.launch();
   const ctx = await b.newContext({ viewport: { width: 360, height: 700 }, hasTouch: true, deviceScaleFactor: 2 });

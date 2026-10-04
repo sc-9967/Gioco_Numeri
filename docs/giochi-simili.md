@@ -54,6 +54,12 @@ Raddoppio ha le stesse regole di base di 2048. Non è un caso fortuito: è la st
 - **Origine.** Rielaborato da un prototipo ricevuto ("La cassaforte a indizi", dentro un file "Tre nuove sfide"). Del prototipo non resta codice: aveva il colore verde sulla cifra sbagliata, l'indizio sulla somma e una sola partita senza tetto né fine definita.
 - **Rischio:** basso per il gioco, basso-medio per il nome «Cassaforte» (parola comune: da verificare su EUIPO, UIBM e negli store prima di una pubblicazione).
 
+## Dieci: somma 10 con un rettangolo
+
+- La meccanica (trascinare un rettangolo, somma 10, le cifre spariscono, tempo limitato) è quella di giochi web noti con nomi come «Fruit Box» o «Apple Game». [Probabile; non ho cercato le fonti] Quindi non è una novità: il valore sta nella resa, nella sfida del giorno e nel resto della raccolta.
+- **Scelte proprie:** griglia 10×10 (pensata per il telefono), colore per cifra per riconoscere subito le combinazioni, secondi extra per le mosse grosse, aiuto a pagamento di tempo, fine anticipata se non esistono più mosse, tastiera e griglia con somma multipla di 10.
+- Nessuna grafica o testo di altri giochi è stato riusato.
+
 ## Fonti
 
 - [Make7! Hexa Puzzle - App Store](https://apps.apple.com/us/app/make7-hexa-puzzle/id1095539172)
