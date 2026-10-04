@@ -4,8 +4,8 @@
 --
 -- Come e' protetto:
 --  * le tabelle hanno la sicurezza a livello di riga attiva e NESSUNA regola: dal browser nessuno puo' leggerle o scriverle direttamente;
---  * il browser puo' solo chiamare le 4 funzioni qui sotto (nit_register, nit_new_nick, nit_submit, nit_board);
---  * nessun dato personale: il giocatore ha un identificativo casuale, un segreto (salvato solo come hash) e un nome generato dal server
+--  * il browser puo' solo chiamare le 4 funzioni qui sotto (nit_register, nit_set_nick, nit_submit, nit_board);
+--  * nessun dato personale: il giocatore ha un identificativo casuale, un segreto (salvato solo come hash) e un nome composto dal server da sesso, animale e numero scelti
 --    (non si puo' scrivere un nome libero, quindi niente insulti ne' dati personali);
 --  * il server decide il giorno (fuso Europa/Roma), scarta punteggi fuori scala, limita la frequenza degli invii.
 -- Limite noto: i punteggi arrivano dal browser e il server NON rifa' la partita. Un barare ben fatto, entro il massimo, passa.
@@ -92,12 +92,20 @@ begin
   return p;
 end $$;
 
-create or replace function public.nit_new_nick(p_id uuid, p_secret text) returns text
+-- il giocatore sceglie sesso, animale (elenco al maschile o al femminile) e numero: il nome lo compone il server, quindi niente testo libero
+drop function if exists public.nit_new_nick(uuid, text);
+create or replace function public.nit_set_nick(p_id uuid, p_secret text, p_sex text, p_animal int, p_num int) returns text
 language plpgsql security definer set search_path = public as $$
-declare p nit_players; v text;
+declare
+  p nit_players; v text;
+  m text[] := array['Lupo','Gatto','Orso','Leone','Cervo','Gufo','Falco','Delfino','Riccio','Tasso','Cigno','Pavone','Coniglio','Scoiattolo','Pinguino','Leopardo'];
+  f text[] := array['Lupa','Gatta','Orsa','Leonessa','Cerva','Volpe','Civetta','Aquila','Tigre','Lontra','Farfalla','Balena','Pantera','Giraffa','Tartaruga','Foca'];
 begin
   p := nit_auth(p_id, p_secret);
-  v := nit_make_nick();
+  if p_sex is null or p_sex not in ('m', 'f') or p_animal is null or p_animal < 0 or p_animal > 15 or p_num is null or p_num < 1 or p_num > 999 then
+    raise exception 'scelta non valida';
+  end if;
+  v := (case p_sex when 'm' then m else f end)[p_animal + 1] || ' ' || p_num;
   update nit_players set nick = v where id = p.id;
   return v;
 end $$;
@@ -147,9 +155,9 @@ begin
   return jsonb_build_object('top', v_top, 'me', v_me, 'total', v_total, 'day', v_today);
 end $$;
 
-revoke all on function public.nit_register(text), public.nit_auth(uuid, text), public.nit_new_nick(uuid, text),
+revoke all on function public.nit_register(text), public.nit_auth(uuid, text), public.nit_set_nick(uuid, text, text, int, int),
   public.nit_submit(uuid, text, text, int), public.nit_board(text, text, uuid), public.nit_make_nick(), public.nit_rome_today() from public, anon, authenticated;
-grant execute on function public.nit_register(text), public.nit_new_nick(uuid, text),
+grant execute on function public.nit_register(text), public.nit_set_nick(uuid, text, text, int, int),
   public.nit_submit(uuid, text, text, int), public.nit_board(text, text, uuid) to anon, authenticated;
 
 -- ---------------------------------------------------------------- MODERAZIONE (a mano, dal SQL Editor)

@@ -157,11 +157,11 @@ Risultati e misure del 30/09/2026 in `docs/risultati-test.md`. L'analisi dei gio
 
 Copyright © 2026 Silvio Chiaverini. Licenza GNU GPL v3: vedi il file `LICENSE`. Scelte su licenza, donazioni, pubblicità e bambini: `docs/decisioni.md`. In fondo alla home c'è il numero di versione (`BUILD` in `index.html`): serve a sapere quale file si sta usando.
 
-## Classifiche pubbliche (versione 2026-10-04.4)
+## Classifiche pubbliche (versione 2026-10-04.6)
 
 - **Cosa è pubblico:** solo le due sfide del giorno, uguali per tutti: **Sentiero** (sfida del giorno, massimo 500) e **Cassaforte** (codice del giorno aperto, massimo 1.400). Primi 10 per oggi, settimana (da lunedì), mese e sempre, più la tua posizione. Pulsante «Classifiche» in home e «Vedi la classifica» a fine sfida.
 - **Dove:** database Supabase del progetto. Lo schema e le protezioni sono in `docs/classifica.sql`, da eseguire una volta nello SQL Editor.
-- **Privacy:** nessun account. Il dispositivo genera un segreto casuale (salvato solo qui; sul server resta solo l'impronta) e il **server assegna un nome** tipo «Astuto Gatto 971». Non si scrive un nome libero: niente insulti né dati personali. «Cambia nome» ne estrae un altro.
+- **Privacy:** nessun account. Il dispositivo genera un segreto casuale (salvato solo qui; sul server resta solo l'impronta). Il nome in classifica lo **componi tu da un elenco**: sesso (maschio/femmina), animale declinato (Lupo/Lupa, Leone/Leonessa…) e numero da 1 a 999, per esempio «Volpe 27». Il server compone il nome: non si scrive testo libero, quindi niente insulti né dati personali. Fino alla scelta si ha un nome casuale.
 - **Sicurezza:** le tabelle non sono leggibili né scrivibili dal browser; si possono solo chiamare 4 funzioni. Il server decide il giorno (Roma), scarta punteggi fuori scala, accetta un invio ogni 8 secondi e 200 al giorno per giocatore, tiene il migliore del giorno, può escludere un giocatore.
 - **Limite onesto:** il server **non rifà la partita**. Un punteggio falso entro il massimo passa. Per rimuoverlo: istruzioni di moderazione in fondo a `docs/classifica.sql`.
 - **Offline:** se il server non risponde il gioco funziona come prima e compare un avviso; il punteggio non viene rinviato in seguito.

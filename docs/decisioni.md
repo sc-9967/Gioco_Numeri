@@ -45,7 +45,7 @@ Fonti: [Google Play Console](https://support.google.com/googleplay/android-devel
 ## Classifiche pubbliche (2026-10-04)
 
 - **Scelta:** Supabase (login con GitHub, nessuna carta); controlli nel database, non servono funzioni a pagamento. Firebase avrebbe richiesto le Cloud Functions, che di norma chiedono un piano con carta.
-- **Nomi:** generati dal server, nessun testo libero (minori, GDPR, nessuna moderazione dei contenuti). Decisione presa da me sulla raccomandazione: la domanda non ha avuto risposta.
+- **Nomi:** niente testo libero (minori, GDPR, nessuna moderazione dei contenuti). Prima li generava il server; su richiesta del titolare ora si sceglie da elenco: sesso, animale declinato (16 maschili, 16 femminili) e numero 1-999. Gli elenchi sono duplicati nel gioco e in `nit_set_nick`: se si cambiano, vanno cambiati in entrambi (il test `tests/classifica.js` li confronta).
 - **Partenza:** solo le due sfide del giorno. Gli altri giochi aspettano che le classifiche piacciano ai tester.
 - **Da fare prima di aprire al pubblico:** pagina con l'informativa privacy (dati: identificativo anonimo, nome generato, punteggi); controllare che il progetto Supabase sia in regione europea; ricordarsi che i progetti gratuiti inattivi vanno in pausa dopo circa una settimana.
 - **Chiave:** nel file c'è solo l'indirizzo e la chiave pubblicabile. La chiave segreta non va mai incollata nel file né in chat.

@@ -222,3 +222,9 @@ Misura: per ogni gioco si apre e si esce 12 volte (dopo 3 di riscaldamento) e si
 - **Caratteri:** il foglio di stile di Google Fonts bloccava la prima visualizzazione. Ora si carica senza bloccare (`media="print"` poi `all`) e il testo compare subito con i caratteri di riserva. Non l'ho misurato su rete vera.
 - **Non fatto, di proposito:** minificare il file (418 KB, 106 KB compressi). Toglierebbe leggibilità al codice sorgente, che è GPL, per un guadagno piccolo.
 - **Non risolto:** i caratteri arrivano ancora da Google (indirizzo IP dei giocatori inviato a Google; offline il gioco usa i caratteri di riserva). Incorporarli nel file lo farebbe crescere e non ho potuto scaricarli da qui.
+
+## Classifiche: scelta del nome da elenco (versione 2026-10-04.6)
+
+- Sesso → animale declinato (Lupo/Lupa, Leone/Leonessa, Volpe, Aquila…) → numero 1-999; anteprima «Comparirai come: Volpe 27» e salvataggio sul server (`nit_set_nick`). Dopo la prima sfida compare anche il pulsante «Scegli il tuo nome».
+- Prova (`tests/classifica.js`, schema SQL vero su PostgreSQL locale): nome salvato sul server e sul dispositivo; **le 32 combinazioni del gioco coincidono con quelle del server**; sesso, animale o numero fuori elenco rifiutati. Layout controllato a 360 px.
+- **Da rieseguire in Supabase:** tutto `docs/classifica.sql` (rimuove `nit_new_nick`, aggiunge `nit_set_nick`). Finché non lo fai, «Salva» il nome dà errore.

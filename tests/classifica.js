@@ -24,7 +24,7 @@ function prepare() {
 function sqlFor(fn, b) {
   const calls = {
     nit_register: () => `nit_register(${q(b.p_secret)})`,
-    nit_new_nick: () => `nit_new_nick(${q(b.p_id)}::uuid, ${q(b.p_secret)})`,
+    nit_set_nick: () => `nit_set_nick(${q(b.p_id)}::uuid, ${q(b.p_secret)}, ${q(b.p_sex)}, ${q(b.p_animal)}::int, ${q(b.p_num)}::int)`,
     nit_submit: () => `nit_submit(${q(b.p_id)}::uuid, ${q(b.p_secret)}, ${q(b.p_board)}, ${q(b.p_score)}::int)`,
     nit_board: () => `nit_board(${q(b.p_board)}, ${q(b.p_period)}, ${q(b.p_player)}::uuid)`,
   };
@@ -97,10 +97,31 @@ const count = sql => run(sql).trim().split('\n').pop();
   }
   await page.click('#lx-pubboards button:has-text("Cassaforte")'); await sleep(500);
   ok(/Nessun punteggio in questo periodo/.test(await page.textContent('#lx-publist')), 'Cassaforte ancora vuota');
-  // cambio nome
-  const oldNick = nick; let newNick = oldNick;
-  for (let i = 0; i < 6 && newNick === oldNick; i++) { await page.click('#lx-pubnick'); await sleep(700); newNick = JSON.parse(await page.evaluate(() => localStorage.getItem('nit_pub'))).nick; }
-  ok(newNick !== oldNick && count("select nick from nit_players;") === newNick, 'cambio nome: ' + oldNick + ' -> ' + newNick);
+  // scelta del nome: sesso, animale declinato, numero
+  const oldNick = nick;
+  await page.click('#lx-pubnick'); await sleep(300);
+  ok(await page.isVisible('#lx-nickbox'), 'si apre la scelta del nome');
+  await page.click('#lx-nicksex button:has-text("Femmina")'); await sleep(100);
+  const opts = await page.$$eval('#lx-nickanimal option', o => o.map(x => x.textContent));
+  ok(opts.length === 16 && opts.includes('Leonessa') && !opts.includes('Leone'), 'elenco al femminile: ' + opts.slice(0, 6).join(', ') + '…');
+  ok(await page.isDisabled('#lx-nicksave'), 'senza numero non si puo\' salvare');
+  await page.selectOption('#lx-nickanimal', { label: 'Volpe' }); await page.fill('#lx-nicknum', '27'); await sleep(100);
+  ok(/Comparirai come: Volpe 27/.test(await page.textContent('#lx-nickprev')), 'anteprima: ' + await page.textContent('#lx-nickprev'));
+  await page.click('#lx-nicksave'); await sleep(800);
+  const newNick = JSON.parse(await page.evaluate(() => localStorage.getItem('nit_pub'))).nick;
+  ok(newNick === 'Volpe 27' && count("select nick from nit_players;") === 'Volpe 27', 'nome scelto sul server e sul dispositivo: ' + oldNick + ' -> ' + newNick);
+  ok(/Volpe 27/.test(await page.textContent('#lx-pubme')) && await page.isHidden('#lx-nickbox'), 'il pannello mostra il nuovo nome');
+  // gli elenchi del gioco e quelli del server coincidono per tutte le 32 combinazioni
+  const src = fs.readFileSync(__dirname + '/../index.html', 'utf8');
+  const lst = k => JSON.parse(new RegExp(k + ": (\\[[^\\]]*\\])").exec(src.slice(src.indexOf('const ANIMALS'))) [1].replace(/'/g, '"'));
+  const AN = { m: lst('m'), f: lst('f') };
+  const pl0 = JSON.parse(await page.evaluate(() => localStorage.getItem('nit_pub')));
+  let same = true;
+  for (const sx of ['m', 'f']) for (let i = 0; i < 16; i++) { const r = count(`set role anon; select nit_set_nick('${pl0.id}'::uuid, '${pl0.secret}', '${sx}', ${i}, 5);`); if (r !== AN[sx][i] + ' 5') { same = false; console.log('  diverso:', sx, i, r, AN[sx][i]); } }
+  ok(same, 'elenchi uguali tra gioco e server (32 animali)');
+  const tryNick = (sx, an, nm) => { try { run(`set role anon; select nit_set_nick('${pl0.id}'::uuid, '${pl0.secret}', ${q(sx)}, ${an}, ${nm});`); return 'accettato'; } catch (e) { return /scelta non valida/.test(String(e.stderr)) ? 'rifiutato' : String(e.stderr); } };
+  ok(tryNick('x', 0, 5) === 'rifiutato' && tryNick('m', 16, 5) === 'rifiutato' && tryNick('m', -1, 5) === 'rifiutato' && tryNick('m', 0, 0) === 'rifiutato' && tryNick('m', 0, 1000) === 'rifiutato', 'il server rifiuta sesso, animale o numero fuori elenco');
+  run(`update nit_players set nick = 'Volpe 27' where id = '${pl0.id}';`);
   await page.screenshot({ path: 'shots/pub-pannello.png' });
   await page.click('#lx-pubclose');
 

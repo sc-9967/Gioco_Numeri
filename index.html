@@ -183,6 +183,10 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 .lx-publist .s{font-variant-numeric:tabular-nums;font-weight:800}
 .lx-publist li.me{background:rgba(30,107,255,.14);border-radius:8px}
 .lx-publist li.empty{color:var(--l-muted);font-weight:600}
+.lx-nickbox{display:flex;flex-direction:column;gap:8px;border:2px solid var(--l-line);border-radius:14px;padding:12px}
+.lx-nickbox[hidden]{display:none}
+.lx-nicklbl{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;color:var(--l-muted)}
+.lx-nicklbl select,.lx-nicklbl input{font:inherit;font-size:16px;font-weight:700;padding:9px 10px;border-radius:10px;border:2px solid var(--l-ink);background:var(--l-card);color:var(--l-ink)}
 .lx-recbtns{display:flex;gap:8px}
 .lx-recbtns button,.lx-recclose{font:inherit;font-weight:800;font-size:14px;padding:10px 12px;border-radius:12px;border:2px solid var(--l-ink);background:var(--l-card);color:var(--l-ink);cursor:pointer;flex:1}
 .lx-recclose{background:var(--l-ink);color:var(--l-bg)}
@@ -291,8 +295,15 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
       <ol class="lx-publist" id="lx-publist"></ol>
       <p class="lx-recnote" id="lx-pubme"></p>
       <p class="lx-recmsg" id="lx-pubmsg" role="status"></p>
-      <div class="lx-recbtns"><button type="button" id="lx-pubnick">Cambia nome</button></div>
-      <p class="lx-recnote">Sono pubbliche le sfide del giorno (stessa partita per tutti). In classifica compaiono solo un nome generato e il punteggio, senza dati personali. I punteggi arrivano dal tuo dispositivo e il server non rifà la partita: tra amici va bene, non è a prova di imbroglio.</p>
+      <div class="lx-recbtns"><button type="button" id="lx-pubnick">Scegli il tuo nome</button></div>
+      <div class="lx-nickbox" id="lx-nickbox" hidden>
+        <div class="lx-pubtabs" id="lx-nicksex" role="group" aria-label="Sesso"></div>
+        <label class="lx-nicklbl">Animale<select id="lx-nickanimal"></select></label>
+        <label class="lx-nicklbl">Numero da 1 a 999<input id="lx-nicknum" type="number" min="1" max="999" inputmode="numeric"></label>
+        <p class="lx-recnote" id="lx-nickprev" role="status"></p>
+        <div class="lx-recbtns"><button type="button" id="lx-nicksave">Salva</button><button type="button" id="lx-nickcancel">Annulla</button></div>
+      </div>
+      <p class="lx-recnote">Sono pubbliche le sfide del giorno (stessa partita per tutti). In classifica compaiono solo il nome che componi (animale e numero) e il punteggio, senza dati personali. I punteggi arrivano dal tuo dispositivo e il server non rifà la partita: tra amici va bene, non è a prova di imbroglio.</p>
       <button class="lx-recclose" id="lx-pubclose" type="button">Chiudi</button>
     </div>
   </div>
@@ -1897,7 +1908,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
   // Contributo nascosto per ora: metti true per riattivare il riquadro e il link a fine partita.
   const SHOW_DONATE = true;
   const AUTHOR = 'Silvio Chiaverini';
-  const BUILD = '2026-10-04.5';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
+  const BUILD = '2026-10-04.6';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
   // Nome del giocatore: salvato solo sul dispositivo, compare nei testi che si condividono (mai nelle statistiche anonime).
   const cleanName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
   const playerName = () => { try { return cleanName(JSON.parse(localStorage.getItem('nit_name'))); } catch (e) { return ''; } };
@@ -6668,6 +6679,11 @@ requestAnimationFrame(frame);
   // Schema e protezioni: docs/classifica.sql. Il browser chiama solo funzioni del database (nessun accesso diretto alle tabelle).
   const PUB = { url: 'https://jjdykknfepdlpaxgryou.supabase.co', key: 'sb_publishable_5I67JFJFARsKSzDtGesZYQ_ciJIxwNN' };
   const BOARDS = { 'sentiero-giorno': 'Sentiero · sfida del giorno', 'cassaforte-giorno': 'Cassaforte · codice del giorno' };
+  // gli stessi elenchi sono in docs/classifica.sql (nit_set_nick): il server compone il nome, qui si sceglie solo la posizione
+  const ANIMALS = {
+    m: ['Lupo', 'Gatto', 'Orso', 'Leone', 'Cervo', 'Gufo', 'Falco', 'Delfino', 'Riccio', 'Tasso', 'Cigno', 'Pavone', 'Coniglio', 'Scoiattolo', 'Pinguino', 'Leopardo'],
+    f: ['Lupa', 'Gatta', 'Orsa', 'Leonessa', 'Cerva', 'Volpe', 'Civetta', 'Aquila', 'Tigre', 'Lontra', 'Farfalla', 'Balena', 'Pantera', 'Giraffa', 'Tartaruga', 'Foca'],
+  };
   const PERIODS = [['day', 'Oggi'], ['week', 'Settimana'], ['month', 'Mese'], ['all', 'Sempre']];
   const pubStore = {
     get() { try { const v = JSON.parse(localStorage.getItem('nit_pub')); return v && v.id && v.secret ? v : null; } catch (e) { return null; } },
@@ -6720,6 +6736,10 @@ requestAnimationFrame(frame);
         : 'Classifica di oggi: sei ' + me.r + '° su ' + d.total + ' (' + me.nick + ')' + (first ? ' · al 1° mancano ' + pubNum(first.score - me.score) + ' punti' : '');
       const b = document.createElement('button'); b.type = 'button'; b.className = 'lx-sharebtn'; b.textContent = 'Vedi la classifica';
       b.addEventListener('click', () => openPub(board)); hook.appendChild(b);
+      if (!(pubStore.get() || {}).chosen) {
+        const c = document.createElement('button'); c.type = 'button'; c.className = 'lx-sharebtn'; c.textContent = 'Scegli il tuo nome (animale e numero)';
+        c.addEventListener('click', () => openPub(board, true)); hook.appendChild(c);
+      }
     } catch (e) { if (holder.isConnected) line.textContent = 'Classifica pubblica non raggiungibile: il punteggio resta salvato su questo dispositivo.'; }
   }
   const pubPanel = document.getElementById('lx-pubpanel');
@@ -6751,21 +6771,49 @@ requestAnimationFrame(frame);
       if (d.total) pubMsg(d.total + (d.total === 1 ? ' giocatore' : ' giocatori') + ' in questo periodo.');
     } catch (e) { if (tok !== pubTok) return; list.textContent = ''; pubMsg('Classifica non raggiungibile. Controlla la connessione e riprova.', true); }
   }
-  function openPub(board) {
+  function openPub(board, edit) {
     if (board && BOARDS[board]) pubSel.board = board;
     pubPanel.hidden = false; pubLoad();
+    if (edit) openNick(); else document.getElementById('lx-nickbox').hidden = true;
     document.getElementById('lx-pubclose').focus({ preventScroll: true });
   }
   document.getElementById('lx-pubbtn').addEventListener('click', () => openPub());
   document.getElementById('lx-pubclose').addEventListener('click', () => { pubPanel.hidden = true; });
   pubPanel.addEventListener('click', e => { if (e.target === pubPanel) pubPanel.hidden = true; });
-  document.getElementById('lx-pubnick').addEventListener('click', async () => {
+  // scelta del nome: sesso, animale (declinato) e numero; il server compone il nome
+  const nickBox = document.getElementById('lx-nickbox'), nickAnimal = document.getElementById('lx-nickanimal'), nickNum = document.getElementById('lx-nicknum');
+  const nickSave = document.getElementById('lx-nicksave'), nickPrev = document.getElementById('lx-nickprev');
+  let nickSex = 'm';
+  function nickRefresh() {
+    pubTabs(document.getElementById('lx-nicksex'), [['m', 'Maschio'], ['f', 'Femmina']], nickSex, k => { const i = nickAnimal.selectedIndex; nickSex = k; nickFill(i); nickRefresh(); });
+    const n = parseInt(nickNum.value, 10), good = n >= 1 && n <= 999;
+    nickPrev.textContent = good ? 'Comparirai come: ' + ANIMALS[nickSex][nickAnimal.selectedIndex] + ' ' + n : 'Scegli un numero da 1 a 999.';
+    nickSave.disabled = !good;
+  }
+  function nickFill(idx) {
+    nickAnimal.textContent = '';
+    ANIMALS[nickSex].forEach((a, i) => { const o = document.createElement('option'); o.value = i; o.textContent = a; nickAnimal.appendChild(o); });
+    nickAnimal.selectedIndex = Math.max(0, Math.min(15, idx || 0));
+  }
+  function openNick() {
+    const m = /^(\S+) (\d{1,3})$/.exec((pubStore.get() || {}).nick || '');   // parte dal nome attuale, se e' nel formato scelto
+    let idx = 0, num = '';
+    if (m) { for (const k of ['m', 'f']) { const i = ANIMALS[k].indexOf(m[1]); if (i >= 0) { nickSex = k; idx = i; num = m[2]; } } }
+    nickFill(idx); nickNum.value = num; nickRefresh(); nickBox.hidden = false;
+    nickAnimal.focus({ preventScroll: true });
+  }
+  nickAnimal.addEventListener('change', nickRefresh);
+  nickNum.addEventListener('input', nickRefresh);
+  document.getElementById('lx-pubnick').addEventListener('click', openNick);
+  document.getElementById('lx-nickcancel').addEventListener('click', () => { nickBox.hidden = true; });
+  nickSave.addEventListener('click', async () => {
     if (pubOff()) return;
+    nickSave.disabled = true;
     try {
       const p = await pubEnsure();
-      const nick = await pubCall('nit_new_nick', { p_id: p.id, p_secret: p.secret });
-      pubStore.set({ id: p.id, secret: p.secret, nick }); pubLoad();
-    } catch (e) { pubMsg('Non riesco a cambiare il nome adesso: riprova più tardi.', true); }
+      const nick = await pubCall('nit_set_nick', { p_id: p.id, p_secret: p.secret, p_sex: nickSex, p_animal: nickAnimal.selectedIndex, p_num: parseInt(nickNum.value, 10) });
+      pubStore.set({ id: p.id, secret: p.secret, nick, chosen: true }); nickBox.hidden = true; pubLoad();
+    } catch (e) { pubMsg('Non riesco a salvare il nome adesso: riprova più tardi.', true); nickRefresh(); }
   });
   // ---------- pannello dei record, backup e protezione dell'archiviazione ----------
   const recPanel = document.getElementById('lx-recpanel');
