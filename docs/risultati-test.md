@@ -212,3 +212,13 @@ Prova di `tests/classifica.js`: il launcher viene eseguito in un browser vero e 
 - Offline: messaggio chiaro, nessun errore in pagina. Sotto automazione senza `nit_pub_test` non parte nessuna chiamata.
 - **Trovato durante la prova:** il pannello era dentro la home, quindi invisibile dalla schermata finale di un gioco → spostato fuori dalla home; Esc lo chiude.
 - **Non coperto:** nessuna prova con Supabase vero (CORS, chiave pubblicabile, tempi di rete); nessuna prova con molti giocatori contemporanei. [Ipotesi] che il blocco di 60 registrazioni al minuto sia una soglia ragionevole.
+
+## Ottimizzazione: memoria e caratteri (versione 2026-10-04.5)
+
+Misura: per ogni gioco si apre e si esce 12 volte (dopo 3 di riscaldamento) e si contano elementi DOM e ascoltatori ancora in memoria dopo la raccolta dei rifiuti.
+
+- **Primo perdeva memoria:** a ogni apertura restavano circa **194 elementi e 22 ascoltatori**. Causa: un ascoltatore del tema chiaro/scuro (`matchMedia`) e un osservatore di `data-theme` non venivano rimossi all'uscita. Ora i giochi possono registrare una pulizia con `window.onUnmount(...)`, eseguita all'uscita. Dopo: 0 elementi, 0 ascoltatori per ciclo.
+- Gli altri otto giochi: 0 elementi e 0 ascoltatori in più per ciclo; restano pochi KB di heap per ciclo (rumore di misura). Nessun `requestAnimationFrame` né intervallo vivo dopo l'uscita.
+- **Caratteri:** il foglio di stile di Google Fonts bloccava la prima visualizzazione. Ora si carica senza bloccare (`media="print"` poi `all`) e il testo compare subito con i caratteri di riserva. Non l'ho misurato su rete vera.
+- **Non fatto, di proposito:** minificare il file (418 KB, 106 KB compressi). Toglierebbe leggibilità al codice sorgente, che è GPL, per un guadagno piccolo.
+- **Non risolto:** i caratteri arrivano ancora da Google (indirizzo IP dei giocatori inviato a Google; offline il gioco usa i caratteri di riserva). Incorporarli nel file lo farebbe crescere e non ho potuto scaricarli da qui.

@@ -12,7 +12,8 @@
 <meta name="copyright" content="© 2026 Silvio Chiaverini.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Figtree:wght@400;600;800&family=Bodoni+Moda:ital,wght@0,600;0,800;1,800&family=Work+Sans:wght@400;600;800&family=Big+Shoulders+Display:wght@800;900&family=IBM+Plex+Sans:wght@400;600;700&family=Archivo:wght@400;600;800&family=Courier+Prime:wght@400;700&family=Share+Tech+Mono&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Figtree:wght@400;600;800&family=Bodoni+Moda:ital,wght@0,600;0,800;1,800&family=Work+Sans:wght@400;600;800&family=Big+Shoulders+Display:wght@800;900&family=IBM+Plex+Sans:wght@400;600;700&family=Archivo:wght@400;600;800&family=Courier+Prime:wght@400;700&family=Share+Tech+Mono&family=Fredoka:wght@500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Figtree:wght@400;600;800&family=Bodoni+Moda:ital,wght@0,600;0,800;1,800&family=Work+Sans:wght@400;600;800&family=Big+Shoulders+Display:wght@800;900&family=IBM+Plex+Sans:wght@400;600;700&family=Archivo:wght@400;600;800&family=Courier+Prime:wght@400;700&family=Share+Tech+Mono&family=Fredoka:wght@500;600;700&display=swap"></noscript>
 <style>
 /* Layout: a game shelf. Header, a 2x2 grid of cards that each wear their game's own identity, a donation strip, the copyright footer. */
 :root{
@@ -1896,7 +1897,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
   // Contributo nascosto per ora: metti true per riattivare il riquadro e il link a fine partita.
   const SHOW_DONATE = true;
   const AUTHOR = 'Silvio Chiaverini';
-  const BUILD = '2026-10-04.4';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
+  const BUILD = '2026-10-04.5';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
   // Nome del giocatore: salvato solo sul dispositivo, compare nei testi che si condividono (mai nelle statistiche anonime).
   const cleanName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
   const playerName = () => { try { return cleanName(JSON.parse(localStorage.getItem('nit_name'))); } catch (e) { return ''; } };
@@ -2904,8 +2905,11 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
     DISPLAY = v('--display'); UI = v('--ui');
   }
   readTokens();
-  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readTokens);
-  new MutationObserver(readTokens).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  const themeMq = matchMedia('(prefers-color-scheme: dark)'), themeMo = new MutationObserver(readTokens);
+  themeMq.addEventListener('change', readTokens);
+  themeMo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  // senza questo, ogni apertura di Primo restava in memoria (circa 190 elementi e 22 ascoltatori in piu')
+  if (window.onUnmount) window.onUnmount(() => { themeMq.removeEventListener('change', readTokens); themeMo.disconnect(); });
 
   const store = {
     get(k, d) { try { const x = localStorage.getItem(k); return x === null ? d : JSON.parse(x); } catch (e) { return d; } },
@@ -6573,10 +6577,11 @@ requestAnimationFrame(frame);
     launcher.hidden = true;
     document.body.appendChild(holder);
     decorate(holder, key);
-    const ctx = { alive: true, listeners: [] };
+    const ctx = { alive: true, listeners: [], cleanups: [] };
     const win = new Proxy(window, {
       get(t, k) {
         if (k === 'addEventListener') return (ty, f, o) => { ctx.listeners.push([ty, f, o]); window.addEventListener(ty, f, o); };
+        if (k === 'onUnmount') return f => { ctx.cleanups.push(f); };   // il gioco registra qui cio' che non e' un ascoltatore di window
         if (k === 'AudioContext' || k === 'webkitAudioContext') return function () { return getAC(); };
         const v = Reflect.get(window, k);
         return typeof v === 'function' ? v.bind(window) : v;
@@ -6623,6 +6628,7 @@ requestAnimationFrame(frame);
     closeHowto(holder);
     ctx.alive = false;
     ctx.listeners.forEach(([t, f, o]) => window.removeEventListener(t, f, o));
+    ctx.cleanups.forEach(f => { try { f(); } catch (e) {} });
     holder.remove();
     current = null;
     launcher.hidden = false;
