@@ -239,3 +239,10 @@ Prova di `tests/dieci.js` (browser vero, mouse reale per il trascinamento):
 - Uscita senza residui; a 320×560 il tabellone sta nello schermo senza scorrimento orizzontale; uscendo e rientrando 12 volte: 0 elementi e 0 ascoltatori persi.
 - **Trovato e corretto durante la prova:** (1) un fotogramma già in coda dopo l'uscita dal gioco scriveva su elementi non più presenti (errore in pagina); (2) dopo aver premuto «Nuova» o «Aiuto» la tastiera restava intrappolata sul pulsante: ora la partita toglie il focus ai pulsanti.
 - **Non provato:** il gioco con un dito vero su un telefono vero (precisione del rettangolo con dita grosse, scorrimento della pagina durante il trascinamento). [Ipotesi] che a 10×10 su 360 px le caselle (circa 30 px) bastino.
+
+## Dieci: griglia nuova quando non ci sono più somme 10 (versione 2026-10-05.2)
+
+- **Perché:** la simulazione con tre bot semplici (600 griglie) dava questo: dopo circa 22-28 mosse non resta nessuna somma 10 e la partita finiva da sola intorno a 55-62 punti, con più di metà del tempo ancora disponibile. Così il tempo non era quasi mai il limite e il punteggio era fermo a circa 60.
+- **Ora:** griglia nuova con tempo e punti invariati; tabellone pulito = griglia nuova + 5 s. Il gioco finisce solo a tempo scaduto; a fine partita compare il numero di griglie giocate.
+- **Prova** (`tests/dieci.js`): «Nessuna somma 10: nuova griglia» compare, la partita continua con la griglia 2, i punti restano e il tempo anche; con il tabellone pulito +5 s; durante il cambio il gioco è fermo e poi riparte; la griglia 2 della sfida del giorno è uguale a ogni tentativo e diversa dalla 1; la partita finisce solo a tempo scaduto.
+- **Effetto da sapere:** i punteggi non sono più limitati a 100, quindi i record fatti prima di questa versione (massimo 100) restano molto bassi e vengono superati subito. Il gioco è ora più una gara di velocità che di pianificazione. [Probabile]

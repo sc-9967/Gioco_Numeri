@@ -1943,6 +1943,8 @@ h1 span{color:var(--accent)}
 .v1{background:#bff0d4}.v2{background:#cfdcea}.v3{background:#ffe08a}.v4{background:#ff9d8a}.v5{background:#ff9fcf}
 .v6{background:#9fdcf5}.v7{background:#ffb866}.v8{background:#c6ec7a}.v9{background:#c9a8ff}
 .t.gone{transform:scale(.15) rotate(50deg);opacity:0;box-shadow:none}
+.t.in{animation:tin .35s ease-out}
+@keyframes tin{from{transform:scale(.2);opacity:0}}
 .t.kc{outline:.7cqw solid #fff;outline-offset:-.3cqw}
 .sel{position:relative;border:.7cqw solid #fff;border-radius:2.4cqw;background:rgba(255,255,255,.14);box-sizing:border-box}
 .sel[hidden]{display:none}
@@ -1992,7 +1994,7 @@ h1 span{color:var(--accent)}
 .stats span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
 #shareBox{width:100%;box-sizing:border-box;font:13px/1.4 var(--ui);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;resize:none}
 @media (max-height:560px){.hud{padding-top:6px}.stat b{font-size:22px}h1{font-size:22px}.bar{padding-bottom:8px}.card{padding:16px 18px;gap:10px}.card h1{font-size:34px}.rules{font-size:13px;gap:6px}.card .big{font-size:44px}}
-@media (prefers-reduced-motion:reduce){.t,.sel,.pts,.stat b,.tbar i{animation:none!important;transition-duration:.01ms!important}}
+@media (prefers-reduced-motion:reduce){.t,.t.in,.sel,.pts,.stat b,.tbar i{animation:none!important;transition-duration:.01ms!important}}
 </style><div class="app" id="app">
   <header class="hud">
     <div class="stat"><span class="lbl">Punti</span><b id="score">0</b></div>
@@ -2023,7 +2025,7 @@ h1 span{color:var(--accent)}
       <ul class="rules">
         <li><span class="chip">☝️</span><span>Trascina un rettangolo sui numeri. Il cerchietto mostra la somma di quelli dentro.</span></li>
         <li><span class="chip ok">10</span><span>Se la somma è proprio 10 il rettangolo diventa verde: lascia il dito e i numeri spariscono.</span></li>
-        <li><span class="chip cy">+1 s</span><span>Ogni numero tolto è un punto. Con 4 o più numeri in una volta guadagni secondi.</span></li>
+        <li><span class="chip cy">+1 s</span><span>Ogni numero tolto è un punto. Con 4 o più numeri in una volta guadagni secondi. Se non restano somme 10, arriva una griglia nuova: tempo e punti restano.</span></li>
       </ul>
       <div class="btns">
         <button class="btn primary" id="play" type="button">Gioca</button>
@@ -2040,9 +2042,9 @@ h1 span{color:var(--accent)}
       <div class="big" id="overScore">0</div>
       <span class="rec" id="newRecord" hidden>Nuovo record</span>
       <div class="stats">
-        <div><b id="stTaken">0</b><span>Tolti su 100</span></div>
+        <div><b id="stTaken">0</b><span>Numeri tolti</span></div>
         <div><b id="stMoves">0</b><span>Mosse</span></div>
-        <div><b id="stBig">0</b><span>Il più grosso</span></div>
+        <div><b id="stBig">1</b><span>Griglie</span></div>
       </div>
       <div class="btns">
         <button class="btn primary" id="again" type="button">Rigioca</button>
@@ -2065,7 +2067,7 @@ h1 span{color:var(--accent)}
   // Contributo nascosto per ora: metti true per riattivare il riquadro e il link a fine partita.
   const SHOW_DONATE = true;
   const AUTHOR = 'Silvio Chiaverini';
-  const BUILD = '2026-10-05.1';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
+  const BUILD = '2026-10-05.2';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
   // Nome del giocatore: salvato solo sul dispositivo, compare nei testi che si condividono (mai nelle statistiche anonime).
   const cleanName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
   const playerName = () => { try { return cleanName(JSON.parse(localStorage.getItem('nit_name'))); } catch (e) { return ''; } };
@@ -6336,9 +6338,10 @@ requestAnimationFrame(frame);
    DIECI: puzzle di somme su griglia 10x10 di cifre da 1 a 9, due minuti.
    Si trascina un rettangolo: se la somma delle cifre rimaste al suo interno e' 10, spariscono (i buchi contano 0).
    Ogni cifra tolta e' un punto; togliere 4 o piu' cifre in una volta regala secondi (+1 s da 4, +2 s da 6).
-   La griglia ha sempre somma multipla di 10 (quindi una pulizia totale e' almeno possibile in teoria).
-   Sfida del giorno: stessa griglia per tutti (seme = data di Roma). "Aiuto" mostra un rettangolo valido e costa 6 secondi.
-   Il gioco finisce a tempo scaduto, o subito se non esiste piu' nessun rettangolo con somma 10.
+   Ogni griglia ha somma multipla di 10. Quando non resta nessun rettangolo con somma 10, o il tabellone e' pulito, arriva
+   una griglia nuova: tempo e punti restano (con il tabellone pulito in piu' +5 s). Il gioco finisce solo a tempo scaduto.
+   Sfida del giorno: stessa sequenza di griglie per tutti (seme = data di Roma e numero della griglia).
+   "Aiuto" mostra un rettangolo valido e costa 6 secondi.
    Struttura: 1) logica pura  2) stato  3) audio  4) partita  5) input e schermate
    ============================================================================ */
 (() => {
@@ -6396,7 +6399,7 @@ const today = romeDate();
 const todayLabel = today.slice(8, 10) + '/' + today.slice(5, 7);
 const dailyKey = 'dieci_d_' + today;
 let grid = new Array(N * N).fill(0), cellEls = [];
-let score = 0, best = 0, prevBest = 0, moves = 0, biggest = 0, hints = 0, tLeft = TIME, lastSec = -1, lastT = 0;
+let score = 0, best = 0, prevBest = 0, moves = 0, biggest = 0, hints = 0, tLeft = TIME, lastSec = -1, lastT = 0, gridNo = 0, busy = false;
 let mode = 'free', lastMode = 'free', running = false, over = false, gen = 0, TS = 1;
 let drag = null, kc = { r: 0, c: 0 }, kAnchor = null, hintTimer = 0;
 const APP = $('app'), gridEl = $('grid'), selEl = $('sel'), fxEl = $('fx');
@@ -6405,8 +6408,16 @@ function buildCells() {
   gridEl.textContent = ''; cellEls = [];
   for (let i = 0; i < N * N; i++) { const el = document.createElement('i'); el.className = 't'; gridEl.appendChild(el); cellEls.push(el); }
 }
-function paint() {
-  grid.forEach((v, i) => { const el = cellEls[i]; el.className = 't' + (v ? ' v' + v : ' gone'); el.textContent = v ? v : ''; });
+function paint(fresh) {
+  grid.forEach((v, i) => { const el = cellEls[i]; el.className = 't' + (v ? ' v' + v : ' gone') + (fresh && v && !reduceMotion ? ' in' : ''); el.textContent = v ? v : ''; });
+}
+// Griglia numero k della partita: libera = casuale; sfida del giorno = sequenza uguale per tutti (la prima e' quella di sempre).
+function gridFor(k) {
+  for (let t = 0; t < 6; t++) {
+    const rand = mode === 'daily' ? mulberry(hashStr('dieci-' + today + (k ? ':' + k : '') + (t ? '.' + t : ''))) : Math.random;
+    const g = makeGrid(rand); if (hasMove(g)) return g;
+  }
+  return makeGrid(Math.random);
 }
 
 /* ---------------------------------------------------------------- 3) AUDIO */
@@ -6477,8 +6488,7 @@ function refreshMenu() {
 function start(m) {
   ac(); lastMode = m; mode = m; gen++;
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();   // la tastiera deve comandare il tabellone, non l'ultimo pulsante premuto
-  const rand = m === 'daily' ? mulberry(hashStr('dieci-' + today)) : Math.random;
-  grid = makeGrid(rand); paint();
+  gridNo = 0; busy = false; grid = gridFor(0); paint();
   score = 0; moves = 0; biggest = 0; hints = 0; tLeft = TIME; lastSec = -1; lastT = 0;
   running = true; over = false; drag = null; kAnchor = null; hideSel();
   best = store.get(bestKey(), 0); prevBest = best;
@@ -6490,7 +6500,7 @@ function start(m) {
     if (!APP.isConnected) { running = false; return; }        // il gioco e' stato chiuso mentre il fotogramma era in coda
     const dt = lastT ? Math.min(0.25, (t - lastT) / 1000) : 0;   // se la pagina resta in secondo piano il tempo non scorre
     lastT = t; tLeft -= dt;
-    if (tLeft <= 0) { tLeft = 0; render(); finish('time'); return; }
+    if (tLeft <= 0) { tLeft = 0; render(); finish(); return; }
     renderTime();
     requestAnimationFrame(frame);
   };
@@ -6498,7 +6508,7 @@ function start(m) {
 }
 
 function commit(a, b) {
-  if (!running) return false;
+  if (!running || busy) return false;
   const info = rectInfo(grid, a[0], a[1], b[0], b[1]);
   if (info.sum !== 10 || info.n < 2) { if (info.n > 1) { selEl.classList.add('no'); sfx.deny(); } return false; }
   for (let r = info.r1; r <= info.r2; r++) for (let c = info.c1; c <= info.c2; c++) {
@@ -6511,14 +6521,24 @@ function commit(a, b) {
   if (bonus) toast('+' + bonus + ' s');
   sfx.clear(info.n); buzz(info.n >= 4 ? 25 : 12);
   render(true);
-  const g0 = gen;
-  if (grid.every(v => !v)) setTimeout(() => { if (g0 === gen && running) finish('clean'); }, 300 * TS);
-  else if (!hasMove(grid)) setTimeout(() => { if (g0 === gen && running) finish('stuck'); }, 500 * TS);
+  if (grid.every(v => !v)) refill(true);
+  else if (!hasMove(grid)) refill(false);
   return true;
+}
+// Niente piu' somme 10 (o tabellone pulito): arriva una griglia nuova, tempo e punti restano.
+function refill(clean) {
+  busy = true; hideSel(); drag = null; kAnchor = null;
+  toast(clean ? 'Pulito! Nuova griglia · +5 s' : 'Nessuna somma 10: nuova griglia');
+  if (clean) { tLeft += 5; sfx.win(); }
+  const g0 = gen;
+  setTimeout(() => {
+    if (g0 !== gen || !running) return;
+    gridNo++; grid = gridFor(gridNo); paint(true); busy = false; render();
+  }, (clean ? 600 : 800) * TS);
 }
 
 function hint() {
-  if (!running || tLeft <= HINT_COST) return;
+  if (!running || busy || tLeft <= HINT_COST) return;
   const list = allMoves(grid).sort((x, y) => (x.n - y.n) || ((x.r2 - x.r1 + 1) * (x.c2 - x.c1 + 1) - (y.r2 - y.r1 + 1) * (y.c2 - y.c1 + 1)));
   if (!list.length) return;
   const m = list[0]; hints++; tLeft -= HINT_COST; sfx.hint(); toast('−' + HINT_COST + ' s');
@@ -6528,18 +6548,18 @@ function hint() {
   render();
 }
 
-function finish(why) {
-  over = true; running = false; drag = null; kAnchor = null; hideSel();
+function finish() {
+  over = true; running = false; busy = false; drag = null; kAnchor = null; hideSel();
   const key = bestKey(), old = store.get(key, 0);
   if (score > old) store.set(key, score);
   const isRecord = score > prevBest && score > 0;
   $('overMode').textContent = mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : 'Partita libera';
-  $('overTitle').textContent = why === 'clean' ? 'Tabellone pulito!' : why === 'stuck' ? 'Nessuna somma 10 rimasta' : 'Tempo scaduto';
+  $('overTitle').textContent = 'Tempo scaduto';
   $('overScore').textContent = score.toLocaleString('it-IT');
   $('newRecord').hidden = !isRecord; $('newRecord').textContent = mode === 'daily' ? 'Il tuo migliore di oggi' : 'Nuovo record';
-  $('stTaken').textContent = score; $('stMoves').textContent = moves; $('stBig').textContent = biggest;
+  $('stTaken').textContent = score; $('stMoves').textContent = moves; $('stBig').textContent = gridNo + 1;
   $('share').hidden = mode !== 'daily'; $('share').textContent = 'Copia risultato'; $('shareBox').hidden = true;
-  why === 'clean' ? sfx.win() : sfx.over(); buzz(80);
+  sfx.over(); buzz(80);
   render();
   const g0 = gen;
   setTimeout(() => { if (g0 === gen) { $('over').hidden = false; $('again').focus({ preventScroll: true }); } }, 450 * TS);
@@ -6562,7 +6582,7 @@ $('restart').addEventListener('click', () => {
 });
 $('hint').addEventListener('click', () => { hint(); $('hint').blur(); });
 $('share').addEventListener('click', () => {
-  const txt = withName('Dieci · sfida del ' + todayLabel + '\n' + score + ' caselle tolte su 100 · ' + moves + ' mosse · il più grosso ' + biggest);
+  const txt = withName('Dieci · sfida del ' + todayLabel + '\n' + score + ' numeri tolti · ' + moves + ' mosse · ' + (gridNo + 1) + (gridNo ? ' griglie' : ' griglia'));
   const fallback = () => { const b = $('shareBox'); b.value = txt; b.hidden = false; b.focus(); b.select(); $('share').textContent = 'Seleziona e copia il testo'; };
   try { navigator.clipboard.writeText(txt).then(() => { $('share').textContent = 'Copiato'; }, fallback); } catch (e) { fallback(); }
 });
@@ -6578,7 +6598,7 @@ const cellAtPoint = (x, y) => {
   return [Math.max(0, Math.min(N - 1, Math.floor((y - R.top) / R.height * N))), Math.max(0, Math.min(N - 1, Math.floor((x - R.left) / R.width * N)))];
 };
 cellsEl.addEventListener('pointerdown', e => {
-  if (!running) return;
+  if (!running || busy) return;
   ac(); hintTimer++; kAnchor = null;
   try { cellsEl.setPointerCapture(e.pointerId); } catch (err) {}
   const p = cellAtPoint(e.clientX, e.clientY);
@@ -6601,7 +6621,7 @@ cellsEl.addEventListener('pointercancel', () => { drag = null; hideSel(); });
 // Tastiera: frecce per muovere il cursore, Spazio o Invio per fissare un angolo e poi l'angolo opposto.
 function showCursor() { cellEls.forEach(el => el.classList.remove('kc')); if (running && kc) cellEls[kc.r * N + kc.c].classList.add('kc'); }
 window.addEventListener('keydown', e => {
-  if (e.ctrlKey || e.metaKey || e.altKey || !running) return;
+  if (e.ctrlKey || e.metaKey || e.altKey || !running || busy) return;
   const tag = e.target && e.target.tagName;
   if (tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'BUTTON') return;
   const mv = { ArrowLeft: [0, -1], ArrowRight: [0, 1], ArrowUp: [-1, 0], ArrowDown: [1, 0] }[e.key];
@@ -6622,7 +6642,7 @@ window.addEventListener('keydown', e => {
 /* Interfaccia di prova (usata dai test automatici; innocua per il gioco). */
 window.__D = {
   makeGrid, rectInfo, allMoves, hasMove, bonusOf, mulberry, hashStr,
-  get S() { return { score, best, moves, biggest, hints, tLeft, running, over, mode, grid: grid.slice() }; },
+  get S() { return { score, best, moves, biggest, hints, tLeft, running, over, mode, gridNo, busy, grid: grid.slice() }; },
   start, hint, finish, commit(r1, c1, r2, c2) { return commit([r1, c1], [r2, c2]); },
   setGrid(rows) { grid = rows.flat(); paint(); },
   setTime(v) { tLeft = v; renderTime(); },
@@ -6803,6 +6823,7 @@ refreshMenu(); render();
       ['🟢', 'Se il totale è proprio 10, il rettangolo diventa verde. Togli il dito: i numeri spariscono!'],
       ['🔴', 'Se superi 10, il rettangolo diventa rosso. Prova con meno numeri.'],
       ['⏱️', 'Hai due minuti. Ogni numero che sparisce è un punto. Se ne togli tanti insieme, guadagni secondi.'],
+      ['🔄', 'Se non si può più fare dieci, arriva una griglia nuova. Il tempo e i punti restano!'],
       ['💡', '"Aiuto" ti fa vedere dove fare dieci, ma ti costa 6 secondi.']], tip: 'I posti vuoti valgono zero: puoi tirare il rettangolo anche sopra i buchi.' },
   };
   let howEsc = null;

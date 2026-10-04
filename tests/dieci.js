@@ -87,24 +87,41 @@ let bad = 0; const ok = (c, m) => { console.log((c ? 'OK   ' : 'FAIL ') + m); if
   await sleep(2500);
   ok(await page.getAttribute('#sel', 'hidden') !== null, 'il suggerimento sparisce da solo');
 
-  // ---- fine: nessuna somma rimasta, tabellone pulito, tempo scaduto
-  g = base0(); g[1][1] = 3; g[1][2] = 7;                // restano molti 9: 9+9... non fa 10; 3+7 si toglie e poi nessuna mossa
+  // ---- niente piu' somme 10: arriva una griglia nuova, tempo e punti restano; il tabellone pulito regala 5 secondi
+  g = base0(); g[1][1] = 3; g[1][2] = 7;                // restano solo 9: dopo 3+7 non c'e' piu' nessuna somma 10
   await page.evaluate(rows => { window.__D.setGrid(rows); window.__D.setTime(60); }, g);
-  await dragRect(1, 1, 1, 2); await sleep(1500);
-  ok(await page.isVisible('#over') && /Nessuna somma 10/.test(await page.textContent('#overTitle')), 'senza mosse possibili la partita finisce: ' + await page.textContent('#overTitle'));
+  await page.evaluate(() => window.__D.setTimescale(1));   // da qui i ritardi sono quelli veri
+  const sBefore = await page.evaluate(() => window.__D.S);
+  await dragRect(1, 1, 1, 2); await sleep(250);
+  ok((await page.evaluate(() => window.__D.S.busy)) && /nuova griglia/i.test(await page.textContent('#toast')), 'senza somme 10 compare «nuova griglia»: ' + await page.textContent('#toast'));
+  await sleep(1300);
+  S = await page.evaluate(() => window.__D.S);
+  ok(S.running && !S.over && S.gridNo === 1 && !S.busy && S.score === sBefore.score + 2, 'la partita continua con la griglia 2 e i punti restano (' + S.score + ')');
+  ok(S.tLeft > 57 && S.tLeft < 60.2, 'il tempo residuo resta: ' + S.tLeft.toFixed(1) + ' s');
+  ok(S.grid.length === 100 && S.grid.every(v => v >= 1 && v <= 9) && await page.evaluate(() => window.__D.hasMove(window.__D.S.grid)), 'la griglia nuova e\' piena e ha mosse possibili');
+  await page.screenshot({ path: 'shots/die-nuova.png' });
+  g = Array.from({ length: 10 }, () => Array(10).fill(0)); g[0][0] = 4; g[0][1] = 6;
+  await page.evaluate(rows => { window.__D.setGrid(rows); window.__D.setTime(60); }, g);
+  await dragRect(0, 0, 0, 1); await sleep(1500);
+  S = await page.evaluate(() => window.__D.S);
+  ok(S.gridNo === 2 && S.tLeft > 62 && S.tLeft < 65.5 && S.running, 'tabellone pulito: griglia nuova e +5 s (' + S.tLeft.toFixed(1) + ')');
+  // durante il cambio griglia i tocchi non fanno nulla
+  g = base0(); g[1][1] = 3; g[1][2] = 7;
+  await page.evaluate(rows => window.__D.setGrid(rows), g);
+  await dragRect(1, 1, 1, 2); await sleep(150);
+  const busyNow = await page.evaluate(() => ({ b: window.__D.S.busy, c: window.__D.commit(3, 3, 3, 4) }));
+  ok(busyNow.b === true && busyNow.c === false, 'durante il cambio griglia il gioco e\' fermo');
+  await sleep(1300);
+  ok((await page.evaluate(() => window.__D.S.busy)) === false && (await page.evaluate(() => window.__D.S.gridNo)) === 3, 'finito il cambio si torna a giocare (griglia 4)');
+  // fine solo a tempo scaduto
+  await page.evaluate(() => window.__D.setTime(0.2)); await sleep(800);
+  ok(await page.isVisible('#over') && /Tempo scaduto/.test(await page.textContent('#overTitle')), 'la partita finisce solo a tempo scaduto');
+  ok(await page.textContent('#stBig') === '4', 'a fine partita il numero di griglie: ' + await page.textContent('#stBig'));
   ok(await page.textContent('#overScore') === (await page.evaluate(() => String(window.__D.S.score))), 'punteggio finale mostrato');
   await page.screenshot({ path: 'shots/die-over.png' });
   const rec = await page.evaluate(() => ({ best: JSON.parse(localStorage.getItem('dieci_best')), hist: JSON.parse(localStorage.getItem('nit_hist') || '{}').dieci }));
   ok(rec.best > 0 && rec.hist && Object.values(rec.hist)[0].n === 1, 'record salvato (' + rec.best + ') e registrato nello storico del launcher');
   ok(await page.isVisible('.lx-hook .lx-hl'), 'gancio di fine partita nel launcher: ' + (await page.textContent('.lx-hook .lx-hl')));
-  await page.click('#again'); await sleep(300);
-  g = Array.from({ length: 10 }, () => Array(10).fill(0)); g[0][0] = 4; g[0][1] = 6;
-  await page.evaluate(rows => { window.__D.setGrid(rows); }, g);
-  await dragRect(0, 0, 0, 1); await sleep(1500);
-  ok(/Tabellone pulito/.test(await page.textContent('#overTitle')), 'tutto tolto: «Tabellone pulito!»');
-  await page.click('#again'); await sleep(300);
-  await page.evaluate(() => window.__D.setTime(0.2)); await sleep(800);
-  ok(await page.isVisible('#over') && /Tempo scaduto/.test(await page.textContent('#overTitle')), 'tempo scaduto');
 
   // ---- sfida del giorno: stessa griglia, migliore del giorno separato dal record
   await page.click('#toMenu'); await sleep(200);
@@ -113,6 +130,13 @@ let bad = 0; const ok = (c, m) => { console.log((c ? 'OK   ' : 'FAIL ') + m); if
   await page.click('#restart'); await sleep(200);
   const d2 = (await page.evaluate(() => window.__D.S)).grid.join('');
   ok(d1 === d2 && (await page.evaluate(() => window.__D.S.mode)) === 'daily', 'sfida del giorno: stessa griglia a ogni tentativo');
+  const seq = async () => { await page.evaluate(() => { const D = window.__D; D.setGrid(Array.from({ length: 10 }, () => Array(10).fill(9)).map((r, i) => (i === 0 ? [3, 7, 9, 9, 9, 9, 9, 9, 9, 9] : r.map(() => 0)))); }); await dragRect(0, 0, 0, 1); await sleep(1400); return (await page.evaluate(() => window.__D.S)).grid.join(''); };
+  await page.click('#restart'); await sleep(200);
+  const n1 = await seq();
+  await page.click('#restart'); await sleep(200);
+  await page.click('#restart'); await sleep(200);
+  const n2 = await seq();
+  ok(n1.length === 100 && n1 === n2 && n1 !== d1, 'sfida del giorno: la griglia 2 e\' uguale a ogni tentativo e diversa dalla 1');
   const dm = await page.evaluate(() => window.__D.allMoves(window.__D.S.grid).length);
   ok(dm > 20, 'la griglia del giorno ha ' + dm + ' mosse possibili');
 
