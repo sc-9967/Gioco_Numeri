@@ -40,3 +40,12 @@ Principio: prima scoprire se qualcuno rigioca, poi spendere. Costo per cominciar
 - **Prossimi passi proposti:** (a) pagina installabile e indirizzo nel testo condiviso, (b) pagina con l'informativa privacy (serve al Play Store e ai consensi).
 
 Fonti: [Google Play Console](https://support.google.com/googleplay/android-developer/answer/14151465), [CrazyGames](https://app.cinevva.com/guides/publish-game-crazygames), [Poki](https://app.cinevva.com/guides/publish-game-poki), [Bubblewrap](https://www.thinktecture.com/en/pwa/twa-bubblewrap), [itch.io](https://itch.io/docs/creators/payments), [Google AdSense H5](https://support.google.com/publisherpolicies/answer/11975916), [Google, consensi nello SEE](https://support.google.com/admob/answer/13554020).
+
+
+## Classifiche pubbliche (2026-10-04)
+
+- **Scelta:** Supabase (login con GitHub, nessuna carta); controlli nel database, non servono funzioni a pagamento. Firebase avrebbe richiesto le Cloud Functions, che di norma chiedono un piano con carta.
+- **Nomi:** generati dal server, nessun testo libero (minori, GDPR, nessuna moderazione dei contenuti). Decisione presa da me sulla raccomandazione: la domanda non ha avuto risposta.
+- **Partenza:** solo le due sfide del giorno. Gli altri giochi aspettano che le classifiche piacciano ai tester.
+- **Da fare prima di aprire al pubblico:** pagina con l'informativa privacy (dati: identificativo anonimo, nome generato, punteggi); controllare che il progetto Supabase sia in regione europea; ricordarsi che i progetti gratuiti inattivi vanno in pausa dopo circa una settimana.
+- **Chiave:** nel file c'è solo l'indirizzo e la chiave pubblicabile. La chiave segreta non va mai incollata nel file né in chat.

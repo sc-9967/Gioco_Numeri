@@ -199,3 +199,16 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 ## Primo: anche l'ultimo blocco riuscito (versione 2026-10-04.3)
 
 - Su richiesta la schermata finale mostra **entrambi**: il blocco su cui il gioco si è fermato (con la scomposizione) e, se ne hai finito almeno uno, «Ultimo blocco riuscito: …» in una seconda riga. Provato con due partite vere: senza blocchi finiti compare solo il primo; dopo blocchi finiti compaiono entrambi e i fattori mostrati danno il numero.
+
+## Classifiche pubbliche (versione 2026-10-04.4)
+
+Prova di `tests/classifica.js`: il launcher viene eseguito in un browser vero e le chiamate al server sono girate al **vero schema `docs/classifica.sql` su PostgreSQL 16 locale** (ruolo `anon`, come in Supabase). Non è stato provato contro il progetto Supabase reale: da questo ambiente l'indirizzo non è raggiungibile (il proxy risponde 403). [Certo]
+
+- Classifica vuota: invito a essere il primo; aprirla non registra nessuno.
+- Sentiero: percorso ottimo → 500; a fine partita «Sei 1° oggi su 1 (nome generato)»; riga sul server da 500; un solo giocatore registrato; il riepilogo di una sfida già giocata non invia nulla.
+- Pannello: periodi Oggi/Settimana/Mese/Sempre, riga «(tu)», Cassaforte vuota, cambio nome (anche sul server).
+- Cassaforte: il codice del giorno aperto entra (1.400 con 1 tentativo e nessun indizio); il pulsante «Vedi la classifica» apre la sua classifica; la serie normale non invia nulla.
+- Server: 501 su un massimo di 500 rifiutato; segreto sbagliato rifiutato; due invii ravvicinati rifiutati; lettura diretta delle tabelle vietata; un punteggio più basso non sostituisce il migliore; giocatore escluso non compare più.
+- Offline: messaggio chiaro, nessun errore in pagina. Sotto automazione senza `nit_pub_test` non parte nessuna chiamata.
+- **Trovato durante la prova:** il pannello era dentro la home, quindi invisibile dalla schermata finale di un gioco → spostato fuori dalla home; Esc lo chiude.
+- **Non coperto:** nessuna prova con Supabase vero (CORS, chiave pubblicabile, tempi di rete); nessuna prova con molti giocatori contemporanei. [Ipotesi] che il blocco di 60 registrazioni al minuto sia una soglia ragionevole.

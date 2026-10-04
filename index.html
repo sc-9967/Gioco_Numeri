@@ -170,6 +170,18 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 .lx-rectable th:first-child,.lx-rectable td:first-child{text-align:left}
 .lx-rectable td{padding:7px 3px;white-space:nowrap;border-top:1px solid var(--l-line);text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
 .lx-rectable td:first-child{font-weight:800}
+.lx-recrow{display:flex;gap:8px;flex-wrap:wrap}
+.lx-pubtabs{display:flex;gap:6px;flex-wrap:wrap}
+.lx-pubtabs button{font:inherit;font-weight:800;font-size:13px;padding:7px 11px;border-radius:99px;border:2px solid var(--l-ink);background:var(--l-card);color:var(--l-ink);cursor:pointer}
+.lx-pubtabs button[aria-pressed="true"]{background:var(--l-ink);color:var(--l-bg)}
+.lx-publist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;min-height:48px}
+.lx-publist li{display:flex;gap:8px;align-items:baseline;padding:7px 4px;border-top:1px solid var(--l-line);font-weight:700;font-size:14px}
+.lx-publist li:first-child{border-top:none}
+.lx-publist .r{width:2.2em;color:var(--l-muted);font-variant-numeric:tabular-nums}
+.lx-publist .n{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lx-publist .s{font-variant-numeric:tabular-nums;font-weight:800}
+.lx-publist li.me{background:rgba(30,107,255,.14);border-radius:8px}
+.lx-publist li.empty{color:var(--l-muted);font-weight:600}
 .lx-recbtns{display:flex;gap:8px}
 .lx-recbtns button,.lx-recclose{font:inherit;font-weight:800;font-size:14px;padding:10px 12px;border-radius:12px;border:2px solid var(--l-ink);background:var(--l-card);color:var(--l-ink);cursor:pointer;flex:1}
 .lx-recclose{background:var(--l-ink);color:var(--l-bg)}
@@ -265,7 +277,24 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
     <p class="lx-thint" id="lx-thint"></p>
     <button class="lx-tplay" id="lx-tplay" type="button"></button>
   </section>
-  <button class="lx-recbtn" id="lx-recbtn" type="button">I miei record</button>
+  <div class="lx-recrow">
+    <button class="lx-recbtn" id="lx-recbtn" type="button">I miei record</button>
+    <button class="lx-recbtn" id="lx-pubbtn" type="button">Classifiche</button>
+  </div>
+
+  <div class="lx-modal" id="lx-pubpanel" role="dialog" aria-modal="true" aria-labelledby="lx-pubtitle" hidden>
+    <div class="lx-modalcard">
+      <h2 id="lx-pubtitle">Classifiche</h2>
+      <div class="lx-pubtabs" id="lx-pubboards" role="group" aria-label="Classifica"></div>
+      <div class="lx-pubtabs" id="lx-pubperiods" role="group" aria-label="Periodo"></div>
+      <ol class="lx-publist" id="lx-publist"></ol>
+      <p class="lx-recnote" id="lx-pubme"></p>
+      <p class="lx-recmsg" id="lx-pubmsg" role="status"></p>
+      <div class="lx-recbtns"><button type="button" id="lx-pubnick">Cambia nome</button></div>
+      <p class="lx-recnote">Sono pubbliche le sfide del giorno (stessa partita per tutti). In classifica compaiono solo un nome generato e il punteggio, senza dati personali. I punteggi arrivano dal tuo dispositivo e il server non rifà la partita: tra amici va bene, non è a prova di imbroglio.</p>
+      <button class="lx-recclose" id="lx-pubclose" type="button">Chiudi</button>
+    </div>
+  </div>
 
   <div class="lx-modal" id="lx-recpanel" role="dialog" aria-modal="true" aria-labelledby="lx-rectitle" hidden>
     <div class="lx-modalcard">
@@ -1867,7 +1896,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
   // Contributo nascosto per ora: metti true per riattivare il riquadro e il link a fine partita.
   const SHOW_DONATE = true;
   const AUTHOR = 'Silvio Chiaverini';
-  const BUILD = '2026-10-04.3';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
+  const BUILD = '2026-10-04.4';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
   // Nome del giocatore: salvato solo sul dispositivo, compare nei testi che si condividono (mai nelle statistiche anonime).
   const cleanName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
   const playerName = () => { try { return cleanName(JSON.parse(localStorage.getItem('nit_name'))); } catch (e) { return ''; } };
@@ -5162,6 +5191,7 @@ function showOver(isRecord) {
   $('overMode').textContent = label;
   $('overTitle').textContent = rankOf(L.total);
   $('overScore').textContent = L.total;
+  if (L.mode === 'daily') $('over').dataset.board = 'sentiero-giorno'; else delete $('over').dataset.board;   // il launcher invia il punteggio alla classifica pubblica
   $('newRecord').hidden = !isRecord;
   const strip = $('strip'); strip.textContent = '';
   L.pcts.forEach((p, i) => { const d = document.createElement('div'); d.className = 'g' + band(p); d.textContent = p; const s = document.createElement('span'); s.textContent = 'G' + (i + 1); d.appendChild(s); strip.appendChild(d); });
@@ -6021,6 +6051,7 @@ function finish(kind) {
     showDaily(res, false);
     return;
   }
+  delete $('over').dataset.board;
   const isRecord = score > prevBest && score > 0;
   if (score > store.get('cass_best', 0)) store.set('cass_best', score);
   kind === 'clear' ? sfx.win() : sfx.over(); buzz(80);
@@ -6043,6 +6074,7 @@ function showDaily(res, replay) {
   shareText = 'Cassaforte · codice del giorno ' + todayLabel + '\n' + (res.ok ? res.t + '/' + res.max + ' tentativi · ' + fmt(res.s) + ' punti' : 'non aperta (' + res.t + '/' + res.max + ')') + '\n' + res.grid;
   if (replay) { $('over').dataset.replay = '1'; $('menu').hidden = true; $('over').hidden = false; $('again').focus({ preventScroll: true }); return; }
   delete $('over').dataset.replay;
+  if (res.ok) $('over').dataset.board = 'cassaforte-giorno'; else delete $('over').dataset.board;   // solo il codice del giorno aperto va in classifica pubblica
   setTimeout(() => { if (g0 === gen) { $('over').hidden = false; $('again').focus({ preventScroll: true }); } }, 500 * TS);
 }
 function refreshMenu() {
@@ -6578,6 +6610,7 @@ requestAnimationFrame(frame);
       refreshRecLines(holder, key);
       floor = Math.max(floor, readBest());
       if (sc > 0) fillHook(holder, key, sc, before, stBefore);
+      if (sc > 0 && over.dataset.board && BOARDS[over.dataset.board]) pubAfterGame(holder, over.dataset.board, sc);
     })
       .observe(over, { attributes: true, attributeFilter: ['hidden'] });
     window.scrollTo(0, 0);
@@ -6625,6 +6658,109 @@ requestAnimationFrame(frame);
   });
   document.getElementById('lx-namechange').addEventListener('click', () => { renderWho(true); whoIn.focus(); whoIn.select(); });
   renderWho(false);
+  // ---------- classifiche pubbliche (Supabase): solo le sfide del giorno, uguali per tutti ----------
+  // Schema e protezioni: docs/classifica.sql. Il browser chiama solo funzioni del database (nessun accesso diretto alle tabelle).
+  const PUB = { url: 'https://jjdykknfepdlpaxgryou.supabase.co', key: 'sb_publishable_5I67JFJFARsKSzDtGesZYQ_ciJIxwNN' };
+  const BOARDS = { 'sentiero-giorno': 'Sentiero · sfida del giorno', 'cassaforte-giorno': 'Cassaforte · codice del giorno' };
+  const PERIODS = [['day', 'Oggi'], ['week', 'Settimana'], ['month', 'Mese'], ['all', 'Sempre']];
+  const pubStore = {
+    get() { try { const v = JSON.parse(localStorage.getItem('nit_pub')); return v && v.id && v.secret ? v : null; } catch (e) { return null; } },
+    set(v) { try { localStorage.setItem('nit_pub', JSON.stringify(v)); } catch (e) {} },
+    del() { try { localStorage.removeItem('nit_pub'); } catch (e) {} },
+  };
+  // i test automatici non scrivono sul server vero (salvo nit_pub_test=1, usato con un server simulato)
+  const pubOff = () => !!navigator.webdriver && localStorage.getItem('nit_pub_test') !== '1';
+  async function pubCall(fn, body) {
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 8000);
+    try {
+      const r = await fetch(PUB.url + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { apikey: PUB.key, 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal });
+      const j = await r.json().catch(() => null);
+      if (!r.ok) { const e = new Error((j && j.message) || 'HTTP ' + r.status); e.server = true; throw e; }
+      return j;
+    } finally { clearTimeout(t); }
+  }
+  let pubReg = null;
+  function pubEnsure() {
+    const p = pubStore.get(); if (p) return Promise.resolve(p);
+    if (!pubReg) pubReg = (async () => {
+      const a = new Uint8Array(16);
+      try { crypto.getRandomValues(a); } catch (e) { for (let i = 0; i < 16; i++) a[i] = Math.floor(Math.random() * 256); }
+      const secret = Array.from(a, b => b.toString(16).padStart(2, '0')).join('');
+      const r = await pubCall('nit_register', { p_secret: secret });
+      const np = { id: r.id, secret, nick: r.nick }; pubStore.set(np); return np;
+    })().finally(() => { pubReg = null; });
+    return pubReg;
+  }
+  async function pubSubmit(board, score) {
+    for (let i = 0; i < 2; i++) {
+      const p = await pubEnsure();
+      try { return await pubCall('nit_submit', { p_id: p.id, p_secret: p.secret, p_board: board, p_score: score }); }
+      catch (e) { if (i === 0 && e.server && /sconosciuto/.test(e.message)) { pubStore.del(); continue; } throw e; }   // il server non ci conosce piu': nuova registrazione
+    }
+  }
+  const pubBoard = (board, period) => pubCall('nit_board', { p_board: board, p_period: period, p_player: (pubStore.get() || {}).id || null });
+  const pubNum = n => Number(n).toLocaleString('it-IT');
+  // dopo una sfida del giorno: invia il punteggio e mostra la posizione di oggi nel riquadro di fine partita
+  async function pubAfterGame(holder, board, score) {
+    const hook = holder.querySelector('.lx-hook'); if (!hook || pubOff()) return;
+    const line = document.createElement('p'); line.className = 'lx-hs lx-pub'; line.textContent = 'Classifica pubblica: invio del punteggio…'; hook.appendChild(line);
+    try {
+      await pubSubmit(board, score);
+      const d = await pubBoard(board, 'day');
+      if (!holder.isConnected) return;
+      const me = d.me, first = d.top && d.top[0];
+      line.textContent = !me ? 'Classifica pubblica: punteggio inviato.'
+        : me.r === 1 ? '🏆 Sei 1° oggi su ' + d.total + ' (' + me.nick + ')'
+        : 'Classifica di oggi: sei ' + me.r + '° su ' + d.total + ' (' + me.nick + ')' + (first ? ' · al 1° mancano ' + pubNum(first.score - me.score) + ' punti' : '');
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'lx-sharebtn'; b.textContent = 'Vedi la classifica';
+      b.addEventListener('click', () => openPub(board)); hook.appendChild(b);
+    } catch (e) { if (holder.isConnected) line.textContent = 'Classifica pubblica non raggiungibile: il punteggio resta salvato su questo dispositivo.'; }
+  }
+  const pubPanel = document.getElementById('lx-pubpanel');
+  document.body.appendChild(pubPanel);   // fuori dalla home: deve restare visibile anche dalla schermata finale di un gioco
+  let pubSel = { board: Object.keys(BOARDS)[0], period: 'day' }, pubTok = 0;
+  const pubMsg = (t, bad) => { const m = document.getElementById('lx-pubmsg'); m.textContent = t; m.style.color = bad ? '#c0392b' : 'inherit'; };
+  function pubTabs(el, items, cur, onPick) {
+    el.textContent = '';
+    items.forEach(([k, label]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.setAttribute('aria-pressed', k === cur ? 'true' : 'false'); b.addEventListener('click', () => onPick(k)); el.appendChild(b); });
+  }
+  async function pubLoad() {
+    const tok = ++pubTok, list = document.getElementById('lx-publist'), meEl = document.getElementById('lx-pubme');
+    pubTabs(document.getElementById('lx-pubboards'), Object.entries(BOARDS), pubSel.board, k => { pubSel.board = k; pubLoad(); });
+    pubTabs(document.getElementById('lx-pubperiods'), PERIODS, pubSel.period, k => { pubSel.period = k; pubLoad(); });
+    const mine = pubStore.get();
+    meEl.textContent = mine ? 'Il tuo nome in classifica: ' + mine.nick : 'Comparirai con un nome generato dal momento in cui invii il primo punteggio.';
+    list.textContent = ''; const li0 = document.createElement('li'); li0.className = 'empty'; li0.textContent = 'Caricamento…'; list.appendChild(li0); pubMsg('');
+    try {
+      const d = await pubBoard(pubSel.board, pubSel.period);
+      if (tok !== pubTok) return;
+      list.textContent = '';
+      if (!d.top.length) { const li = document.createElement('li'); li.className = 'empty'; li.textContent = pubSel.period === 'day' ? 'Nessuno ha ancora un punteggio oggi: sii il primo.' : 'Nessun punteggio in questo periodo: sii il primo.'; list.appendChild(li); }
+      d.top.forEach(x => {
+        const li = document.createElement('li'); if (x.me) li.className = 'me';
+        [['r', x.r + '.'], ['n', x.nick + (x.me ? ' (tu)' : '')], ['s', pubNum(x.score)]].forEach(([c, t]) => { const sp = document.createElement('span'); sp.className = c; sp.textContent = t; li.appendChild(sp); });
+        list.appendChild(li);
+      });
+      if (d.me && d.me.r > 10) { const li = document.createElement('li'); li.className = 'me'; [['r', d.me.r + '.'], ['n', d.me.nick + ' (tu)'], ['s', pubNum(d.me.score)]].forEach(([c, t]) => { const sp = document.createElement('span'); sp.className = c; sp.textContent = t; li.appendChild(sp); }); list.appendChild(li); }
+      if (d.total) pubMsg(d.total + (d.total === 1 ? ' giocatore' : ' giocatori') + ' in questo periodo.');
+    } catch (e) { if (tok !== pubTok) return; list.textContent = ''; pubMsg('Classifica non raggiungibile. Controlla la connessione e riprova.', true); }
+  }
+  function openPub(board) {
+    if (board && BOARDS[board]) pubSel.board = board;
+    pubPanel.hidden = false; pubLoad();
+    document.getElementById('lx-pubclose').focus({ preventScroll: true });
+  }
+  document.getElementById('lx-pubbtn').addEventListener('click', () => openPub());
+  document.getElementById('lx-pubclose').addEventListener('click', () => { pubPanel.hidden = true; });
+  pubPanel.addEventListener('click', e => { if (e.target === pubPanel) pubPanel.hidden = true; });
+  document.getElementById('lx-pubnick').addEventListener('click', async () => {
+    if (pubOff()) return;
+    try {
+      const p = await pubEnsure();
+      const nick = await pubCall('nit_new_nick', { p_id: p.id, p_secret: p.secret });
+      pubStore.set({ id: p.id, secret: p.secret, nick }); pubLoad();
+    } catch (e) { pubMsg('Non riesco a cambiare il nome adesso: riprova più tardi.', true); }
+  });
   // ---------- pannello dei record, backup e protezione dell'archiviazione ----------
   const recPanel = document.getElementById('lx-recpanel');
   const recMsg = (t, bad) => { const m = document.getElementById('lx-recmsg'); m.textContent = t; m.style.color = bad ? '#c0392b' : 'inherit'; };
@@ -6680,7 +6816,7 @@ requestAnimationFrame(frame);
   if (!storageOK()) document.getElementById('lx-storewarn').hidden = false;
   else if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   document.querySelectorAll('[data-game]').forEach(b => b.addEventListener('click', () => go(b.dataset.game)));
-  window.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!recPanel.hidden) closeRec(); else if (current) unmount(); } });
+  window.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!pubPanel.hidden) pubPanel.hidden = true; else if (!recPanel.hidden) closeRec(); else if (current) unmount(); } });
   refreshBest();
   const hashKey = () => (location.hash || '').slice(1).split('?')[0];
   const start = hashKey();

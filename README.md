@@ -62,7 +62,7 @@ Puzzle di calcolo: griglia 5×5, si parte da 1 in alto a sinistra e si arriva in
 - **Sfida del giorno:** stesse 5 griglie per tutti (il seme è la data di Roma), un solo tentativo ufficiale al giorno. Più allenamenti liberi con griglie casuali.
 - **Record** per giorno, settimana (da lunedì), anno e sempre, con migliore, media e giorni giocati, più la serie di giorni consecutivi. Sono calcolati dallo storico salvato **sul dispositivo**: senza un server non esiste una classifica condivisa.
 - **Con gli amici, senza server:** il risultato si copia come testo con le caselle colorate; dopo un allenamento il testo contiene un codice sfida `SEN-…-punti` (e, se la pagina è online, un link `#sentiero?c=…`). Chi lo incolla nella schermata iniziale gioca le stesse 5 griglie e vede se ha battuto il punteggio.
-- **Limite:** i punteggi non sono verificabili. Va bene tra amici, non per una classifica pubblica.
+- **Limite:** i punteggi non sono verificabili. Va bene tra amici; la classifica pubblica (sotto) li limita ma non li ricalcola.
 - **Il tuo percorso è rosa tenue:** anello rosa e numero d'ordine (1, 2, 3…) sulle caselle toccate, senza linee. Alla fine della griglia il percorso ottimo compare in blu; dove i due coincidono si vedono entrambi gli anelli (rosa fuori, blu dentro).
 
 ## Lampo
@@ -156,3 +156,14 @@ Risultati e misure del 30/09/2026 in `docs/risultati-test.md`. L'analisi dei gio
 - Il riquadro del contributo PayPal è nascosto. Per riattivarlo, in `index.html` imposta `SHOW_DONATE = true`.
 
 Copyright © 2026 Silvio Chiaverini. Licenza GNU GPL v3: vedi il file `LICENSE`. Scelte su licenza, donazioni, pubblicità e bambini: `docs/decisioni.md`. In fondo alla home c'è il numero di versione (`BUILD` in `index.html`): serve a sapere quale file si sta usando.
+
+## Classifiche pubbliche (versione 2026-10-04.4)
+
+- **Cosa è pubblico:** solo le due sfide del giorno, uguali per tutti: **Sentiero** (sfida del giorno, massimo 500) e **Cassaforte** (codice del giorno aperto, massimo 1.400). Primi 10 per oggi, settimana (da lunedì), mese e sempre, più la tua posizione. Pulsante «Classifiche» in home e «Vedi la classifica» a fine sfida.
+- **Dove:** database Supabase del progetto. Lo schema e le protezioni sono in `docs/classifica.sql`, da eseguire una volta nello SQL Editor.
+- **Privacy:** nessun account. Il dispositivo genera un segreto casuale (salvato solo qui; sul server resta solo l'impronta) e il **server assegna un nome** tipo «Astuto Gatto 971». Non si scrive un nome libero: niente insulti né dati personali. «Cambia nome» ne estrae un altro.
+- **Sicurezza:** le tabelle non sono leggibili né scrivibili dal browser; si possono solo chiamare 4 funzioni. Il server decide il giorno (Roma), scarta punteggi fuori scala, accetta un invio ogni 8 secondi e 200 al giorno per giocatore, tiene il migliore del giorno, può escludere un giocatore.
+- **Limite onesto:** il server **non rifà la partita**. Un punteggio falso entro il massimo passa. Per rimuoverlo: istruzioni di moderazione in fondo a `docs/classifica.sql`.
+- **Offline:** se il server non risponde il gioco funziona come prima e compare un avviso; il punteggio non viene rinviato in seguito.
+- **Non pubblico:** serie normali, allenamenti e gli altri sette giochi. Accendere un'altra classifica = una riga in `nit_boards` + il gioco che segna la partita (`over.dataset.board`).
+- Sotto test automatici (`navigator.webdriver`) il launcher non chiama il server vero, salvo `nit_pub_test=1`.
