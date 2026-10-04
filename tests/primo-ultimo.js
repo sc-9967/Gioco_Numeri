@@ -1,4 +1,4 @@
-// Primo: a fine partita si mostra il blocco su cui il gioco si è fermato (non l'ultimo riuscito), con la scomposizione completa.
+// Primo: a fine partita si mostra il blocco su cui il gioco si è fermato (con la scomposizione completa) e, se c'è, anche l'ultimo blocco riuscito.
 const { chromium } = require('playwright');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 let fails = 0; const ok = (c, m) => { if (!c) fails++; console.log((c ? 'OK  ' : 'KO  ') + m); };
@@ -19,7 +19,7 @@ let fails = 0; const ok = (c, m) => { if (!c) fails++; console.log((c ? 'OK  ' :
   console.log(JSON.stringify(t1));
   const m1 = /sul blocco (\d+)\..*Scomposizione: (\d+) = ([\d × ]+)\./.exec(t1);
   ok(m1 && +m1[1] === +m1[2] && prod(m1[3].split(' × ').map(Number)) === +m1[1], 'mostra il blocco rimasto e la scomposizione corretta (' + (m1 && m1[1] + ' = ' + m1[3]) + ')');
-  ok(!/Ultimo blocco:/.test(t1), 'non propone più "l\'ultimo blocco riuscito"');
+  ok(!/Ultimo blocco riuscito/.test(t1), 'senza blocchi finiti non compare l\'ultimo riuscito');
   await page.screenshot({ path: 'shots/primo-ultimo.png' });
   // 2) con blocchi finiti prima: continua a mostrare quello rimasto, non l'ultimo riuscito
   await page.click('#again'); await sleep(400);
@@ -33,7 +33,9 @@ let fails = 0; const ok = (c, m) => { if (!c) fails++; console.log((c ? 'OK  ' :
   const t2 = await page.evaluate(() => ({ txt: document.getElementById('stLast').innerText, blocks: document.getElementById('stBlocks').textContent }));
   console.log(JSON.stringify(t2));
   const m2 = /sul blocco (\d+)/.exec(t2.txt) || /sul blocco (\d+)\: era già/.exec(t2.txt);
-  ok(m2 && /sul blocco/.test(t2.txt) && !/Ultimo blocco:/.test(t2.txt), 'dopo ' + t2.blocks + ' blocchi finiti, la schermata finale mostra il blocco rimasto');
+  const lastOk = /Ultimo blocco riuscito: (\d+) = ([\d × ]+)/.exec(t2.txt);
+  ok(m2 && /sul blocco/.test(t2.txt), 'dopo ' + t2.blocks + ' blocchi finiti, la schermata finale mostra il blocco rimasto');
+  ok(lastOk && prod(lastOk[2].split(' × ').map(Number)) === +lastOk[1], 'e anche l\'ultimo blocco riuscito, con i fattori giusti (' + (lastOk && lastOk[0]) + ')');
   ok(!(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)), 'nessuno scorrimento orizzontale');
   console.log('errori:', JSON.stringify(errs)); await b.close();
   console.log(fails ? 'FALLITI: ' + fails : 'TUTTO OK');

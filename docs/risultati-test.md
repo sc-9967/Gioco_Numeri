@@ -195,3 +195,7 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 - **Segnalazione:** a fine partita compariva l'ultima sequenza *riuscita* e non quella su cui il gioco si era fermato.
 - **Causa:** la schermata finale leggeva l'ultimo blocco frantumato; il blocco in corso quando la torre tocca il soffitto non veniva mai memorizzato.
 - **Ora:** «Il gioco si è fermato sul blocco 15. Scomposizione: 15 = 3 × 5.» più «Avevi già tolto: …» se avevi cominciato; se il blocco era già primo: «era già un numero primo, bastava premere «È primo!»». Provato con due partite vere: senza nessun blocco finito e dopo 2 blocchi finiti; il prodotto dei fattori mostrati torna con il numero.
+
+## Primo: anche l'ultimo blocco riuscito (versione 2026-10-04.3)
+
+- Su richiesta la schermata finale mostra **entrambi**: il blocco su cui il gioco si è fermato (con la scomposizione) e, se ne hai finito almeno uno, «Ultimo blocco riuscito: …» in una seconda riga. Provato con due partite vere: senza blocchi finiti compare solo il primo; dopo blocchi finiti compaiono entrambi e i fattori mostrati danno il numero.

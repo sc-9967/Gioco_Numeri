@@ -1867,7 +1867,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
   // Contributo nascosto per ora: metti true per riattivare il riquadro e il link a fine partita.
   const SHOW_DONATE = true;
   const AUTHOR = 'Silvio Chiaverini';
-  const BUILD = '2026-10-04.2';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
+  const BUILD = '2026-10-04.3';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
   // Nome del giocatore: salvato solo sul dispositivo, compare nei testi che si condividono (mai nelle statistiche anonime).
   const cleanName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
   const playerName = () => { try { return cleanName(JSON.parse(localStorage.getItem('nit_name'))); } catch (e) { return ''; } };
@@ -3078,7 +3078,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
       const full = primeFactors(eb.orig), had = eb.factors.length ? ' Avevi già tolto: <b>' + eb.factors.join(' × ') + '</b>.' : '';
       $('stLast').innerHTML = (full.length === 1 ? 'Il gioco si è fermato sul blocco <b>' + eb.orig + '</b>: era già un numero primo, bastava premere «È primo!».'
         : 'Il gioco si è fermato sul blocco <b>' + eb.orig + '</b>. Scomposizione: <b>' + eb.orig + ' = ' + full.join(' × ') + '</b>.' + had);
-    } else $('stLast').innerHTML = lb ? 'Ultimo blocco: <b>' + lb.orig + ' = ' + lb.factors.join(' × ') + '</b>' : '';
+    } else $('stLast').innerHTML = '';
+    if (lb) $('stLast').innerHTML += (eb ? '<br>' : '') + 'Ultimo blocco riuscito: <b>' + lb.orig + ' = ' + lb.factors.join(' × ') + '</b>';
     $('share').hidden = S.mode !== 'daily';
     $('share').textContent = 'Copia risultato';
     $('shareBox').hidden = true;

@@ -110,7 +110,7 @@ Ogni gioco ha le istruzioni scritte per un bambino di 5 anni: frasi corte (in me
 ## Navigazione: «← Tutti i giochi» e schermata finale di Primo
 
 - **«← Tutti i giochi» blu elettrico:** il pulsante ha un bordo blu elettrico (#1e6bff) con un leggero alone, in partita (largo come lo schermo, sotto i comandi), nel menu di ogni gioco (in cima alla scheda, così si vede anche sugli schermi bassi dove il menu scorre) e nella schermata finale. In partita il primo tocco chiede conferma (bordo rosso), il secondo esce.
-- **Primo, fine partita:** la schermata finale mostra il blocco su cui il gioco si è fermato (non l'ultimo riuscito), con la scomposizione completa, per esempio «Il gioco si è fermato sul blocco 84. Scomposizione: 84 = 2 × 2 × 3 × 7. Avevi già tolto: 2».
+- **Primo, fine partita:** la schermata finale mostra il blocco su cui il gioco si è fermato (non l'ultimo riuscito), con la scomposizione completa, per esempio «Il gioco si è fermato sul blocco 84. Scomposizione: 84 = 2 × 2 × 3 × 7. Avevi già tolto: 2». Se ne hai finito almeno uno, sotto compare anche «Ultimo blocco riuscito: …».
 
 ## Test
 
