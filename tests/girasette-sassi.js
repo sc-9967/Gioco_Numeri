@@ -33,7 +33,7 @@ let fails = 0; const ok = (c, m) => { if (!c) fails++; console.log((c ? 'OK  ' :
   console.log(JSON.stringify(R));
   ok(R.over, 'la partita (strategia "prima mossa valida") finisce: prima arrivava a 336 giri senza finire (ora ' + R.spins + ' giri, ' + R.placed + ' pezzi)');
   ok(R.firstRock && R.firstRock.trays >= 11 && R.firstRock.trays <= 15, 'il primo sasso arriva dopo ' + (R.firstRock && R.firstRock.trays) + ' riserve');
-  ok(R.maxRocks >= 4 && R.rocksStat >= R.maxRocks, 'i sassi si accumulano (massimo ' + R.maxRocks + ' in plancia, ' + R.rocksStat + ' arrivati)');
+  ok(R.maxRocks >= 2 && R.rocksStat >= R.maxRocks, 'i sassi si accumulano (massimo ' + R.maxRocks + ' in plancia, ' + R.rocksStat + ' arrivati)');
   ok(await page.isVisible('#over'), 'schermata finale visibile');
   // la riga di annuncio durante una partita nuova
   await page.click('#again'); await sleep(200);

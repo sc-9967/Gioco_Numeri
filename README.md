@@ -107,6 +107,11 @@ Ogni gioco ha le istruzioni scritte per un bambino di 5 anni: frasi corte (in me
 - **Limite:** capire le regole non vuol dire saper giocare: Primo (divisioni), Resto (soldi) e Sentiero (somme e moltiplicazioni) richiedono matematica da scuola elementare.
 - Il testo sta nella tabella `HOWTO` del launcher, una voce per gioco: si cambia lì.
 
+## Navigazione: «← Tutti i giochi» e schermata finale di Primo
+
+- **«← Tutti i giochi» blu elettrico:** il pulsante ha un bordo blu elettrico (#1e6bff) con un leggero alone, in partita (largo come lo schermo, sotto i comandi), nel menu di ogni gioco (in cima alla scheda, così si vede anche sugli schermi bassi dove il menu scorre) e nella schermata finale. In partita il primo tocco chiede conferma (bordo rosso), il secondo esce.
+- **Primo, fine partita:** la schermata finale mostra il blocco su cui il gioco si è fermato (non l'ultimo riuscito), con la scomposizione completa, per esempio «Il gioco si è fermato sul blocco 84. Scomposizione: 84 = 2 × 2 × 3 × 7. Avevi già tolto: 2».
+
 ## Test
 
 I test usano Playwright e si trovano in `tests/`:
@@ -136,6 +141,8 @@ node launcher-cassaforte.js   # tastierino, note, indizio, vite, tempo, codice d
 node launcher-calamita.js    # serie, obiettivo, gancio di fine partita, coriandoli, condivisione
 node istruzioni.js            # istruzioni per bambini: prima apertura, riapertura, lettura, lunghezza delle frasi
 node donazione.js             # pulsante Dona visibile, link sicuro
+node tutti-i-giochi.js        # pulsante blu elettrico in partita, nel menu e a fine partita
+node primo-ultimo.js          # Primo: a fine partita il blocco rimasto e la sua scomposizione
 node launcher-nome.js         # nome obbligatorio, testi condivisi, statistiche anonime
 node launcher-uscita.js       # uscita dalla partita in ogni gioco, record oggi/settimana/mese/anno/sempre
 node launcher-record.js       # storico, periodi, backup e ripristino, avviso archiviazione

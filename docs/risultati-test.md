@@ -183,3 +183,15 @@ Bot che non sbagliano (`tests/bots-esperti.js`). Velocità 1 = tempi base, 1,6 =
 - **Ora:** l'indizio regala **una cifra giusta nel posto giusto**. Compare tratteggiata e dorata nella riga che stai scrivendo, con il riquadro «💡 posto 4: il 4», un messaggio, un testo che sale e il tasto lampeggiante. Va scritta lo stesso, così il giocatore resta protagonista. Costo: 120 punti (prima 50); 250 nel codice del giorno (prima 100). Un solo indizio per cassaforte. Nella partita del giorno la posizione è la stessa per tutti e si ritrova se si esce e si rientra.
 - **Verificato a 360×700 e 320×560:** posizione scelta valida, cifra tratteggiata nel posto giusto, messaggio e riquadro coerenti, un solo indizio per cassaforte, punti ridotti di 120.
 - **Non misurato:** quanto cambi la difficoltà. Una cifra giusta in posizione riduce molto i casi possibili (un codice a 4 cifre ha 5.040 combinazioni, con una cifra nota ne restano circa 504): potrebbe essere troppo conveniente a 120 punti. Il prezzo si cambia in `HINT_COST`. [Ipotesi]
+
+## «← Tutti i giochi» in blu elettrico (versione 2026-10-04.1)
+
+- **Cosa:** bordo blu elettrico 2 px con alone, sfondo azzurro tenue, in partita, nel menu e a fine partita, in tutti e nove i giochi a 360×700. Verificato: colore del bordo, pulsante dentro lo schermo, primo tocco che chiede conferma (bordo rosso), secondo che torna ai giochi, nessuno scorrimento orizzontale.
+- **Trovato e corretto durante la prova:** nei menu bassi il pulsante finiva sotto la piega (nel menu di Resto a 360×700 era tagliato; a 320×560 serviva scorrere in 8 giochi su 9) perché avevo aggiunto «Come si gioca». Ora in menu sta in cima alla scheda: 0 casi su 27 con il pulsante fuori vista. In Girasette la scheda del menu non scorreva affatto e usciva dallo schermo (a 320×560 il pulsante era irraggiungibile): ora scorre come negli altri giochi.
+- **Limite:** a 320×560 le schede dei menu più lunghe (Resto, Bilancia) continuano a scorrere per arrivare ai pulsanti principali.
+
+## Primo: blocco su cui ci si ferma (versione 2026-10-04.2)
+
+- **Segnalazione:** a fine partita compariva l'ultima sequenza *riuscita* e non quella su cui il gioco si era fermato.
+- **Causa:** la schermata finale leggeva l'ultimo blocco frantumato; il blocco in corso quando la torre tocca il soffitto non veniva mai memorizzato.
+- **Ora:** «Il gioco si è fermato sul blocco 15. Scomposizione: 15 = 3 × 5.» più «Avevi già tolto: …» se avevi cominciato; se il blocco era già primo: «era già un numero primo, bastava premere «È primo!»». Provato con due partite vere: senza nessun blocco finito e dopo 2 blocchi finiti; il prodotto dei fattori mostrati torna con il numero.

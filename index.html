@@ -176,9 +176,14 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 #lx-recbox{width:100%;box-sizing:border-box;font:12px/1.4 var(--lx-ui);border:1px solid var(--l-line);border-radius:10px;padding:8px;background:var(--l-bg);color:var(--l-ink);resize:none}
 .lx-recmsg{margin:0;min-height:18px;font-size:13px;font-weight:700}
 /* uscita dalla partita e record nel gioco */
-.lx-holder footer .lx-leave{flex:0 0 100%!important;width:100%!important;font:inherit!important;font-size:14px!important;font-weight:600!important;color:inherit!important;opacity:.72;background:none!important;border:none!important;box-shadow:none!important;padding:6px 8px!important;margin:0!important;cursor:pointer;text-align:center;text-transform:none!important;letter-spacing:0!important}
-.lx-holder footer .lx-leave:hover{opacity:1}
-.lx-holder footer .lx-leave.ask{opacity:1;color:#ff5368!important;font-weight:800!important}
+.lx-holder footer .lx-leave{flex:0 0 calc(100% - 28px)!important;width:calc(100% - 28px)!important;box-sizing:border-box!important;font:inherit!important;font-size:14px!important;font-weight:700!important;color:inherit!important;opacity:1;background:rgba(30,107,255,.12)!important;border:2px solid #1e6bff!important;border-radius:12px!important;box-shadow:0 0 10px rgba(30,107,255,.5)!important;padding:8px 10px!important;margin:4px auto 0!important;cursor:pointer;text-align:center;text-transform:none!important;letter-spacing:0!important}
+.lx-holder footer .lx-leave:hover{background:rgba(30,107,255,.25)!important}
+.lx-holder footer .lx-leave.ask{color:#ff5368!important;font-weight:800!important;border-color:#ff5368!important;box-shadow:0 0 10px rgba(255,83,104,.5)!important;background:rgba(255,83,104,.12)!important}
+/* "← Tutti i giochi" nel menu e nella schermata finale di ogni gioco: stesso bordo blu elettrico */
+.lx-holder .lx-back{box-sizing:border-box!important;border:2px solid #1e6bff!important;border-radius:12px!important;background:rgba(30,107,255,.12)!important;box-shadow:0 0 10px rgba(30,107,255,.5)!important;color:inherit!important;font-weight:700!important;padding:10px 14px!important;opacity:1!important}
+.lx-holder .lx-back:hover{background:rgba(30,107,255,.25)!important}
+.lx-holder .lx-backtop{display:block!important;width:fit-content!important;flex:none!important;margin:0 auto 6px 0!important;padding:7px 12px!important;font-size:14px!important;min-height:0!important}
+.lx-holder .lx-back:focus-visible{outline:3px solid #1e6bff;outline-offset:2px}
 .lx-holder footer .lx-leave:focus-visible{outline:3px solid currentColor;outline-offset:2px}
 .lx-recline{margin:0;font-size:12px;opacity:.75;text-align:center;line-height:1.4}
 /* aggiunte dentro i giochi */
@@ -1103,7 +1108,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 #over,#menu{position:absolute;inset:0;display:grid;place-items:center;padding:16px;background:rgba(8,10,28,.78);z-index:5}
 #over[hidden],#menu[hidden]{display:none}
-.card{width:100%;max-width:340px;box-sizing:border-box;background:var(--panel);border:1.5px solid var(--line);border-radius:22px;padding:26px 22px 22px;display:flex;flex-direction:column;gap:14px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.card{width:100%;max-width:340px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--panel);border:1.5px solid var(--line);border-radius:22px;padding:26px 22px 22px;display:flex;flex-direction:column;gap:14px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5)}
 .card h1{font-size:46px}
 .card h2{margin:0;font-size:32px;font-weight:700;color:var(--accent)}
 .card .eyebrow{margin:0;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
@@ -1862,7 +1867,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
   // Contributo nascosto per ora: metti true per riattivare il riquadro e il link a fine partita.
   const SHOW_DONATE = true;
   const AUTHOR = 'Silvio Chiaverini';
-  const BUILD = '2026-10-03.5';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
+  const BUILD = '2026-10-04.2';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
   // Nome del giocatore: salvato solo sul dispositivo, compare nei testi che si condividono (mai nelle statistiche anonime).
   const cleanName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
   const playerName = () => { try { return cleanName(JSON.parse(localStorage.getItem('nit_name'))); } catch (e) { return ''; } };
@@ -2887,6 +2892,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
   const KEYS = [2, 3, 5, 7, 11, 13];
   const BIG = [17, 19, 23, 29, 31, 37, 41, 43, 47];
   const isPrime = n => { if (n < 2) return false; for (let d = 2; d * d <= n; d++) if (n % d === 0) return false; return true; };
+  const primeFactors = n => { const f = []; for (let d = 2; d * d <= n; d++) while (n % d === 0) { f.push(d); n /= d; } if (n > 1) f.push(n); return f; };
   const BLOCKS_PER_LEVEL = 8;
   function genNumber(idx, r) {
     const lv = 1 + Math.floor(idx / BLOCKS_PER_LEVEL);
@@ -2913,7 +2919,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
     S = {
       mode, rnd: mode === 'daily' ? mulberry(hashStr('primo-' + today)) : Math.random,
       spawned: 0, stack: [], score: 0, streak: 0, maxStreak: 0, done: 0, level: 1,
-      spawnT: 0, running: false, over: false, shards: [], popups: [], shake: 0, flash: 0, lastBlock: null,
+      spawnT: 0, running: false, over: false, shards: [], popups: [], shake: 0, flash: 0, lastBlock: null, endBlock: null,
     };
   }
   function spawnBlock(instant) {
@@ -3030,6 +3036,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
   function collapse() {
     if (S.over) return;
     S.over = true; S.shake = reduceMotion ? 0 : 1.2;
+    // il blocco su cui ci si è fermati (il più in basso, non finito): è quello che la schermata finale deve mostrare
+    S.endBlock = S.stack.length ? { orig: S.stack[0].orig, factors: S.stack[0].factors.slice(), n: S.stack[0].n } : null;
     sfx.end(); buzz(250);
     setTimeout(showOver, 1000);
   }
@@ -3065,8 +3073,12 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
     $('stBlocks').textContent = S.done;
     $('stStreak').textContent = S.maxStreak;
     $('stLevel').textContent = S.level;
-    const lb = S.lastBlock;
-    $('stLast').innerHTML = lb ? 'Ultimo blocco: <b>' + lb.orig + ' = ' + lb.factors.join(' × ') + '</b>' : '';
+    const eb = S.endBlock, lb = S.lastBlock;
+    if (eb) {
+      const full = primeFactors(eb.orig), had = eb.factors.length ? ' Avevi già tolto: <b>' + eb.factors.join(' × ') + '</b>.' : '';
+      $('stLast').innerHTML = (full.length === 1 ? 'Il gioco si è fermato sul blocco <b>' + eb.orig + '</b>: era già un numero primo, bastava premere «È primo!».'
+        : 'Il gioco si è fermato sul blocco <b>' + eb.orig + '</b>. Scomposizione: <b>' + eb.orig + ' = ' + full.join(' × ') + '</b>.' + had);
+    } else $('stLast').innerHTML = lb ? 'Ultimo blocco: <b>' + lb.orig + ' = ' + lb.factors.join(' × ') + '</b>' : '';
     $('share').hidden = S.mode !== 'daily';
     $('share').textContent = 'Copia risultato';
     $('shareBox').hidden = true;
@@ -6473,7 +6485,7 @@ requestAnimationFrame(frame);
   function decorate(holder, key) {
     const back = () => {
       const b = document.createElement('button');
-      b.type = 'button'; b.className = 'btn link'; b.textContent = '← Tutti i giochi';
+      b.type = 'button'; b.className = 'btn link lx-back'; b.textContent = '← Tutti i giochi';
       b.addEventListener('click', unmount);
       return b;
     };
@@ -6481,7 +6493,7 @@ requestAnimationFrame(frame);
     const overPanel = holder.querySelector('#over').firstElementChild;
     const helpBtn = () => { const b = document.createElement('button'); b.type = 'button'; b.className = 'lx-help'; b.textContent = '❓ Come si gioca'; b.addEventListener('click', () => showHowto(holder, key)); return b; };
     menuPanel.querySelector('.btns').appendChild(helpBtn());
-    menuPanel.querySelector('.btns').appendChild(back());
+    { const top = back(); top.classList.add('lx-backtop'); menuPanel.prepend(top); }   // in cima alla scheda: si vede sempre, anche sugli schermi bassi dove il menu scorre
     overPanel.querySelector('.btns').appendChild(helpBtn());
     overPanel.querySelector('.btns').appendChild(back());
     const hook = document.createElement('div'); hook.className = 'lx-hook'; hook.hidden = true; overPanel.querySelector('.btns').after(hook);
