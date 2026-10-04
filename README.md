@@ -172,8 +172,8 @@ Copyright © 2026 Silvio Chiaverini. Licenza GNU GPL v3: vedi il file `LICENSE`.
 ## Dieci (versione 2026-10-05.2)
 
 - **Regola:** griglia 10×10 di cifre da 1 a 9. Si trascina un rettangolo (dito, mouse, oppure frecce e Spazio): il cerchietto mostra la somma. A 10 il rettangolo diventa verde e, rilasciando, le cifre spariscono. Oltre 10 diventa rosso. I posti vuoti valgono 0.
-- **Punteggio:** una cifra tolta = un punto. Togliere 4 o più cifre in una mossa regala 1 secondo, 6 o più ne regalano 2. Il punteggio non ha un massimo: dipende da quante griglie si fanno in 120 secondi.
+- **Punteggio:** una cifra tolta = un punto. Togliere 4 o più cifre in una mossa regala 1 secondo, 6 o più ne regalano 2. Il punteggio non ha un massimo: dipende da quante griglie si fanno in 150 secondi.
 - **Griglia nuova:** quando non resta nessun rettangolo con somma 10, arriva una griglia nuova (compare «Nessuna somma 10: nuova griglia»): **tempo e punti restano**. Se si pulisce tutto il tabellone, la griglia nuova regala anche **+5 secondi**. Il gioco finisce solo a tempo scaduto.
-- **Tempo:** 120 secondi. Se la pagina resta in secondo piano il tempo non scorre. «Aiuto» mostra un rettangolo valido e costa 6 secondi.
+- **Tempo:** 150 secondi (due minuti e mezzo, scelto dal titolare dopo la prova). Se la pagina resta in secondo piano il tempo non scorre. «Aiuto» mostra un rettangolo valido e costa 6 secondi.
 - **Sfida del giorno:** stessa **sequenza** di griglie per tutti (seme = data di Roma e numero della griglia), con più tentativi e il migliore del giorno.
 - **Non ha classifica pubblica:** il server non potrebbe verificare il punteggio.

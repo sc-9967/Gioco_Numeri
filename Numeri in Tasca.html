@@ -377,7 +377,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
     </button>
     <button class="lx-card g-die" type="button" data-game="dieci">
       <span class="lx-name">Die<i>ci</i></span>
-      <span class="lx-desc">Trascina un rettangolo sui numeri: se la somma fa 10, spariscono. Due minuti: ogni numero tolto è un punto.</span>
+      <span class="lx-desc">Trascina un rettangolo sui numeri: se la somma fa 10, spariscono. Due minuti e mezzo: ogni numero tolto è un punto.</span>
       <span class="lx-best"><span>Record <b data-best="dieci_best">0</b></span><span class="lx-play">Gioca</span></span>
     </button>
   </main>
@@ -1999,7 +1999,7 @@ h1 span{color:var(--accent)}
   <header class="hud">
     <div class="stat"><span class="lbl">Punti</span><b id="score">0</b></div>
     <h1>Die<span>ci</span></h1>
-    <div class="stat r"><span class="lbl">Tempo</span><b id="time">120</b></div>
+    <div class="stat r"><span class="lbl">Tempo</span><b id="time">150</b></div>
   </header>
   <div class="tbar" id="tbar"><i id="tfill"></i></div>
   <div class="stage" id="stage">
@@ -2020,7 +2020,7 @@ h1 span{color:var(--accent)}
 
   <section id="menu">
     <div class="card">
-      <p class="eyebrow">Puzzle di somme · due minuti</p>
+      <p class="eyebrow">Puzzle di somme · due minuti e mezzo</p>
       <h1>Die<span>ci</span></h1>
       <ul class="rules">
         <li><span class="chip">☝️</span><span>Trascina un rettangolo sui numeri. Il cerchietto mostra la somma di quelli dentro.</span></li>
@@ -2067,7 +2067,7 @@ h1 span{color:var(--accent)}
   // Contributo nascosto per ora: metti true per riattivare il riquadro e il link a fine partita.
   const SHOW_DONATE = true;
   const AUTHOR = 'Silvio Chiaverini';
-  const BUILD = '2026-10-05.2';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
+  const BUILD = '2026-10-05.3';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
   // Nome del giocatore: salvato solo sul dispositivo, compare nei testi che si condividono (mai nelle statistiche anonime).
   const cleanName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
   const playerName = () => { try { return cleanName(JSON.parse(localStorage.getItem('nit_name'))); } catch (e) { return ''; } };
@@ -6335,7 +6335,7 @@ requestAnimationFrame(frame);
 },
     dieci: function (window, requestAnimationFrame, setTimeout) {
 /* ============================================================================
-   DIECI: puzzle di somme su griglia 10x10 di cifre da 1 a 9, due minuti.
+   DIECI: puzzle di somme su griglia 10x10 di cifre da 1 a 9, due minuti e mezzo (150 secondi).
    Si trascina un rettangolo: se la somma delle cifre rimaste al suo interno e' 10, spariscono (i buchi contano 0).
    Ogni cifra tolta e' un punto; togliere 4 o piu' cifre in una volta regala secondi (+1 s da 4, +2 s da 6).
    Ogni griglia ha somma multipla di 10. Quando non resta nessun rettangolo con somma 10, o il tabellone e' pulito, arriva
@@ -6349,7 +6349,7 @@ requestAnimationFrame(frame);
 const $ = id => document.getElementById(id);
 
 /* ---------------------------------------------------------------- 1) LOGICA PURA */
-const N = 10, TIME = 120, HINT_COST = 6;
+const N = 10, TIME = 150, HINT_COST = 6;
 const mulberry = seed => { let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; };
 const hashStr = s => { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
 
@@ -6821,7 +6821,7 @@ refreshMenu(); render();
       ['☝️', 'Metti il dito su un numero e trascina: appare un rettangolo.'],
       ['➕', 'Il gioco somma tutti i numeri dentro il rettangolo. Il totale lo vedi in un cerchietto.'],
       ['🟢', 'Se il totale è proprio 10, il rettangolo diventa verde. Togli il dito: i numeri spariscono! Se supera 10, diventa rosso.'],
-      ['⏱️', 'Hai due minuti. Ogni numero che sparisce è un punto. Se ne togli tanti insieme, guadagni secondi.'],
+      ['⏱️', 'Hai due minuti e mezzo. Ogni numero che sparisce è un punto. Se ne togli tanti insieme, guadagni secondi.'],
       ['🔄', 'Se non si può più fare dieci, arriva una griglia nuova. Il tempo e i punti restano!'],
       ['💡', '"Aiuto" ti fa vedere dove fare dieci, ma ti costa 6 secondi.']], tip: 'I posti vuoti valgono zero: puoi tirare il rettangolo anche sopra i buchi.' },
   };

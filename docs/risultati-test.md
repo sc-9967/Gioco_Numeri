@@ -246,3 +246,9 @@ Prova di `tests/dieci.js` (browser vero, mouse reale per il trascinamento):
 - **Ora:** griglia nuova con tempo e punti invariati; tabellone pulito = griglia nuova + 5 s. Il gioco finisce solo a tempo scaduto; a fine partita compare il numero di griglie giocate.
 - **Prova** (`tests/dieci.js`): «Nessuna somma 10: nuova griglia» compare, la partita continua con la griglia 2, i punti restano e il tempo anche; con il tabellone pulito +5 s; durante il cambio il gioco è fermo e poi riparte; la griglia 2 della sfida del giorno è uguale a ogni tentativo e diversa dalla 1; la partita finisce solo a tempo scaduto.
 - **Effetto da sapere:** i punteggi non sono più limitati a 100, quindi i record fatti prima di questa versione (massimo 100) restano molto bassi e vengono superati subito. Il gioco è ora più una gara di velocità che di pianificazione. [Probabile]
+
+## Dieci: tempo a 150 secondi (versione 2026-10-05.3)
+
+- Su richiesta del titolare il tempo passa da 120 a 150 secondi. Dopo la prova sul suo telefono (Samsung A34): il rettangolo si prende bene e la schermata è leggibile; 120 secondi gli sembravano pochi.
+- Con la griglia nuova automatica il tempo è il limite vero: i punteggi salgono per tutti. Chi ha già record fatti a 120 secondi li vede superati più facilmente. [Probabile]
+- Il test `dieci.js` non dipende dalla durata (usa tempi impostati a mano).
