@@ -177,3 +177,14 @@ Copyright © 2026 Silvio Chiaverini. Licenza GNU GPL v3: vedi il file `LICENSE`.
 - **Tempo:** 150 secondi (due minuti e mezzo, scelto dal titolare dopo la prova). Se la pagina resta in secondo piano il tempo non scorre. «Aiuto» mostra un rettangolo valido e costa 6 secondi.
 - **Sfida del giorno:** stessa **sequenza** di griglie per tutti (seme = data di Roma e numero della griglia), con più tentativi e il migliore del giorno.
 - **Non ha classifica pubblica:** il server non potrebbe verificare il punteggio.
+
+## Record dentro ogni gioco e sfida tra amici (versione 2026-10-05.5)
+
+- **Pulsante «🏆 Record»** nel menu e nella schermata finale di ogni gioco (nel Sentiero resta il suo pulsante «Record»). Mostra, per oggi, settimana (da lunedì), mese, anno e sempre: **migliore, media e numero di partite**, più la serie di giorni. I dati sono quelli dello storico sul dispositivo; il «migliore di sempre» non scende mai sotto il record già salvato dal gioco.
+- **Sfida un amico** in 7 giochi: Bilancia, Quadrante, Primo, Resto, Raddoppio, Cassaforte e Dieci (il Sentiero ha il suo codice `SEN-…`). Funziona come il Sentiero:
+  1. a fine partita libera il pulsante **«🤝 Sfida un amico»** copia un testo con il codice `PREFISSO-seme-punti`, per esempio `DIE-k3f9a-412`, e, se la pagina è online, un link `#dieci?c=…`;
+  2. l'amico incolla il codice in **«🤝 Sfida un amico»** nel menu del gioco, oppure apre il link: parte una partita con **lo stesso seme**, quindi la stessa sequenza casuale di partenza, con un avviso «Sfida di Anna: batti 412 punti»;
+  3. a fine partita compare il confronto: «Hai battuto la sfida…», «Pareggio…» o «Sfida persa… (ti mancano N)».
+- Prefissi: BIL, QUA, PRI, RES, RAD, CAS, DIE. «Rigioca» dopo una sfida avvia una partita libera nuova.
+- **Cosa significa «stessa partita»:** stesso seme del generatore casuale, come nella sfida del giorno. Nei giochi in cui le scelte del giocatore cambiano quale casella o posto viene scelto (per esempio Quadrante) la sequenza è la stessa ma il tabellone può divergere secondo le mosse. I punteggi nel codice non sono verificabili.
+- **Non hanno la sfida: Girasette e Lampo.** Girasette in partita libera pesca i pezzi guardando la plancia (un aiuto): per renderla riproducibile bisognerebbe toglierlo e cambierebbe la difficoltà. In Lampo i numeri si muovono con valori casuali a ogni fotogramma e le posizioni dipendono dalle dimensioni dello schermo, quindi due telefoni non vedrebbero mai la stessa partita.

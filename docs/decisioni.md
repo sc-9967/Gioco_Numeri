@@ -49,3 +49,12 @@ Fonti: [Google Play Console](https://support.google.com/googleplay/android-devel
 - **Partenza:** solo le due sfide del giorno. Gli altri giochi aspettano che le classifiche piacciano ai tester.
 - **Da fare prima di aprire al pubblico:** pagina con l'informativa privacy (dati: identificativo anonimo, nome generato, punteggi); controllare che il progetto Supabase sia in regione europea; ricordarsi che i progetti gratuiti inattivi vanno in pausa dopo circa una settimana.
 - **Chiave:** nel file c'è solo l'indirizzo e la chiave pubblicabile. La chiave segreta non va mai incollata nel file né in chat.
+
+
+## Sfida tra amici: perché non in tutti i giochi (2026-10-05)
+
+- Richiesta: «la sfida in tutti i giochi che tecnicamente la permettono». Interpretata come il codice sfida del Sentiero (`SEN-…`); la sfida del giorno esisteva già in tutti e nove i giochi.
+- Criterio tecnico: il gioco deve poter ripartire da un seme del generatore casuale senza cambiare le regole. Rispettato da Bilancia, Quadrante, Primo, Resto, Raddoppio, Cassaforte (serie) e Dieci.
+- **Girasette:** in partita libera i pezzi sono scelti guardando la plancia. Per avere un seme riproducibile serve la modalità della sfida del giorno (pezzi indipendenti dalla plancia), che è più difficile. Decisione rimandata: va misurato l'effetto sulla difficoltà prima di cambiare la partita libera.
+- **Lampo:** il generatore casuale è usato a ogni fotogramma per far deviare i numeri e le posizioni dipendono dallo schermo: non riproducibile.
+- Per aggiungere un altro gioco: farlo chiedere un seme con `window.nitSeed(modo)`, generare il contenuto dal seme, ascoltare il pulsante nascosto `#chal`, scrivere `data-seed` e `data-mode` in `#over` a fine partita e aggiungere la chiave a `CHAL_ON` nel launcher.

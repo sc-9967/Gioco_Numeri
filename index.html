@@ -238,6 +238,18 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 @keyframes lxfall{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--dx),105vh) rotate(var(--rot))}}
 /* istruzioni per bambini */
 .lx-holder .lx-help{font:inherit;font-weight:700;font-size:15px;color:inherit;background:none;border:1.5px solid currentColor;border-radius:12px;padding:10px 14px;cursor:pointer;opacity:.95}
+.lx-holder .lx-brow{display:flex;gap:8px}
+.lx-holder .lx-brow>.lx-help{flex:1;min-width:0;padding-inline:8px;font-size:14px;white-space:nowrap}
+.lx-holder .lx-chalwrap{display:flex;flex-direction:column;gap:6px}
+.lx-holder .lx-chalbox{display:flex;gap:8px}
+.lx-holder .lx-chalbox[hidden]{display:none}
+.lx-holder .lx-chalin{flex:1;min-width:0;font:inherit;font-size:16px;font-weight:700;padding:9px 10px;border-radius:12px;border:1.5px solid currentColor;background:rgba(255,255,255,.12);color:inherit}
+.lx-holder .lx-chalin::placeholder{color:inherit;opacity:.55}
+.lx-holder .lx-chalgo{padding-inline:16px}
+.lx-holder .lx-chalerr{margin:0;font-size:13px;font-weight:700;min-height:0}
+.lx-holder .lx-chalerr:empty{display:none}
+.lx-holder .lx-chalbanner{position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:30;max-width:92vw;background:#ffd34e;color:#2a1d00;font:700 14px/1.25 system-ui,sans-serif;padding:8px 14px;border-radius:99px;box-shadow:0 6px 18px rgba(0,0,0,.35);text-align:center;pointer-events:none;animation:lxban .4s ease-out}
+@keyframes lxban{from{transform:translate(-50%,-20px);opacity:0}}
 .lx-holder .lx-help:focus-visible{outline:3px solid currentColor;outline-offset:2px}
 .lx-howto{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:12px;background:rgba(10,12,30,.72)}
 .lx-howcard{width:100%;max-width:440px;max-height:94vh;overflow:hidden;box-sizing:border-box;background:#fffaf0;color:#2b2540;border-radius:26px;padding:22px 20px 18px;display:flex;flex-direction:column;gap:12px;font-family:var(--lx-ui,system-ui,sans-serif);box-shadow:0 24px 70px rgba(0,0,0,.5)}
@@ -289,6 +301,16 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
   <div class="lx-recrow">
     <button class="lx-recbtn" id="lx-recbtn" type="button">I miei record</button>
     <button class="lx-recbtn" id="lx-pubbtn" type="button">Classifiche</button>
+  </div>
+
+  <div class="lx-modal" id="lx-grecpanel" role="dialog" aria-modal="true" aria-labelledby="lx-grectitle" hidden>
+    <div class="lx-modalcard">
+      <h2 id="lx-grectitle">Record</h2>
+      <p class="lx-recwho" id="lx-grecwho"></p>
+      <div class="lx-recwrap"><table class="lx-rectable"><thead><tr><th>Quando</th><th>Migliore</th><th>Media</th><th>Partite</th></tr></thead><tbody id="lx-grecrows"></tbody></table></div>
+      <p class="lx-recnote" id="lx-grecnote"></p>
+      <button class="lx-recclose" id="lx-grecclose" type="button">Chiudi</button>
+    </div>
   </div>
 
   <div class="lx-modal" id="lx-pubpanel" role="dialog" aria-modal="true" aria-labelledby="lx-pubtitle" hidden>
@@ -2067,7 +2089,7 @@ h1 span{color:var(--accent)}
   // Contributo nascosto per ora: metti true per riattivare il riquadro e il link a fine partita.
   const SHOW_DONATE = true;
   const AUTHOR = 'Silvio Chiaverini';
-  const BUILD = '2026-10-05.3';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
+  const BUILD = '2026-10-05.5';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
   // Nome del giocatore: salvato solo sul dispositivo, compare nei testi che si condividono (mai nelle statistiche anonime).
   const cleanName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
   const playerName = () => { try { return cleanName(JSON.parse(localStorage.getItem('nit_name'))); } catch (e) { return ''; } };
@@ -2195,9 +2217,10 @@ h1 span{color:var(--accent)}
   // ---------- stato ----------
   let S;
   function newState(mode) {
-    const rnd = mode === 'daily' ? mulberry(hashStr('bilancia-' + today)) : Math.random;
+    const tok = mode === 'daily' ? '' : (window.nitSeed ? window.nitSeed(mode) : Math.floor(Math.random() * 60466176).toString(36).padStart(5, '0'));
+    const rnd = mode === 'daily' ? mulberry(hashStr('bilancia-' + today)) : mulberry(hashStr('bilancia-x' + tok));   // libera e sfida: dal seme
     const s = {
-      mode, rnd, gen: 0, cur: null, next: null,
+      mode, rnd, tok, gen: 0, cur: null, next: null,
       plates: [{ items: [], sum: 0 }, { items: [], sum: 0 }],
       score: 0, time: START_TIME, combo: 0, maxCombo: 0, sinceClear: 0, perfects: 0, placed: 0,
       running: false, over: false, tipDir: 0, theta: S ? S.theta : 0, vel: S ? S.vel : 0,
@@ -2321,7 +2344,8 @@ h1 span{color:var(--accent)}
     const prev = store.get(key, 0);
     const isRecord = S.score > prev;
     if (isRecord) store.set(key, S.score);
-    $('overMode').textContent = S.mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : 'Partita libera';
+    $('overMode').textContent = S.mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : S.mode === 'chal' ? 'Sfida di un amico' : 'Partita libera';
+    if (S.mode === 'daily') { delete el.over.dataset.seed; delete el.over.dataset.mode; } else { el.over.dataset.seed = S.tok; el.over.dataset.mode = S.mode; }   // il launcher ne ricava il codice sfida
     $('overWhy').textContent = why === 'tip' ? 'Si è ribaltata!' : 'Tempo scaduto';
     $('overScore').textContent = S.score.toLocaleString('it-IT');
     $('overRecord').hidden = !isRecord || S.score === 0;
@@ -2342,6 +2366,7 @@ h1 span{color:var(--accent)}
 
   $('play').addEventListener('click', () => { lastMode = 'free'; start('free'); });
   $('daily').addEventListener('click', () => { lastMode = 'daily'; start('daily'); });
+  if ($('chal')) $('chal').addEventListener('click', () => { lastMode = 'free'; start('chal'); });   // premuto dal launcher con un codice sfida
   $('again').addEventListener('click', () => start(lastMode));
   $('toMenu').addEventListener('click', () => { refreshMenu(); el.over.hidden = true; el.menu.hidden = false; });
   $('share').addEventListener('click', () => {
@@ -2355,6 +2380,7 @@ h1 span{color:var(--accent)}
   const syncMute = () => { muteBtn.textContent = muted ? 'Suono: no' : 'Suono: sì'; };
   muteBtn.addEventListener('click', () => { muted = !muted; store.set('bil_mute', muted); ac(); syncMute(); });
   syncMute();
+  window.__B = { get S() { return S; }, start };   // interfaccia di prova
 
   // ---------- input ----------
   let ptr = null;
@@ -2700,8 +2726,9 @@ h1 span{color:var(--accent)}
     while (S.targets.length < targetsFor(S.level)) spawnTarget();
   }
   function newState(mode) {
+    const tok = mode === 'daily' ? '' : (window.nitSeed ? window.nitSeed(mode) : Math.floor(Math.random() * 60466176).toString(36).padStart(5, '0'));
     S = {
-      mode, rnd: mode === 'daily' ? mulberry(hashStr('quadrante-' + today)) : Math.random,
+      mode, tok, rnd: mode === 'daily' ? mulberry(hashStr('quadrante-' + today)) : mulberry(hashStr('quadrante-x' + tok)),   // libera e sfida: dal seme
       pos: 0, steps: 0, cards: [], targets: [], hazards: [],
       rubies: 3, score: 0, combo: 0, maxCombo: 0, hits: 0, level: 1,
       running: false, over: false,
@@ -2765,7 +2792,7 @@ h1 span{color:var(--accent)}
     if (deal && !reduceMotion) { b.classList.remove('deal'); void b.offsetWidth; b.classList.add('deal'); }
   }
   function renderHints() {
-    const show = S.running && S.mode === 'free' && S.hits < 2;
+    const show = S.running && S.mode !== 'daily' && S.hits < 2;
     const tset = new Set(S.targets.map(t => t.p));
     cardBtns.forEach((b, i) => b.classList.toggle('hint', show && tset.has(mod12(S.pos + S.cards[i]))));
   }
@@ -2847,7 +2874,7 @@ h1 span{color:var(--accent)}
   }
   let lastMode = 'free';
   function start(mode) {
-    ac(); lastMode = mode;
+    ac(); lastMode = mode === 'chal' ? 'free' : mode;
     newState(mode); S.running = true;
     cardBtns.forEach((_, i) => renderCard(i, true));
     renderHints();
@@ -2859,7 +2886,8 @@ h1 span{color:var(--accent)}
     const key = S.mode === 'daily' ? dailyKey : 'quad_best';
     const prev = store.get(key, 0), isRecord = S.score > prev;
     if (isRecord) store.set(key, S.score);
-    $('overMode').textContent = S.mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : 'Partita libera';
+    $('overMode').textContent = S.mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : S.mode === 'chal' ? 'Sfida di un amico' : 'Partita libera';
+    if (S.mode === 'daily') { delete el.over.dataset.seed; delete el.over.dataset.mode; } else { el.over.dataset.seed = S.tok; el.over.dataset.mode = S.mode; }   // il launcher ne ricava il codice sfida
     $('overScore').textContent = S.score.toLocaleString('it-IT');
     $('overRecord').hidden = !isRecord || S.score === 0;
     $('overRecord').textContent = S.mode === 'daily' ? 'Il tuo migliore di oggi' : 'Nuovo record';
@@ -2874,6 +2902,7 @@ h1 span{color:var(--accent)}
   }
   $('play').addEventListener('click', () => start('free'));
   $('daily').addEventListener('click', () => start('daily'));
+  if ($('chal')) $('chal').addEventListener('click', () => start('chal'));   // premuto dal launcher con un codice sfida
   $('again').addEventListener('click', () => start(lastMode));
   $('toMenu').addEventListener('click', () => { refreshMenu(); el.over.hidden = true; el.menu.hidden = false; });
   $('share').addEventListener('click', () => {
@@ -2885,6 +2914,7 @@ h1 span{color:var(--accent)}
   const syncMute = () => { muteBtn.textContent = muted ? 'Suono: no' : 'Suono: sì'; };
   muteBtn.addEventListener('click', () => { muted = !muted; store.set('quad_mute', muted); ac(); syncMute(); });
   syncMute();
+  window.__Q = { get S() { return S; }, start, gameOver };   // interfaccia di prova
   window.addEventListener('keydown', e => {
     const i = ['1', '2', '3', '4'].indexOf(e.key);
     if (i >= 0 && !e.repeat) { ac(); play(i); }
@@ -3119,8 +3149,9 @@ h1 span{color:var(--accent)}
   // ---------- stato ----------
   let S;
   function newState(mode) {
+    const tok = mode === 'daily' ? '' : (window.nitSeed ? window.nitSeed(mode) : Math.floor(Math.random() * 60466176).toString(36).padStart(5, '0'));
     S = {
-      mode, rnd: mode === 'daily' ? mulberry(hashStr('primo-' + today)) : Math.random,
+      mode, tok, rnd: mode === 'daily' ? mulberry(hashStr('primo-' + today)) : mulberry(hashStr('primo-x' + tok)),   // libera e sfida: dal seme
       spawned: 0, stack: [], score: 0, streak: 0, maxStreak: 0, done: 0, level: 1,
       spawnT: 0, running: false, over: false, shards: [], popups: [], shake: 0, flash: 0, lastBlock: null, endBlock: null,
     };
@@ -3256,7 +3287,7 @@ h1 span{color:var(--accent)}
   }
   let lastMode = 'free';
   function start(mode) {
-    ac(); lastMode = mode;
+    ac(); lastMode = mode === 'chal' ? 'free' : mode;
     newState(mode);
     spawnBlock(true); spawnBlock(true);
     S.running = true;
@@ -3269,7 +3300,8 @@ h1 span{color:var(--accent)}
     const key = S.mode === 'daily' ? dailyKey : 'primo_best';
     const prev = store.get(key, 0), isRecord = S.score > prev;
     if (isRecord) store.set(key, S.score);
-    $('overMode').textContent = S.mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : 'Partita libera';
+    $('overMode').textContent = S.mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : S.mode === 'chal' ? 'Sfida di un amico' : 'Partita libera';
+    if (S.mode === 'daily') { delete el.over.dataset.seed; delete el.over.dataset.mode; } else { el.over.dataset.seed = S.tok; el.over.dataset.mode = S.mode; }   // il launcher ne ricava il codice sfida
     $('overScore').textContent = S.score.toLocaleString('it-IT');
     $('overRecord').hidden = !isRecord || S.score === 0;
     $('overRecord').textContent = S.mode === 'daily' ? 'Il tuo migliore di oggi' : 'Nuovo record';
@@ -3291,6 +3323,7 @@ h1 span{color:var(--accent)}
   }
   $('play').addEventListener('click', () => start('free'));
   $('daily').addEventListener('click', () => start('daily'));
+  if ($('chal')) $('chal').addEventListener('click', () => start('chal'));   // premuto dal launcher con un codice sfida
   $('again').addEventListener('click', () => start(lastMode));
   $('toMenu').addEventListener('click', () => { refreshMenu(); el.over.hidden = true; el.menu.hidden = false; });
   $('share').addEventListener('click', () => {
@@ -3302,6 +3335,7 @@ h1 span{color:var(--accent)}
   const syncMute = () => { muteBtn.textContent = muted ? 'Suono: no' : 'Suono: sì'; };
   muteBtn.addEventListener('click', () => { muted = !muted; store.set('primo_mute', muted); ac(); syncMute(); });
   syncMute();
+  window.__P = { get S() { return S; }, start, collapse };   // interfaccia di prova
   window.addEventListener('keydown', e => {
     if (e.repeat) return;
     const map = { '2': 2, '3': 3, '5': 5, '7': 7, 'q': 11, 'Q': 11, 'w': 13, 'W': 13 };
@@ -3512,8 +3546,9 @@ h1 span{color:var(--accent)}
 
   let S;
   function newState(mode) {
+    const tok = mode === 'daily' ? '' : (window.nitSeed ? window.nitSeed(mode) : Math.floor(Math.random() * 60466176).toString(36).padStart(5, '0'));
     S = {
-      mode, rnd: mode === 'daily' ? mulberry(hashStr('resto-' + today)) : Math.random,
+      mode, tok, rnd: mode === 'daily' ? mulberry(hashStr('resto-' + today)) : mulberry(hashStr('resto-x' + tok)),   // libera e sfida: dal seme
       idx: 0, cust: null, queue: [], given: [], stars: 3, score: 0, streak: 0, maxStreak: 0,
       served: 0, perfects: 0, running: false, over: false, busy: false,
     };
@@ -3604,7 +3639,7 @@ h1 span{color:var(--accent)}
     $('rNum').textContent = String(c.idx + 1).padStart(4, '0');
     $('rTotal').textContent = '€ ' + fmt(c.total);
     $('rPaid').textContent = '€ ' + fmt(c.paid) + (c.extra ? ' + ' + fmt(c.extra) : '');
-    const hint = S.mode === 'free' && c.idx < 2;
+    const hint = S.mode !== 'daily' && c.idx < 2;
     $('rChange').textContent = hint ? '€ ' + fmt(c.change) : '€ ?';
     $('stamp').classList.remove('on');
     const q = $('queue'); q.innerHTML = '';
@@ -3704,7 +3739,8 @@ h1 span{color:var(--accent)}
     const key = S.mode === 'daily' ? dailyKey : 'resto_best';
     const prev = store.get(key, 0), isRecord = S.score > prev;
     if (isRecord) store.set(key, S.score);
-    $('overMode').textContent = S.mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : 'Partita libera';
+    $('overMode').textContent = S.mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : S.mode === 'chal' ? 'Sfida di un amico' : 'Partita libera';
+    if (S.mode === 'daily') { delete $('over').dataset.seed; delete $('over').dataset.mode; } else { $('over').dataset.seed = S.tok; $('over').dataset.mode = S.mode; }   // il launcher ne ricava il codice sfida
     $('overScore').textContent = S.score.toLocaleString('it-IT');
     $('overRecord').hidden = !isRecord || S.score === 0;
     $('overRecord').textContent = S.mode === 'daily' ? 'Il tuo migliore di oggi' : 'Nuovo record';
@@ -3727,7 +3763,7 @@ h1 span{color:var(--accent)}
   }
   let lastMode = 'free';
   function start(mode) {
-    ac(); lastMode = mode;
+    ac(); lastMode = mode === 'chal' ? 'free' : mode;
     newState(mode);
     S.running = true;
     nextCustomer();
@@ -3736,6 +3772,7 @@ h1 span{color:var(--accent)}
   }
   $('play').addEventListener('click', () => start('free'));
   $('daily').addEventListener('click', () => start('daily'));
+  if ($('chal')) $('chal').addEventListener('click', () => start('chal'));   // premuto dal launcher con un codice sfida
   $('again').addEventListener('click', () => start(lastMode));
   $('toMenu').addEventListener('click', () => { refreshMenu(); $('over').hidden = true; $('menu').hidden = false; });
   $('clear').addEventListener('click', () => { if (!S.running || S.busy || !S.given.length) return; S.given = []; sfx.back(); renderGiven(); });
@@ -3748,6 +3785,7 @@ h1 span{color:var(--accent)}
   const syncMute = () => { muteBtn.textContent = muted ? 'Suono: no' : 'Suono: sì'; };
   muteBtn.addEventListener('click', () => { muted = !muted; store.set('resto_mute', muted); ac(); syncMute(); });
   syncMute();
+  window.__RS = { get S() { return S; }, start, gameOver };   // interfaccia di prova
 
   // ---------- ciclo ----------
   let hud = {};
@@ -4695,7 +4733,7 @@ let grid = [];                                     // 4x4 di oggetti tessera o n
 let nextId = 1;
 let score = 0, best = 0, prevBest = 0, streak = 0, maxStreak = 0, hammers = 0, maxTile = 0, moves = 0;
 let won = false;                                   // 2048 gia' raggiunto (il modale si mostra una volta sola)
-let mode = 'free', lastMode = 'free';
+let mode = 'free', lastMode = 'free', seedTok = '';
 let running = false, over = false, busy = false, hammerMode = false, pending = null, undoSnap = null;
 let gen = 0;                                       // invalida i timer di una partita precedente
 let TS = 1;                                        // scala dei tempi (i test la riducono)
@@ -4854,8 +4892,9 @@ function setHammer(on) {
 }
 
 function start(m) {
-  ac(); lastMode = m; mode = m; gen++;
-  rs = m === 'daily' ? hashStr('raddoppio-' + today) : (Math.random() * 4294967296) >>> 0;
+  ac(); lastMode = m === 'chal' ? 'free' : m; mode = m; gen++;
+  seedTok = m === 'daily' ? '' : (window.nitSeed ? window.nitSeed(m) : Math.floor(Math.random() * 60466176).toString(36).padStart(5, '0'));
+  rs = m === 'daily' ? hashStr('raddoppio-' + today) : hashStr('raddoppio-x' + seedTok);   // libera e sfida: dal seme
   clearBoard();
   score = 0; streak = 0; maxStreak = 0; hammers = 0; maxTile = 0; moves = 0; won = false;
   running = true; over = false; busy = false; hammerMode = false; pending = null; undoSnap = null;
@@ -4971,7 +5010,8 @@ function finish() {
   over = true; running = false; hammerMode = false; $('win').hidden = true;
   bumpBest();
   const isRecord = score > prevBest && score > 0;
-  $('overMode').textContent = mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : 'Partita libera';
+  $('overMode').textContent = mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : mode === 'chal' ? 'Sfida di un amico' : 'Partita libera';
+  if (mode === 'daily') { delete $('over').dataset.seed; delete $('over').dataset.mode; } else { $('over').dataset.seed = seedTok; $('over').dataset.mode = mode; }   // il launcher ne ricava il codice sfida
   $('overScore').textContent = score.toLocaleString('it-IT');
   $('newRecord').hidden = !isRecord;
   $('newRecord').textContent = mode === 'daily' ? 'Il tuo migliore di oggi' : 'Nuovo record';
@@ -5001,6 +5041,7 @@ function armRestart(on) {
 }
 $('play').addEventListener('click', () => start('free'));
 $('daily').addEventListener('click', () => start('daily'));
+if ($('chal')) $('chal').addEventListener('click', () => start('chal'));   // premuto dal launcher con un codice sfida
 $('again').addEventListener('click', () => start(lastMode));
 $('toMenu').addEventListener('click', () => { refreshMenu(); $('over').hidden = true; $('menu').hidden = false; });
 $('winGo').addEventListener('click', () => { $('win').hidden = true; });
@@ -5058,8 +5099,9 @@ stage.addEventListener('pointercancel', () => { ptr = null; });
 /* Interfaccia di prova (usata dai test automatici; innocua per il gioco). */
 window.__R = {
   planLine, cellAt, multOf,
-  get S() { return { score, best, streak, maxStreak, hammers, maxTile, moves, running, over, busy, won, hammerMode, mode, rs }; },
+  get S() { return { score, best, streak, maxStreak, hammers, maxTile, moves, running, over, busy, won, hammerMode, mode, rs, seedTok }; },
   values() { return grid.map(row => row.map(t => (t ? t.v : 0))); },
+  setScore(v) { score = v; },
   setGrid(rows, opts = {}) { clearBoard(); rows.forEach((row, r) => row.forEach((v, c) => { if (v) makeTile(v, r, c, false); })); if (opts.hammers !== undefined) hammers = opts.hammers; if (opts.streak !== undefined) streak = opts.streak; if (opts.maxTile !== undefined) maxTile = opts.maxTile; render(); },
   move: input, start, undo, finish, canMove, useHammerAt(r, c) { setHammer(true); useHammer(grid[r][c]); },
   setTimescale(x) { TS = x; boardEl.style.setProperty('--slide', Math.max(1, Math.round(SLIDE_MS() * x)) + 'ms'); },
@@ -6084,10 +6126,10 @@ function saveProgress() {
 function newCode() {
   len = mode === 'daily' ? DAILY_LEN : LEN_AT(n);
   maxTries = TRIES_OF[len];
-  code = mode === 'daily' ? dailyCode() : makeCode(len, Math.random);
+  code = mode === 'daily' ? dailyCode() : makeCode(len, serieRnd);   // serie e sfida: i codici vengono dal seme, uno dopo l'altro
   guesses = []; cur = []; excl = new Set(); hintUsed = 0; hintDigit = ''; hintPos = -1; tickSec = -1; codeSecs = 0; animRow = -1; locked = false; noteMode = false;
   tLimit = mode === 'daily' ? 0 : timeLimit(len, n); tLeft = tLimit;
-  hintRnd = mode === 'daily' ? mulberry(hashStr('indizio-' + today)) : Math.random;
+  hintRnd = mode === 'daily' ? mulberry(hashStr('indizio-' + today)) : mulberry(hashStr('indizio-x' + serieTok + '-' + n));
   if (mode === 'daily') {
     const p = store.get(progKey, null);
     if (p && Array.isArray(p.g)) {
@@ -6105,8 +6147,11 @@ function newCode() {
   else if (mode === 'serie') banner('Cassaforte ' + (n + 1), len + ' cifre · ' + maxTries + ' tentativi');
   sfx.start();
 }
+let serieTok = '', serieRnd = Math.random, isChal = false;
 function start(m) {
-  ac(); gen++; mode = m; over = false; delete $('over').dataset.replay;
+  ac(); gen++; isChal = m === 'chal'; mode = m === 'chal' ? 'serie' : m; over = false; delete $('over').dataset.replay;
+  serieTok = mode === 'daily' ? '' : (window.nitSeed ? window.nitSeed(m) : Math.floor(Math.random() * 60466176).toString(36).padStart(5, '0'));
+  serieRnd = mode === 'daily' ? Math.random : mulberry(hashStr('cassaforte-x' + serieTok));
   lastMiss = ''; missed = []; n = 0; solved = 0; lives = LIVES; streak = 0; maxStreak = 0; score = 0; dispScore = 0; totalTries = 0; elapsed = 0; dailyGrid = [];
   best = store.get('cass_best', 0); prevBest = best;
   $('menu').hidden = true; $('over').hidden = true;
@@ -6221,11 +6266,13 @@ function finish(kind) {
   if (mode === 'daily') {
     const win = kind === true, res = { s: win ? score : 0, ok: win, t: guesses.length, sec: Math.round(elapsed), h: hintUsed, len, max: maxTries, grid: dailyGridText(guesses), code: win ? '' : code };
     store.set(dailyKey, res); store.del(progKey);
+    delete $('over').dataset.seed; delete $('over').dataset.mode;
     win ? sfx.win() : sfx.over();
     showDaily(res, false);
     return;
   }
   delete $('over').dataset.board;
+  $('over').dataset.seed = serieTok; $('over').dataset.mode = isChal ? 'chal' : 'free';   // il launcher ne ricava il codice sfida
   const isRecord = score > prevBest && score > 0;
   if (score > store.get('cass_best', 0)) store.set('cass_best', score);
   kind === 'clear' ? sfx.win() : sfx.over(); buzz(80);
@@ -6234,7 +6281,7 @@ function finish(kind) {
   const title = kind === 'clear' ? 'Banca svuotata!' : 'Fine della serie';
   const near = isRecord ? (prevBest > 0 ? 'Hai battuto il tuo record di ' + fmt(prevBest) + '.' : 'Primo record: ora hai un punteggio da battere.')
     : prevBest > 0 ? (gap < prevBest * 0.25 ? 'Ci sei quasi: ti mancano ' + fmt(gap) + ' punti al record.' : 'Record da battere: ' + fmt(prevBest) + '.') : 'Prima serie: ora hai un record da battere.';
-  fillOver({ mode: 'Serie · ' + (kind === 'clear' ? 'tutte le 20 casseforti' : solved + (solved === 1 ? ' cassaforte aperta' : ' casseforti aperte')), title, score, record: isRecord, near, a: [solved, 'Aperte'], b: [maxStreak, 'Serie max'], c: [avg, 'Tentativi'], again: 'Rigioca', code: lastMiss, codeLbl: 'Il codice che non hai aperto era:', earlier: missed.slice(0, -1) });
+  fillOver({ mode: (isChal ? 'Sfida di un amico · ' : 'Serie · ') + (kind === 'clear' ? 'tutte le 20 casseforti' : solved + (solved === 1 ? ' cassaforte aperta' : ' casseforti aperte')), title, score, record: isRecord, near, a: [solved, 'Aperte'], b: [maxStreak, 'Serie max'], c: [avg, 'Tentativi'], again: 'Rigioca', code: lastMiss, codeLbl: 'Il codice che non hai aperto era:', earlier: missed.slice(0, -1) });
   shareText = 'Cassaforte · Serie\n' + fmt(score) + ' punti · ' + solved + (solved === 1 ? ' cassaforte aperta' : ' casseforti aperte') + (kind === 'clear' ? ' (tutte!)' : '') + ' · serie di ' + maxStreak + ' (' + fmtMult(mult(maxStreak)) + ')';
   setTimeout(() => { if (g0 === gen) { $('over').hidden = false; $('again').focus({ preventScroll: true }); } }, 500 * TS);
 }
@@ -6274,6 +6321,7 @@ $('pad').addEventListener('click', e => {
 });
 $('hint').addEventListener('click', useHint);
 $('play').addEventListener('click', () => start('serie'));
+if ($('chal')) $('chal').addEventListener('click', () => start('chal'));   // premuto dal launcher con un codice sfida
 $('daily').addEventListener('click', () => {
   const d = store.get(dailyKey, null);
   if (d) { gen++; mode = 'daily'; over = true; state = 'over'; showDaily(d, true); return; }
@@ -6322,10 +6370,10 @@ function frame(t) {
 /* Interfaccia di prova (usata dai test automatici; innocua per il gioco). */
 window.__C = {
   LEN_AT, TRIES_OF, TIME_OF, timeLimit, mult, codePoints, dailyPoints, makeCode, feedback, validGuess, allCodes, sameFb, mulberry, hashStr, dailyCode, MAX_CODES, LIVES,
-  start, pressDigit, backspace, submit, useHint, type(s) { [...s].forEach(pressDigit); },
+  start, pressDigit, backspace, submit, useHint, type(s) { [...s].forEach(pressDigit); }, finish, setScore(v) { score = v; },
   setCode(c) { code = c; len = c.length; maxTries = TRIES_OF[len] || maxTries; guesses = []; cur = []; render(); updatePad(); },
   setTime(v) { tLeft = v; }, setTimescale(x) { TS = x; },
-  get S() { return { state, mode, code, len, maxTries, guesses, cur, n, solved, lives, streak, maxStreak, score, tLeft, tLimit, elapsed, locked, hintUsed, hintPos, excl: [...excl], over }; },
+  get S() { return { serieTok, isChal, state, mode, code, len, maxTries, guesses, cur, n, solved, lives, streak, maxStreak, score, tLeft, tLimit, elapsed, locked, hintUsed, hintPos, excl: [...excl], over }; },
   HINT_COST, DAILY_HINT_COST,
 };
 
@@ -6399,7 +6447,7 @@ const today = romeDate();
 const todayLabel = today.slice(8, 10) + '/' + today.slice(5, 7);
 const dailyKey = 'dieci_d_' + today;
 let grid = new Array(N * N).fill(0), cellEls = [];
-let score = 0, best = 0, prevBest = 0, moves = 0, biggest = 0, hints = 0, tLeft = TIME, lastSec = -1, lastT = 0, gridNo = 0, busy = false;
+let score = 0, best = 0, prevBest = 0, moves = 0, biggest = 0, hints = 0, tLeft = TIME, lastSec = -1, lastT = 0, gridNo = 0, busy = false, seedTok = '';
 let mode = 'free', lastMode = 'free', running = false, over = false, gen = 0, TS = 1;
 let drag = null, kc = { r: 0, c: 0 }, kAnchor = null, hintTimer = 0;
 const APP = $('app'), gridEl = $('grid'), selEl = $('sel'), fxEl = $('fx');
@@ -6414,7 +6462,8 @@ function paint(fresh) {
 // Griglia numero k della partita: libera = casuale; sfida del giorno = sequenza uguale per tutti (la prima e' quella di sempre).
 function gridFor(k) {
   for (let t = 0; t < 6; t++) {
-    const rand = mode === 'daily' ? mulberry(hashStr('dieci-' + today + (k ? ':' + k : '') + (t ? '.' + t : ''))) : Math.random;
+    const tail = (k ? ':' + k : '') + (t ? '.' + t : '');
+    const rand = mode === 'daily' ? mulberry(hashStr('dieci-' + today + tail)) : mulberry(hashStr('dieci-x' + seedTok + tail));   // libera e sfida: dal seme (si puo' rigiocare uguale)
     const g = makeGrid(rand); if (hasMove(g)) return g;
   }
   return makeGrid(Math.random);
@@ -6486,7 +6535,8 @@ function refreshMenu() {
 }
 
 function start(m) {
-  ac(); lastMode = m; mode = m; gen++;
+  ac(); lastMode = m === 'chal' ? 'free' : m; mode = m; gen++;
+  seedTok = m === 'daily' ? '' : (window.nitSeed ? window.nitSeed(m) : Math.floor(Math.random() * 60466176).toString(36).padStart(5, '0'));
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();   // la tastiera deve comandare il tabellone, non l'ultimo pulsante premuto
   gridNo = 0; busy = false; grid = gridFor(0); paint();
   score = 0; moves = 0; biggest = 0; hints = 0; tLeft = TIME; lastSec = -1; lastT = 0;
@@ -6553,8 +6603,9 @@ function finish() {
   const key = bestKey(), old = store.get(key, 0);
   if (score > old) store.set(key, score);
   const isRecord = score > prevBest && score > 0;
-  $('overMode').textContent = mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : 'Partita libera';
+  $('overMode').textContent = mode === 'daily' ? 'Sfida del giorno · ' + todayLabel : mode === 'chal' ? 'Sfida di un amico' : 'Partita libera';
   $('overTitle').textContent = 'Tempo scaduto';
+  const ov = $('over'); if (mode === 'daily') { delete ov.dataset.seed; delete ov.dataset.mode; } else { ov.dataset.seed = seedTok; ov.dataset.mode = mode; }   // il launcher ne ricava il codice sfida
   $('overScore').textContent = score.toLocaleString('it-IT');
   $('newRecord').hidden = !isRecord; $('newRecord').textContent = mode === 'daily' ? 'Il tuo migliore di oggi' : 'Nuovo record';
   $('stTaken').textContent = score; $('stMoves').textContent = moves; $('stBig').textContent = gridNo + 1;
@@ -6574,6 +6625,7 @@ function armRestart(on) {
 }
 $('play').addEventListener('click', () => start('free'));
 $('daily').addEventListener('click', () => start('daily'));
+if ($('chal')) $('chal').addEventListener('click', () => start('chal'));   // premuto dal launcher quando si incolla un codice sfida
 $('again').addEventListener('click', () => start(lastMode));
 $('toMenu').addEventListener('click', () => { refreshMenu(); $('over').hidden = true; $('menu').hidden = false; });
 $('restart').addEventListener('click', () => {
@@ -6642,7 +6694,7 @@ window.addEventListener('keydown', e => {
 /* Interfaccia di prova (usata dai test automatici; innocua per il gioco). */
 window.__D = {
   makeGrid, rectInfo, allMoves, hasMove, bonusOf, mulberry, hashStr,
-  get S() { return { score, best, moves, biggest, hints, tLeft, running, over, mode, gridNo, busy, grid: grid.slice() }; },
+  get S() { return { score, best, moves, biggest, hints, tLeft, running, over, mode, gridNo, busy, seedTok, grid: grid.slice() }; },
   start, hint, finish, commit(r1, c1, r2, c2) { return commit([r1, c1], [r2, c2]); },
   setGrid(rows) { grid = rows.flat(); paint(); },
   setTime(v) { tLeft = v; renderTime(); },
@@ -7027,9 +7079,16 @@ refreshMenu(); render();
     const menuPanel = holder.querySelector('#menu').firstElementChild;
     const overPanel = holder.querySelector('#over').firstElementChild;
     const helpBtn = () => { const b = document.createElement('button'); b.type = 'button'; b.className = 'lx-help'; b.textContent = '❓ Come si gioca'; b.addEventListener('click', () => showHowto(holder, key)); return b; };
-    menuPanel.querySelector('.btns').appendChild(helpBtn());
+    const recOpenBtn = () => { const b = document.createElement('button'); b.type = 'button'; b.className = 'lx-help lx-recopen'; b.textContent = '🏆 Record'; b.addEventListener('click', () => openGameRec(key)); return b; };
+    // il Sentiero ha gia' il suo pulsante Record: li' basta «Come si gioca»; negli altri giochi i due pulsanti stanno affiancati (meno altezza)
+    const helpRow = () => { if (holder.querySelector('#recBtn')) return helpBtn(); const r = document.createElement('div'); r.className = 'lx-brow'; r.append(helpBtn(), recOpenBtn()); return r; };
+    menuPanel.querySelector('.btns').appendChild(helpRow());
+    if (CHAL_ON.has(key)) {
+      const hb = document.createElement('button'); hb.type = 'button'; hb.id = 'chal'; hb.hidden = true; menuPanel.appendChild(hb);   // il gioco ascolta questo pulsante: il launcher lo preme per avviare una sfida
+      menuPanel.querySelector('.btns').appendChild(chalRow(holder, key));
+    }
     { const top = back(); top.classList.add('lx-backtop'); menuPanel.prepend(top); }   // in cima alla scheda: si vede sempre, anche sugli schermi bassi dove il menu scorre
-    overPanel.querySelector('.btns').appendChild(helpBtn());
+    overPanel.querySelector('.btns').appendChild(helpRow());
     overPanel.querySelector('.btns').appendChild(back());
     const hook = document.createElement('div'); hook.className = 'lx-hook'; hook.hidden = true; overPanel.querySelector('.btns').after(hook);
     const copy = document.createElement('p');
@@ -7065,7 +7124,7 @@ refreshMenu(); render();
     }
   }
   function refreshRecLines(holder, key) { holder.querySelectorAll('.lx-recline').forEach(r => { r.textContent = recLine(key); }); }
-  function mount(key) {
+  function mount(key, prefill) {
     if (current) unmount();
     const tpl = document.getElementById('tpl-' + key);
     if (!tpl || !GAMES[key]) return;
@@ -7075,10 +7134,12 @@ refreshMenu(); render();
     launcher.hidden = true;
     document.body.appendChild(holder);
     decorate(holder, key);
-    const ctx = { alive: true, listeners: [], cleanups: [] };
+    const ctx = { alive: true, listeners: [], cleanups: [], chal: null };
     const win = new Proxy(window, {
       get(t, k) {
         if (k === 'addEventListener') return (ty, f, o) => { ctx.listeners.push([ty, f, o]); window.addEventListener(ty, f, o); };
+        if (k === 'nitSeed') return mode => (mode === 'chal' && ctx.chal ? ctx.chal.seed : newSeed());   // seme della partita (modi non giornalieri)
+        if (k === 'nitChal') return ctx.chal;
         if (k === 'onUnmount') return f => { ctx.cleanups.push(f); };   // il gioco registra qui cio' che non e' un ascoltatore di window
         if (k === 'AudioContext' || k === 'webkitAudioContext') return function () { return getAC(); };
         const v = Reflect.get(window, k);
@@ -7113,9 +7174,11 @@ refreshMenu(); render();
       refreshRecLines(holder, key);
       floor = Math.max(floor, readBest());
       if (sc > 0) fillHook(holder, key, sc, before, stBefore);
+      if (sc > 0) chalAfter(holder, key, sc);
       if (sc > 0 && over.dataset.board && BOARDS[over.dataset.board]) pubAfterGame(holder, over.dataset.board, sc);
     })
       .observe(over, { attributes: true, attributeFilter: ['hidden'] });
+    if (prefill) { const w = holder.querySelector('.lx-chalwrap'); if (w && w._prefill) w._prefill(prefill); }
     window.scrollTo(0, 0);
   }
   function unmount() {
@@ -7136,7 +7199,7 @@ refreshMenu(); render();
   // ---------- nome del giocatore: serve prima di giocare, compare nei risultati condivisi ----------
   const whoEl = document.getElementById('lx-who'), whoForm = document.getElementById('lx-whoform'), whoIn = document.getElementById('lx-name');
   const whoHello = document.getElementById('lx-hello'), whoErr = document.getElementById('lx-nameerr');
-  let pendingKey = null;
+  let pendingKey = null, pendingChal = null;
   function renderWho(edit) {
     const n = playerName(), showForm = !n || edit;
     whoForm.hidden = !showForm; whoHello.hidden = showForm;
@@ -7144,24 +7207,129 @@ refreshMenu(); render();
     if (showForm) whoIn.value = n;
     whoEl.classList.remove('need'); whoErr.textContent = '';
   }
-  function go(key) {
+  function go(key, chal) {
     if (!playerName()) {
-      pendingKey = key; renderWho(false);
+      pendingKey = key; pendingChal = chal || null; renderWho(false);
       whoEl.classList.add('need'); whoErr.textContent = 'Scrivi il tuo nome per giocare.';
       window.scrollTo(0, 0); whoIn.focus();
       return;
     }
-    mount(key);
+    mount(key, chal);
   }
   whoForm.addEventListener('submit', e => {
     e.preventDefault();
     const n = cleanName(whoIn.value);
     if (!n) { whoErr.textContent = 'Scrivi un nome (massimo 20 caratteri).'; whoIn.focus(); return; }
     ls.set('nit_name', n); renderWho(false);
-    if (pendingKey) { const k = pendingKey; pendingKey = null; mount(k); }
+    if (pendingKey) { const k = pendingKey, c = pendingChal; pendingKey = null; pendingChal = null; mount(k, c); }
   });
   document.getElementById('lx-namechange').addEventListener('click', () => { renderWho(true); whoIn.focus(); whoIn.select(); });
   renderWho(false);
+  // ---------- sfida tra amici (come il codice SEN del Sentiero): stessa sequenza di partenza e punteggio da battere ----------
+  // Il codice e' PREFISSO-seme-punti. Il gioco chiede il seme con window.nitSeed(modo) e a fine partita lo scrive in #over (data-seed, data-mode).
+  const CHAL_PFX = { bilancia: 'BIL', quadrante: 'QUA', primo: 'PRI', resto: 'RES', girasette: 'GIR', raddoppio: 'RAD', lampo: 'LAM', cassaforte: 'CAS', dieci: 'DIE' };
+  const CHAL_ON = new Set(['dieci', 'bilancia', 'quadrante', 'primo', 'resto', 'raddoppio', 'cassaforte']);   // giochi che accettano la sfida
+  const newSeed = () => Math.floor(Math.random() * 60466176).toString(36).padStart(5, '0');
+  function parseChal(text) {
+    const t = String(text || ''), m = /\b([A-Za-z]{3})-([0-9a-z]{3,8})-(\d{1,7})\b/i.exec(t);
+    if (!m) return null;
+    const key = Object.keys(CHAL_PFX).find(k => CHAL_PFX[k] === m[1].toUpperCase());
+    if (!key) return null;
+    let name = '';
+    const nm = /[?&]n=([^&\s]+)/.exec(t), pm = /^(.{1,20}?) · /m.exec(t);
+    if (nm) { try { name = decodeURIComponent(nm[1]); } catch (e) { name = nm[1]; } } else if (pm) name = pm[1];
+    return { key, seed: m[2].toLowerCase(), target: parseInt(m[3], 10), name: cleanName(name) };
+  }
+  const chalCode = (key, seed, score) => CHAL_PFX[key] + '-' + seed + '-' + score;
+  function startChal(c, holder) {
+    if (!current || !c) return;
+    current.ctx.chal = { seed: c.seed, target: c.target, name: c.name };
+    const b = holder.querySelector('#chal'); if (b) b.click();
+    const ban = document.createElement('div'); ban.className = 'lx-chalbanner';
+    ban.textContent = 'Sfida' + (c.name ? ' di ' + c.name : '') + ': batti ' + c.target.toLocaleString('it-IT') + ' punti';
+    holder.appendChild(ban); setTimeout(() => ban.remove(), 5000);
+  }
+  function chalRow(holder, key) {
+    const wrap = document.createElement('div'); wrap.className = 'lx-chalwrap';
+    const open = document.createElement('button'); open.type = 'button'; open.className = 'lx-help lx-chalopen'; open.textContent = '🤝 Sfida un amico';
+    const box = document.createElement('div'); box.className = 'lx-chalbox'; box.hidden = true;
+    const inp = document.createElement('input'); inp.type = 'text'; inp.className = 'lx-chalin'; inp.placeholder = 'Codice: ' + CHAL_PFX[key] + '-…'; inp.autocomplete = 'off'; inp.autocapitalize = 'off'; inp.spellcheck = false; inp.setAttribute('aria-label', 'Codice sfida');
+    const go = document.createElement('button'); go.type = 'button'; go.className = 'lx-help lx-chalgo'; go.textContent = 'Sfida';
+    const err = document.createElement('p'); err.className = 'lx-chalerr'; err.setAttribute('role', 'status');
+    const run = () => {
+      const c = parseChal(inp.value);
+      if (!c) { err.textContent = 'Codice non valido. Deve contenere qualcosa come ' + CHAL_PFX[key] + '-k3f9a-412.'; return; }
+      if (c.key !== key) { err.textContent = 'Questo codice è per ' + NAMES[c.key] + ': aprilo da quel gioco.'; return; }
+      err.textContent = ''; startChal(c, holder);
+    };
+    go.addEventListener('click', run);
+    inp.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); run(); } });
+    open.addEventListener('click', () => { box.hidden = !box.hidden; if (!box.hidden) inp.focus(); });
+    box.append(inp, go); wrap.append(open, box, err);
+    wrap._prefill = c => { inp.value = chalCode(c.key, c.seed, c.target); box.hidden = false; err.textContent = 'Sfida' + (c.name ? ' di ' + c.name : '') + ': ' + c.target.toLocaleString('it-IT') + ' punti da battere. Premi «Sfida» per giocare.'; };
+    return wrap;
+  }
+  // a fine partita: confronto con la sfida ricevuta e codice da inviare a un amico
+  function chalAfter(holder, key, score) {
+    const hook = holder.querySelector('.lx-hook'), over = holder.querySelector('#over');
+    if (!hook || !over || !CHAL_ON.has(key)) return;
+    const seed = over.dataset.seed, ch = current && current.ctx.chal;
+    if (over.dataset.mode === 'chal' && ch) {
+      const p = document.createElement('p'); p.className = 'lx-hl win';
+      const who = ch.name ? ' di ' + ch.name : '';
+      p.textContent = score > ch.target ? 'Hai battuto la sfida' + who + ': ' + score.toLocaleString('it-IT') + ' contro ' + ch.target.toLocaleString('it-IT') + '!'
+        : score === ch.target ? 'Pareggio con la sfida' + who + ': ' + score.toLocaleString('it-IT') + ' a ' + ch.target.toLocaleString('it-IT') + '.'
+        : 'Sfida persa' + who + ': ' + score.toLocaleString('it-IT') + ' contro ' + ch.target.toLocaleString('it-IT') + ' (ti mancano ' + (ch.target - score).toLocaleString('it-IT') + ').';
+      hook.prepend(p);
+      if (score > ch.target) confetti(holder, 40);
+    }
+    if (!seed || over.dataset.mode === 'daily') return;
+    const code = chalCode(key, seed, score), n = playerName();
+    const link = /^https?:/.test(location.protocol) ? location.href.split('#')[0] + '#' + key + '?c=' + code + (n ? '&n=' + encodeURIComponent(n) : '') : '';
+    const txt = withName(NAMES[key] + ' · ' + score.toLocaleString('it-IT') + ' punti') + '\nSfida: ' + code + (link ? '\n' + link : '');
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'lx-sharebtn'; b.textContent = '🤝 Sfida un amico';
+    const box = document.createElement('textarea'); box.className = 'lx-sharebox'; box.rows = 3; box.readOnly = true; box.hidden = true;
+    const fb = () => { box.value = txt; box.hidden = false; box.focus(); box.select(); b.textContent = 'Seleziona e copia il testo'; };
+    b.addEventListener('click', () => { try { navigator.clipboard.writeText(txt).then(() => { b.textContent = 'Codice copiato: invialo a un amico'; }, fb); } catch (e) { fb(); } });
+    hook.appendChild(b); hook.appendChild(box);
+  }
+  // ---------- record di un gioco (pulsante «Record» dentro ogni gioco): migliore, media e partite per periodo ----------
+  const grecPanel = document.getElementById('lx-grecpanel');
+  function recDetail(game) {
+    const g = recLoad()[game] || {}, today = romeDate(), ws = mondayOf(today), we = shiftDay(ws, 6);
+    const P = {}; ['day', 'week', 'month', 'year', 'all'].forEach(k => { P[k] = { best: 0, plays: 0, sum: 0, days: 0 }; });
+    Object.keys(g).filter(isDay).forEach(d => {
+      const r = g[d]; if (!r || !sane(r.b) || !sane(r.n) || !sane(r.s)) return;
+      const add = k => { const o = P[k]; o.best = Math.max(o.best, r.b); o.plays += r.n; o.sum += r.s; o.days++; };
+      add('all');
+      if (d.slice(0, 4) === today.slice(0, 4)) add('year');
+      if (d.slice(0, 7) === today.slice(0, 7)) add('month');
+      if (d >= ws && d <= we) add('week');
+      if (d === today) add('day');
+    });
+    let fl = 0; try { fl = JSON.parse(localStorage.getItem(BEST_OF[game])) || 0; } catch (e) {}
+    if (sane(fl) && fl > P.all.best) P.all.best = fl;   // il record salvato dal gioco prima dello storico
+    return P;
+  }
+  function openGameRec(key) {
+    const P = recDetail(key), today = romeDate(), tb = document.getElementById('lx-grecrows');
+    document.getElementById('lx-grectitle').textContent = 'Record · ' + NAMES[key];
+    document.getElementById('lx-grecwho').textContent = (playerName() ? playerName() + ' · ' : '') + 'giorno e settimana secondo il fuso di Roma (settimana da lunedì).';
+    tb.textContent = '';
+    [['day', 'Oggi'], ['week', 'Questa settimana'], ['month', 'Questo mese'], ['year', 'Quest\'anno'], ['all', 'Sempre']].forEach(([k, label]) => {
+      const o = P[k], tr = document.createElement('tr'), has = o.best > 0 || o.plays > 0;
+      [label, has && o.best ? o.best.toLocaleString('it-IT') : '—', o.plays ? Math.round(o.sum / o.plays).toLocaleString('it-IT') : '—', o.plays || '—'].forEach(x => { const td = document.createElement('td'); td.textContent = x; tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
+    const st = streakInfo(recLoad(), today);
+    document.getElementById('lx-grecnote').textContent = 'Serie di giorni di gioco: ' + st.cur + (st.cur === 1 ? ' giorno' : ' giorni') + ' (la migliore: ' + st.best + '). Le partite contano da quando esiste lo storico; i record sono salvati su questo dispositivo.';
+    grecPanel.hidden = false;
+    document.getElementById('lx-grecclose').focus({ preventScroll: true });
+  }
+  const closeGameRec = () => { grecPanel.hidden = true; };
+  document.body.appendChild(grecPanel);   // fuori dalla home: serve anche dentro i giochi
+  document.getElementById('lx-grecclose').addEventListener('click', closeGameRec);
+  grecPanel.addEventListener('click', e => { if (e.target === grecPanel) closeGameRec(); });
   // ---------- classifiche pubbliche (Supabase): solo le sfide del giorno, uguali per tutti ----------
   // Schema e protezioni: docs/classifica.sql. Il browser chiama solo funzioni del database (nessun accesso diretto alle tabelle).
   const PUB = { url: 'https://jjdykknfepdlpaxgryou.supabase.co', key: 'sb_publishable_5I67JFJFARsKSzDtGesZYQ_ciJIxwNN' };
@@ -7357,12 +7525,14 @@ refreshMenu(); render();
   if (!storageOK()) document.getElementById('lx-storewarn').hidden = false;
   else if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   document.querySelectorAll('[data-game]').forEach(b => b.addEventListener('click', () => go(b.dataset.game)));
-  window.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!pubPanel.hidden) pubPanel.hidden = true; else if (!recPanel.hidden) closeRec(); else if (current) unmount(); } });
+  window.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!grecPanel.hidden) closeGameRec(); else if (!pubPanel.hidden) pubPanel.hidden = true; else if (!recPanel.hidden) closeRec(); else if (current) unmount(); } });
   refreshBest();
   const hashKey = () => (location.hash || '').slice(1).split('?')[0];
-  const start = hashKey();
-  if (GAMES[start]) go(start);
-  window.addEventListener('hashchange', () => { const k = hashKey(); if (GAMES[k]) go(k); else if (!k) unmount(); });
+  // #gioco?c=PREFISSO-seme-punti[&n=Nome]: apre il gioco con il codice sfida gia' scritto
+  const hashChal = () => { const c = /[?&]c=/.test(location.hash || '') ? parseChal(location.hash) : null; return c && CHAL_ON.has(c.key) ? c : null; };
+  const start = hashKey(), c0 = hashChal();
+  if (c0) go(c0.key, c0); else if (GAMES[start]) go(start);
+  window.addEventListener('hashchange', () => { const c = hashChal(), k = hashKey(); if (c) go(c.key, c); else if (GAMES[k]) go(k); else if (!k) unmount(); });
 })();
 </script>
 

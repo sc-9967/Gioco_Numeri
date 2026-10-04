@@ -252,3 +252,11 @@ Prova di `tests/dieci.js` (browser vero, mouse reale per il trascinamento):
 - Su richiesta del titolare il tempo passa da 120 a 150 secondi. Dopo la prova sul suo telefono (Samsung A34): il rettangolo si prende bene e la schermata è leggibile; 120 secondi gli sembravano pochi.
 - Con la griglia nuova automatica il tempo è il limite vero: i punteggi salgono per tutti. Chi ha già record fatti a 120 secondi li vede superati più facilmente. [Probabile]
 - Il test `dieci.js` non dipende dalla durata (usa tempi impostati a mano).
+
+## Record in ogni gioco e sfida tra amici (versione 2026-10-05.5)
+
+- **Record per gioco** (`tests/record-gioco.js`): in tutti i giochi c'è il pulsante nel menu e a fine partita; con uno storico di prova (oggi 2 partite, migliore 300, somma 500; una partita vecchia da 900) la tabella dà oggi 300 / media 250 / 2 partite e sempre 900 / media 467 / 3 partite; anno e mese contano solo le partite recenti; Esc chiude il pannello senza uscire dal gioco; i due pulsanti affiancati stanno nello schermo a 360 px.
+- **Sfida** (`tests/sfida.js`), per ognuno dei 7 giochi: il seme della partita libera è di 5 caratteri; a fine partita il pulsante «Sfida un amico» c'è; codice non valido e codice di un altro gioco danno un messaggio; incollando il codice parte la sfida con banner «Sfida di Anna: batti N punti»; **stesso seme e stessa sequenza di partenza** (Bilancia: primi pesi; Quadrante: carte, bersagli e ostacoli; Primo: primi blocchi; Resto: primi clienti; Raddoppio: tessere iniziali; Cassaforte: codice e lunghezza; Dieci: griglia); sfida persa / battuta con i messaggi giusti; etichetta «Sfida di un amico»; «Rigioca» parte libera con un seme nuovo; il link `#gioco?c=…&n=Nome` apre il gioco con il codice scritto e il nome dell'amico.
+- **Cassaforte, controllo più profondo:** i primi 4 codici della serie (094, 517, 4186, 3215) sono identici in due sfide con lo stesso seme.
+- **Non provato:** il pulsante «Copia» negli appunti su un telefono vero (in prova compare il testo da copiare a mano); due telefoni diversi che giocano lo stesso seme. [Ipotesi] Che in Quadrante e Raddoppio la sequenza resti identica a parità di mosse.
+- **Esclusi per motivi tecnici:** Girasette (in partita libera i pezzi dipendono dalla plancia) e Lampo (casualità a ogni fotogramma e posizioni legate alle dimensioni dello schermo).
