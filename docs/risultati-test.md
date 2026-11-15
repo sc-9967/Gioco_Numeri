@@ -266,3 +266,21 @@ Prova di `tests/dieci.js` (browser vero, mouse reale per il trascinamento):
 Prova di `tests/classifica-giochi.js` con lo schema SQL vero su PostgreSQL locale. Per Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio, Lampo e Dieci: la sfida del giorno finita invia il punteggio, la schermata finale dice «Sei 1° oggi su 1», un secondo giocatore con meno punti è 2° su 2 con quanti punti mancano al primo; dal pannello **Record** del gioco il pulsante «🌍 Classifica pubblica» apre la classifica giusta con i due nomi e «(tu)»; il pannello Record dice che sono «I TUOI record». Il menu delle classifiche ha 10 voci; nel Sentiero c'è «🌍 Classifica» accanto a «Come si gioca».
 - **Non provato:** i tetti dei punteggi (1.000.000, Raddoppio 5.000.000) sono scelti da me e non verificati contro partite vere. [Ipotesi] Un punteggio legittimo molto alto sopra il tetto verrebbe rifiutato e il giocatore non lo vedrebbe in classifica.
 - **Rischio noto:** nei giochi senza massimo vero chi invia un numero enorme sotto il tetto vince. Il server non rifà la partita.
+
+## Audit di qualità e correzioni (versione 2026-11-15.3)
+
+Misure fatte con un browser vero su `index.html` (non con una skill: il comando `/impeccable` non esisteva nella sessione). Prova nuova: `tests/accessibilita.js`.
+
+**Corretto**
+1. **Struttura del documento:** `<html lang="it">`, `charset` corretto, `title` e `meta` spostati nell'`head` (prima stavano nel `body`, dopo un'impalcatura incompleta presente fin dal primo commit). Aggiunti `theme-color` (chiaro e scuro) e un'icona del sito in SVG incorporato. Il blocco iniziale con il margine dell'area sicura del telefono è rimasto. Non aggiunta l'icona PNG per la schermata Home di iOS.
+2. **Finestre (Classifiche, I miei record, Record di gioco, istruzioni):** il fuoco resta dentro (Tab e Maiusc+Tab fanno il giro), il resto della pagina è `inert` finché la finestra è aperta, e alla chiusura il fuoco torna sul pulsante che l'ha aperta. Prima 18 pressioni di Tab su 25 uscivano dalla finestra; ora 0 su 30. Esc nelle istruzioni chiude solo le istruzioni (prima chiudeva anche il gioco).
+3. **Nome dei campi di gioco** per Bilancia, Quadrante, Primo, Girasette e Lampo (`role="img"` con descrizione). Non rende i giochi giocabili da chi non vede: dice solo che cosa sono.
+4. **Annunci:** area `aria-live` con l'esito a fine partita («Tempo scaduto. Dieci: N punti. …»), la posizione in classifica e il banner di sfida.
+5. **Contrasti portati sopra la soglia:** «Versione» in fondo alla home (da 2,92 a 5,3), «pio» del titolo Raddoppio (da 2,98 a 3,7), badge «Gioca» di Resto e colore d'accento di Resto (da 4,3-4,5 a 5,1), pulsante «−3» di Bilancia (da 3,2 a 4,8). La moneta dimostrativa di Resto è nascosta agli ausili (decorativa).
+6. **Bersagli di tocco:** «← Tutti i giochi» in cima ai menu ora alto 44 px (prima 35) e «Cambia» il nome 44 px (prima 20).
+
+**Non fatto**
+- **Caratteri da Google Fonts:** restano esterni. Servono 10 famiglie; incorporarle gonfierebbe il file e non posso scaricarli da qui.
+- **Content-Security-Policy:** non aggiunta. Con gli script in linea servirebbe `unsafe-inline`, quindi proteggerebbe poco, e rischia di rompere il pannello donazioni o integrazioni future.
+- **Pulsanti «Suono»** (27-30 px) e tastierino della Cassaforte a 320 px (38 px di altezza): sopra il minimo AA di 24 px, sotto i 44 consigliati. Aumentarli sposta il layout dei giochi.
+- **Lettori di schermo veri:** non provati (TalkBack, VoiceOver). Il contrasto è stato misurato sui menu e sulla home, non sulle schermate di gioco in movimento.

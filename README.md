@@ -194,3 +194,10 @@ Copyright © 2026 Silvio Chiaverini. Licenza GNU GPL v3: vedi il file `LICENSE`.
 
 - Ora ogni gioco ha la sua classifica pubblica della sfida del giorno: bilancia-giorno, quadrante-giorno, primo-giorno, resto-giorno, girasette-giorno, raddoppio-giorno, lampo-giorno, dieci-giorno (più sentiero-giorno e cassaforte-giorno). Il database si aggiorna con l'ultimo `docs/classifica.sql` (basta anche solo il blocco `insert into public.nit_boards`).
 - **Meno a prova di imbroglio dove il punteggio non ha un massimo.** Se un punteggio è sospetto: istruzioni di moderazione in fondo a `docs/classifica.sql`.
+
+## Accessibilità e qualità (versione 2026-11-15.3)
+
+- Documento valido con lingua italiana, titolo e meta nell'`head`, colore della barra del browser e icona del sito.
+- Le finestre trattengono il fuoco della tastiera, escludono il resto della pagina e restituiscono il fuoco; Esc chiude solo la finestra.
+- I campi di gioco hanno un nome; gli esiti di fine partita e la posizione in classifica vengono annunciati ai lettori di schermo; i contrasti del testo di home e menu sono sopra la soglia WCAG AA; i pulsanti «← Tutti i giochi» e «Cambia» hanno un bersaglio di almeno 44 px.
+- Limiti noti: i giochi restano pensati per il tocco (nessun lettore di schermo vero provato); i caratteri arrivano ancora da Google Fonts. Dettagli in `docs/risultati-test.md`.

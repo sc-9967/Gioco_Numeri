@@ -1,7 +1,5 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <title>Numeri in Tasca</title>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!--
   Numeri in Tasca: Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio, Sentiero, Lampo, Cassaforte, Dieci.
   © 2026 Silvio Chiaverini.
@@ -24,7 +22,7 @@
   --g-bil-bg:#16342b; --g-bil-bg2:#0d231d; --g-bil-fg:#f4d88f; --g-bil-tx:#e8dfc7;
   --g-quad-bg:#19233c; --g-quad-bg2:#10182b; --g-quad-fg:#edcb7c; --g-quad-tx:#e3e6ef;
   --g-primo-bg:#2446d8; --g-primo-bg2:#1b36a8; --g-primo-fg:#ffffff; --g-primo-tx:#dbe3ff;
-  --g-resto-bg:#fbfaf5; --g-resto-fg:#24262b; --g-resto-acc:#d23f2c; --g-resto-line:#c9c6bb;
+  --g-resto-bg:#fbfaf5; --g-resto-fg:#24262b; --g-resto-acc:#c4372a; --g-resto-line:#c9c6bb;
   --gold:#c9a93f; --gold-hi:#f3e29a; --gold-lo:#8a7020; --silver:#b7bcc2; --silver-hi:#f1f3f5; --silver-lo:#7d848c;
   --lx-ui:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
@@ -78,7 +76,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 .g-gira .lx-play{background:#ffd166;color:#3a2a00}
 .g-rad{background:radial-gradient(ellipse at 30% 10%,#1f5a6e,#0b1721);color:#e3f3f8}
 .g-rad .lx-name{font-family:"Fredoka",system-ui,sans-serif;font-weight:700;font-size:26px;color:#ffffff}
-.g-rad .lx-name i{font-style:normal;color:#ff7a59}
+.g-rad .lx-name i{font-style:normal;color:#ff9a7e}
 .g-rad .lx-play{background:#ff7a59;color:#2a0d04}
 .g-sen{background:#f4ecd8;background-image:linear-gradient(rgba(31,42,36,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(31,42,36,.07) 1px,transparent 1px);background-size:18px 18px;color:#1f2a24;border:2px solid #1f2a24}
 .g-sen .lx-name{font-family:"Archivo",system-ui,sans-serif;font-weight:800;font-size:30px;color:#1f2a24}
@@ -158,8 +156,9 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 .lx-whorow button{font:inherit;font-weight:800;font-size:15px;padding:10px 16px;border:none;border-radius:12px;background:var(--l-ink);color:var(--l-bg);cursor:pointer}
 .lx-whoerr{margin:6px 0 0;min-height:16px;font-size:13px;font-weight:700;color:#c0392b}
 .lx-whohint{margin:2px 0 0;font-size:12px;color:var(--l-muted);line-height:1.4}
+.lx-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .lx-hello{margin:0;font-size:15px}
-.lx-hello button{font:inherit;font-size:13px;margin-left:8px;border:none;background:none;color:var(--l-muted);text-decoration:underline;cursor:pointer;padding:2px}
+.lx-hello button{font:inherit;font-size:14px;margin-left:4px;border:none;background:none;color:var(--l-muted);text-decoration:underline;cursor:pointer;padding:14px 10px;margin-block:-14px}
 .lx-who.need{outline:3px solid #c0392b;outline-offset:2px}
 .lx-storewarn{margin:8px 0 0;font-size:13px;font-weight:700;color:#c0392b}
 .lx-recbtn{align-self:flex-start;font:inherit;font-size:15px;font-weight:800;color:var(--l-ink);background:var(--l-card);border:2px solid var(--l-ink);border-radius:99px;padding:9px 18px;cursor:pointer}
@@ -202,9 +201,9 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 .lx-holder footer .lx-leave:hover{background:rgba(30,107,255,.25)!important}
 .lx-holder footer .lx-leave.ask{color:#ff5368!important;font-weight:800!important;border-color:#ff5368!important;box-shadow:0 0 10px rgba(255,83,104,.5)!important;background:rgba(255,83,104,.12)!important}
 /* "← Tutti i giochi" nel menu e nella schermata finale di ogni gioco: stesso bordo blu elettrico */
-.lx-holder .lx-back{box-sizing:border-box!important;border:2px solid #1e6bff!important;border-radius:12px!important;background:rgba(30,107,255,.12)!important;box-shadow:0 0 10px rgba(30,107,255,.5)!important;color:inherit!important;font-weight:700!important;padding:10px 14px!important;opacity:1!important}
+.lx-holder .lx-back{box-sizing:border-box!important;border:2px solid #1e6bff!important;border-radius:12px!important;background:rgba(30,107,255,.12)!important;box-shadow:0 0 10px rgba(30,107,255,.5)!important;color:inherit!important;font-weight:700!important;padding:10px 14px!important;min-height:44px!important;opacity:1!important}
 .lx-holder .lx-back:hover{background:rgba(30,107,255,.25)!important}
-.lx-holder .lx-backtop{display:block!important;width:fit-content!important;flex:none!important;margin:0 auto 6px 0!important;padding:7px 12px!important;font-size:14px!important;min-height:0!important}
+.lx-holder .lx-backtop{display:block!important;width:fit-content!important;flex:none!important;margin:0 auto 6px 0!important;padding:11px 14px!important;font-size:14px!important;min-height:44px!important}
 .lx-holder .lx-back:focus-visible{outline:3px solid #1e6bff;outline-offset:2px}
 .lx-holder footer .lx-leave:focus-visible{outline:3px solid currentColor;outline-offset:2px}
 .lx-recline{margin:0;font-size:12px;opacity:.75;text-align:center;line-height:1.4}
@@ -273,6 +272,11 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 @media (max-height:640px){.lx-howsteps .lx-t{font-size:17px}.lx-howsteps .lx-e{font-size:26px}.lx-howtitle{font-size:25px}.lx-howintro{font-size:18px}.lx-howbtns button{padding:11px;font-size:17px}}
 @media (prefers-reduced-motion:reduce){.lx-card{transition:none}.lx-confetti{display:none}}
 </style>
+<meta name="theme-color" content="#eef1f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f1318'/%3E%3Ctext x='32' y='44' font-size='34' font-family='Arial,sans-serif' font-weight='700' fill='%23ffd34e' text-anchor='middle'%3E10%3C/text%3E%3C/svg%3E">
+</head>
+<body>
 
 <div id="lx-launcher" class="lx-page">
   <header>
@@ -436,7 +440,7 @@ body{margin:0;background:var(--l-bg);color:var(--l-ink);font-family:var(--lx-ui)
 
   <footer class="lx-foot">
     <p><strong>© 2026 Silvio Chiaverini.</strong></p>
-    <p class="lx-ver" id="lx-ver" style="font-size:12px;opacity:.7"></p>
+    <p class="lx-ver" id="lx-ver" style="font-size:12px"></p>
     <p>Bilancia, Quadrante, Primo, Resto, Girasette, Raddoppio, Sentiero, Lampo, Cassaforte e Dieci sono giochi ideati e realizzati da Silvio Chiaverini. Codice rilasciato con licenza GNU GPL v3 (vedi LICENSE).</p>
   </footer>
 </div>
@@ -496,7 +500,7 @@ h2{margin:0;font-family:var(--display);font-weight:400;font-size:30px;line-heigh
 .rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.35}
 .rules li{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center}
 .chip{font-family:var(--display);font-size:14px;text-align:center;color:var(--felt-deep);background:var(--brass);border-radius:8px;padding:5px 0}
-.chip.neg{background:var(--rust);color:var(--ivory)}
+.chip.neg{background:#b04027;color:var(--ivory)}
 .btns{display:flex;flex-direction:column;gap:10px}
 .btn{font:inherit;font-weight:800;font-size:17px;border-radius:14px;padding:15px 16px;cursor:pointer;border:2px solid var(--brass)}
 .btn.primary{background:var(--brass);color:var(--felt-deep)}
@@ -531,7 +535,7 @@ h2{margin:0;font-family:var(--display);font-weight:400;font-size:30px;line-heigh
     <div class="stat mid"><span class="lbl">Secondi</span><span class="val big" id="time">40</span><span class="combo" id="combo">combo ×2</span></div>
     <div class="stat right"><span class="lbl" id="bestLbl">Record</span><span class="val" id="best">0</span></div>
   </header>
-  <div class="stage" id="stage"><canvas id="cv"></canvas></div>
+  <div class="stage" id="stage"><canvas id="cv" role="img" aria-label="Bilancia: posa i pesi sui due piatti (frecce o tocco a sinistra e a destra) senza far ribaltare la bilancia"></canvas></div>
   <footer class="foot"><span>← scorri o tocca un lato →</span><button id="mute" type="button">Suono: sì</button></footer>
 
   <section class="overlay" id="menu">
@@ -685,7 +689,7 @@ h2{margin:0;font-family:var(--display);font-weight:800;font-size:32px;line-heigh
     <div class="stat mid"><span class="lbl">Livello</span><span class="val" id="level">1</span><span class="combo" id="combo">combo ×2</span></div>
     <div class="stat right"><span class="lbl">Rubini</span><span class="rubies" id="rubies"><i class="ruby"></i><i class="ruby"></i><i class="ruby"></i></span></div>
   </header>
-  <div class="stage" id="stage"><canvas id="cv"></canvas></div>
+  <div class="stage" id="stage"><canvas id="cv" role="img" aria-label="Quadrante: muovi la lancetta con le carte e centra l'ora accesa"></canvas></div>
   <div class="cards" id="cards"></div>
   <footer class="foot"><span>Record: <b id="best">0</b> · tasti 1–4</span><button id="mute" type="button">Suono: sì</button></footer>
 
@@ -842,7 +846,7 @@ h2{margin:0;font-family:var(--display);font-weight:900;font-size:40px;line-heigh
     <div class="stat mid"><span class="lbl">Livello</span><span class="val" id="level">1</span><span class="streak" id="streak">serie 8 · ×2</span></div>
     <div class="stat right"><span class="lbl" id="bestLbl">Record</span><span class="val" id="best">0</span></div>
   </header>
-  <div class="stage" id="stage"><canvas id="cv"></canvas></div>
+  <div class="stage" id="stage"><canvas id="cv" role="img" aria-label="Primo: scomponi i blocchi in fattori primi prima che la torre tocchi il soffitto"></canvas></div>
   <div class="keys">
     <div class="primes" id="primes"></div>
     <button class="key isprime" id="isPrime" type="button">È primo!</button>
@@ -893,7 +897,7 @@ h2{margin:0;font-family:var(--display);font-weight:900;font-size:40px;line-heigh
 :root{
   --bg:#dce4ea; --bg-2:#c8d2da; --ink:#18202a; --muted:#566271; --line:#b3bec9;
   --drawer:#2d3945; --drawer-cell:#3a4755; --panel:#f4f6f8;
-  --accent:#d23f2c; --accent-ink:#ffffff; --ok:#2f9e5b; --scrim:rgba(18,24,32,.55);
+  --accent:#c4372a; --accent-ink:#ffffff; --ok:#2f9e5b; --scrim:rgba(18,24,32,.55);
   /* materiali: uguali in entrambi i temi */
   --paper:#fbfaf5; --paper-ink:#24262b; --paper-line:#c9c6bb;
   --lcd-bg:#0e1712; --lcd-fg:#8ef0a8;
@@ -991,7 +995,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overfl
 .coin.copper{background:radial-gradient(circle at 35% 30%,var(--copper-hi),var(--copper) 55%,var(--copper-lo))}
 .coin.gold{background:radial-gradient(circle at 35% 30%,var(--gold-hi),var(--gold) 55%,var(--gold-lo))}
 .coin.bi1{background:radial-gradient(circle,var(--silver-hi) 0,var(--silver) 52%,var(--silver-lo) 56%,var(--gold) 58%,var(--gold-hi) 75%,var(--gold-lo) 100%)}
-.coin.bi2{background:radial-gradient(circle,var(--gold-hi) 0,var(--gold) 52%,var(--gold-lo) 56%,var(--silver) 58%,var(--silver-hi) 75%,var(--silver-lo) 100%)}
+.coin.bi2{background:radial-gradient(circle,var(--gold-hi) 0,var(--gold) 52%,var(--gold-lo) 56%,var(--silver) 58%,var(--silver-hi) 75%,var(--silver-lo) 100%);color:var(--coin-ink)}
 .note{width:100%;height:100%;border-radius:6px;display:grid;place-items:center;font-weight:800;font-size:17px;color:var(--paper);
   box-shadow:inset 0 0 0 3px rgba(255,255,255,.18),inset 0 0 0 5px rgba(0,0,0,.08);letter-spacing:.02em}
 .note.n5{background:var(--n5)}
@@ -1120,7 +1124,7 @@ h2{margin:0;font-family:var(--receipt);font-weight:700;font-size:34px;line-heigh
       <h1>Rest<span>o</span></h1>
       <ul class="rules">
         <li><span class="tag">13,40</span><span>Il cliente paga: calcola a mente quanto resto gli devi.</span></li>
-        <li><span class="ic"><span class="coin bi2" style="--d:1">2€</span></span><span>Tocca monete e banconote finché il resto è esatto. Se dai troppo, devi ricominciare.</span></li>
+        <li><span class="ic" aria-hidden="true"><span class="coin bi2" style="--d:1">2€</span></span><span>Tocca monete e banconote finché il resto è esatto. Se dai troppo, devi ricominciare.</span></li>
         <li><span class="tag red">×2</span><span>Con il minor numero di pezzi possibile fai un resto perfetto: punti doppi e la serie sale.</span></li>
         <li><span class="tag red">★</span><span>Se un cliente perde la pazienza, lascia una brutta recensione. Con tre recensioni negative il negozio chiude.</span></li>
       </ul>
@@ -1214,7 +1218,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
     <div class="stat r"><span class="lbl">Record</span><b id="best">0</b></div>
   </header>
   <div class="stage" id="stage">
-    <canvas id="cv"></canvas>
+    <canvas id="cv" role="img" aria-label="Girasette: plancia a esagoni, fondi le tessere uguali fino al 7"></canvas>
     <div id="hint">Trascina i pezzi · dopo il terzo, la plancia gira</div>
   </div>
   <footer class="bar">
@@ -1675,7 +1679,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
   </header>
   <div class="tbar" id="tbar" role="progressbar" aria-label="Tempo"><i id="tfill"></i></div>
   <div class="chips" id="chips"></div>
-  <div class="stage" id="stage"><canvas id="cv" aria-label="Campo di gioco: tocca i numeri in ordine"></canvas></div>
+  <div class="stage" id="stage"><canvas id="cv" role="img" aria-label="Lampo: campo di gioco, tocca i numeri in ordine"></canvas></div>
   <footer class="bar">
     <button class="btn" id="pause" type="button" disabled>Pausa</button>
     <button class="btn" id="mute" type="button">Suono</button>
@@ -2091,7 +2095,7 @@ h1 span{color:var(--accent)}
   // Contributo nascosto per ora: metti true per riattivare il riquadro e il link a fine partita.
   const SHOW_DONATE = true;
   const AUTHOR = 'Silvio Chiaverini';
-  const BUILD = '2026-10-05.6';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
+  const BUILD = '2026-11-15.3';   // numero di versione mostrato in fondo alla home: serve a sapere quale file si sta usando
   // Nome del giocatore: salvato solo sul dispositivo, compare nei testi che si condividono (mai nelle statistiche anonime).
   const cleanName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
   const playerName = () => { try { return cleanName(JSON.parse(localStorage.getItem('nit_name'))); } catch (e) { return ''; } };
@@ -6890,6 +6894,7 @@ refreshMenu(); render();
   let howEsc = null;
   function closeHowto(holder) {
     const h = holder.querySelector('.lx-howto'); if (h) h.remove();
+    [...holder.children].forEach(c => { c.inert = false; });
     try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
     if (howEsc) { window.removeEventListener('keydown', howEsc); howEsc = null; }
   }
@@ -6923,6 +6928,8 @@ refreshMenu(); render();
     const go = document.createElement('button'); go.type = 'button'; go.className = 'lx-howgo'; go.textContent = 'Ho capito! Giochiamo';
     go.addEventListener('click', () => closeHowto(holder)); bt.appendChild(go);
     card.appendChild(bt); box.appendChild(card); holder.appendChild(box);
+    [...holder.children].forEach(c => { if (c !== box) c.inert = true; });   // il fuoco resta nella finestra
+    trapTab(box);
     howEsc = e => { if (e.key === 'Escape') closeHowto(holder); };
     window.addEventListener('keydown', howEsc);
     go.focus({ preventScroll: true });
@@ -7186,6 +7193,8 @@ refreshMenu(); render();
       floor = Math.max(floor, readBest());
       if (sc > 0) fillHook(holder, key, sc, before, stBefore);
       if (sc > 0) chalAfter(holder, key, sc);
+      { const tt = holder.querySelector('#overTitle') || holder.querySelector('#overWhy') || holder.querySelector('#overMode'), hl = holder.querySelector('.lx-hook .lx-hl');
+        setTimeout(() => announce((tt ? tt.textContent.trim() + '. ' : '') + NAMES[key] + ': ' + sc.toLocaleString('it-IT') + ' punti.' + (hl ? ' ' + hl.textContent : '')), 300); }
       if (sc > 0 && over.dataset.board && BOARDS[over.dataset.board]) pubAfterGame(holder, over.dataset.board, sc);
     })
       .observe(over, { attributes: true, attributeFilter: ['hidden'] });
@@ -7256,7 +7265,7 @@ refreshMenu(); render();
     if (!current || !c) return;
     current.ctx.chal = { seed: c.seed, target: c.target, name: c.name };
     const b = holder.querySelector('#chal'); if (b) b.click();
-    const ban = document.createElement('div'); ban.className = 'lx-chalbanner';
+    const ban = document.createElement('div'); ban.className = 'lx-chalbanner'; ban.setAttribute('role', 'status');
     ban.textContent = 'Sfida' + (c.name ? ' di ' + c.name : '') + ': batti ' + c.target.toLocaleString('it-IT') + ' punti';
     holder.appendChild(ban); setTimeout(() => ban.remove(), 5000);
   }
@@ -7404,6 +7413,7 @@ refreshMenu(); render();
       line.textContent = !me ? 'Classifica pubblica: punteggio inviato.'
         : me.r === 1 ? '🏆 Sei 1° oggi su ' + d.total + ' (' + me.nick + ')'
         : 'Classifica di oggi: sei ' + me.r + '° su ' + d.total + ' (' + me.nick + ')' + (first ? ' · al 1° mancano ' + pubNum(first.score - me.score) + ' punti' : '');
+      announce(line.textContent);
       const b = document.createElement('button'); b.type = 'button'; b.className = 'lx-sharebtn'; b.textContent = 'Vedi la classifica';
       b.addEventListener('click', () => openPub(board)); hook.appendChild(b);
       if (!(pubStore.get() || {}).chosen) {
@@ -7488,8 +7498,42 @@ refreshMenu(); render();
       pubStore.set({ id: p.id, secret: p.secret, nick, chosen: true }); nickBox.hidden = true; pubLoad();
     } catch (e) { pubMsg('Non riesco a salvare il nome adesso: riprova più tardi.', true); nickRefresh(); }
   });
+  // ---------- finestre: mentre una e' aperta il resto della pagina e' inerte (Tab e lettori di schermo restano dentro) e al ritorno il fuoco torna dov'era ----------
+  // Tab dall'ultimo elemento torna al primo (e Maiusc+Tab dal primo all'ultimo): il fuoco non esce nemmeno verso la barra del browser
+  function trapTab(box) {
+    box.addEventListener('keydown', e => {
+      if (e.key !== 'Tab' || e.ctrlKey || e.altKey || e.metaKey) return;
+      const f = [...box.querySelectorAll('button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])')].filter(x => !x.disabled && x.offsetParent !== null);
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1], cur = document.activeElement;
+      if (e.shiftKey && (cur === first || !box.contains(cur))) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (cur === last || !box.contains(cur))) { e.preventDefault(); first.focus(); }
+    });
+  }
+  // area dove i lettori di schermo ricevono gli esiti (punteggio finale, posizione in classifica, sfida vinta o persa)
+  const live = document.createElement('div'); live.id = 'lx-live'; live.className = 'lx-sr'; live.setAttribute('role', 'status'); live.setAttribute('aria-live', 'polite'); document.body.appendChild(live);
+  const announce = t => { live.textContent = ''; setTimeout(() => { live.textContent = t; }, 60); };
+  let lastOutside = null;
+  document.addEventListener('focusin', e => { if (!e.target.closest || !e.target.closest('.lx-modal')) lastOutside = e.target; });
+  function watchModal(panel) {
+    trapTab(panel);
+    let off = [], back = null;
+    new MutationObserver(() => {
+      if (!panel.hidden) {
+        back = lastOutside;
+        off = [...document.body.children].filter(e => e !== panel && !e.inert && !/^(SCRIPT|STYLE|LINK|META|TITLE|NOSCRIPT)$/.test(e.tagName));
+        off.forEach(e => { e.inert = true; });
+      } else {
+        off.forEach(e => { e.inert = false; }); off = [];
+        if (back && back.isConnected && back.focus) { try { back.focus({ preventScroll: true }); } catch (e) {} }
+        back = null;
+      }
+    }).observe(panel, { attributes: true, attributeFilter: ['hidden'] });
+  }
+  ['lx-recpanel', 'lx-pubpanel', 'lx-grecpanel'].forEach(id => watchModal(document.getElementById(id)));
   // ---------- pannello dei record, backup e protezione dell'archiviazione ----------
   const recPanel = document.getElementById('lx-recpanel');
+  document.body.appendChild(recPanel);   // fuori dalla home: cosi' il resto della pagina puo' diventare inerte mentre e' aperto
   const recMsg = (t, bad) => { const m = document.getElementById('lx-recmsg'); m.textContent = t; m.style.color = bad ? '#c0392b' : 'inherit'; };
   async function persistState() {
     try {
@@ -7543,7 +7587,7 @@ refreshMenu(); render();
   if (!storageOK()) document.getElementById('lx-storewarn').hidden = false;
   else if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   document.querySelectorAll('[data-game]').forEach(b => b.addEventListener('click', () => go(b.dataset.game)));
-  window.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!grecPanel.hidden) closeGameRec(); else if (!pubPanel.hidden) pubPanel.hidden = true; else if (!recPanel.hidden) closeRec(); else if (current) unmount(); } });
+  window.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!grecPanel.hidden) closeGameRec(); else if (!pubPanel.hidden) pubPanel.hidden = true; else if (!recPanel.hidden) closeRec(); else if (current && current.holder.querySelector('.lx-howto')) closeHowto(current.holder); else if (current) unmount(); } });
   refreshBest();
   const hashKey = () => (location.hash || '').slice(1).split('?')[0];
   // #gioco?c=PREFISSO-seme-punti[&n=Nome]: apre il gioco con il codice sfida gia' scritto
