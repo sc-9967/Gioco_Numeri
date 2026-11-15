@@ -85,7 +85,7 @@ const days = k => { const d = new Date(); const t = new Intl.DateTimeFormat('en-
   await sleep(300);
   const hook6 = await page.evaluate(() => document.querySelector('.lx-hook').innerText);
   console.log(JSON.stringify(hook6));
-  ok(/Ti mancano 3\.766 punti per il record di sempre/.test(hook6), 'Girasette: distanza dal record');
+  ok(/Ti mancano 3\.?766 punti per il record di sempre/.test(hook6), 'Girasette: distanza dal record');
   ok(!(await page.isVisible('.lx-sharebtn')) && !(await page.evaluate(() => !!document.querySelector('.lx-sharebtn'))), 'nessun "Copia risultato" duplicato dal launcher');
   await page.screenshot({ path: 'shots/cal-hook-girasette.png' });
   await page.context().close();

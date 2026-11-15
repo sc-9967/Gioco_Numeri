@@ -284,3 +284,5 @@ Misure fatte con un browser vero su `index.html` (non con una skill: il comando 
 - **Content-Security-Policy:** non aggiunta. Con gli script in linea servirebbe `unsafe-inline`, quindi proteggerebbe poco, e rischia di rompere il pannello donazioni o integrazioni future.
 - **Pulsanti «Suono»** (27-30 px) e tastierino della Cassaforte a 320 px (38 px di altezza): sopra il minimo AA di 24 px, sotto i 44 consigliati. Aumentarli sposta il layout dei giochi.
 - **Lettori di schermo veri:** non provati (TalkBack, VoiceOver). Il contrasto è stato misurato sui menu e sulla home, non sulle schermate di gioco in movimento.
+
+- **Nota sul formato dei numeri:** con il browser più recente usato in questa prova, `toLocaleString('it-IT')` scrive 4 cifre senza punto («3766») e da 5 cifre con il punto («12.345»), come prevede la regola italiana dell'archivio dei dati locali. Il test `launcher-calamita.js` ora accetta entrambe le forme.
